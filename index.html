@@ -1225,28 +1225,34 @@ function pickStatus(statusGroup){
         function gsGetUrl(){ return GSCRIPT_URL + (GSCRIPT_URL.indexOf('?')===-1?'?':'&') + '_t=' + Date.now(); }
         function _setRefreshBtnBusy(busy){ try{ var b=document.querySelector('button[onclick*="refreshData"]'); if(b){ b.style.opacity = busy ? '0.5' : ''; b.style.pointerEvents = busy ? 'none' : ''; var ic=b.querySelector('svg'); if(ic){ if(busy){ b.classList.add('__refreshing'); if(!document.getElementById('__refreshSpinStyle')){ var st=document.createElement('style'); st.id='__refreshSpinStyle'; st.textContent='.__refreshing svg{animation:__rspin .7s linear infinite} @keyframes __rspin{to{transform:rotate(360deg)}}'; document.head.appendChild(st);} } else { b.classList.remove('__refreshing'); } } } }catch(e){} }
         window.GS_EDITOR_NAME = (function(){ try{ return localStorage.getItem('mwEditorName') || ''; }catch(e){ return ''; } })();
-        function askEditorName(){
+        function askEditorName(required){
+            required = !!required;
             Swal.fire({
-                title: 'กรอกชื่อของคุณ',
+                title: required ? 'กรอกชื่อของคุณก่อนเข้าใช้งาน' : 'กรอกชื่อของคุณ',
                 input: 'text',
                 inputValue: window.GS_EDITOR_NAME || '',
                 inputPlaceholder: 'เช่น สมชาย / หัวหน้าทีม',
-                showCancelButton: true,
+                showCancelButton: !required,
                 confirmButtonText: 'บันทึก',
                 cancelButtonText: 'ไม่ต้องกรอก',
+                allowOutsideClick: !required,
+                allowEscapeKey: !required,
                 customClass: { popup: 'rounded-2xl' },
-                inputValidator: function(value){ return null; }
+                inputValidator: function(value){ return (value && String(value).trim()) ? null : 'กรุณากรอกชื่อของคุณ'; }
             }).then(function(res){
                 if(res.isConfirmed){
                     var nm = String(res.value || '').trim();
                     window.GS_EDITOR_NAME = nm || '-';
                     try{ localStorage.setItem('mwEditorName', nm); }catch(e){}
-                    Swal.fire({toast:true, position:'top-end', icon:'success', title:'บันทึกชื่อ: '+(nm||'-'), showConfirmButton:false, timer:1200, customClass:{popup:'rounded-xl'}});
+                    var lbl=document.getElementById('editorNameLabel'); if(lbl){ lbl.innerText = nm || 'ตั้งชื่อ'; }
+                    Swal.fire({toast:true, position:'top-end', icon:'success', title:'บันทึกชื่อ: '+(nm||'-')+' — จำไว้ในคอมนี้แล้ว', showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'}});
+                } else if(required){
+                    setTimeout(function(){ askEditorName(true); }, 300);
                 }
             });
         }
         function ensureEditorName(){
-            if(!window.GS_EDITOR_NAME){ askEditorName(); }
+            if(!window.GS_EDITOR_NAME){ askEditorName(true); }
         }
 
         function gsPost(payload){
@@ -1964,7 +1970,7 @@ function pickStatus(statusGroup){
                     setupTabsAndLoad(sheetNames);
                     if(skeleton){ skeleton.classList.add('opacity-0'); setTimeout(function(){ skeleton.classList.add('hide'); },500); }
                     Swal.fire({ toast:true, position:'top-end', icon:'success', title:'โหลดจาก Google Sheet สำเร็จ', showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'} });
-                    setTimeout(ensureEditorName, 800);
+                    /* ensureEditorName ถูกเรียกตอนโหลดหน้าแล้ว */
                 }catch(err){
                     if(skeleton) skeleton.classList.add('hide');
                     Swal.fire({ icon:'error', title:'เชื่อม Google Sheet ไม่สำเร็จ', text:String(err&&err.message?err.message:err), customClass:{popup:'rounded-2xl'} });
@@ -3718,7 +3724,7 @@ function tryFetchDefaultFile(){
   }
   tryNext();
 }
-setTimeout(function(){ tryFetchDefaultFile(); }, 300);
+/* Google Sheet mode: disabled auto-fetch of stale data.xlsx / cached file — load from Google Sheet only */ /* setTimeout(function(){ tryFetchDefaultFile(); }, 300); */
 
 
 
@@ -3761,7 +3767,7 @@ document.addEventListener('change', function(e){
 </div>
 
 
-<script>try{ window.addEventListener('load', function(){ if(window.loadFromGoogleSheet){ window.loadFromGoogleSheet(); } var lbl=document.getElementById('editorNameLabel'); if(lbl){ lbl.innerText = window.GS_EDITOR_NAME || 'ตั้งชื่อ'; } if(window.restoreAutoRefresh){ window.restoreAutoRefresh(); } }); }catch(e){}</script>
+<script>try{ window.addEventListener('load', function(){ if(window.ensureEditorName){ window.ensureEditorName(); } if(window.loadFromGoogleSheet){ window.loadFromGoogleSheet(); } var lbl=document.getElementById('editorNameLabel'); if(lbl){ lbl.innerText = window.GS_EDITOR_NAME || 'ตั้งชื่อ'; } if(window.restoreAutoRefresh){ window.restoreAutoRefresh(); } }); }catch(e){}</script>
 </body>
 
 </html>
