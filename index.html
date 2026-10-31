@@ -684,9 +684,7 @@
 
                             </div>
 
-                            <button onclick="exportExcelStyling()" class="text-[11px] text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-bold px-4 py-2.5 rounded-xl transition-colors border border-emerald-200 shadow-sm flex items-center gap-1.5">
-
-                                <span id="exportIcon">📥</span> <span id="exportText" class="hidden sm:inline">Export Excel</span></button><button onclick="exportSelected()" class="text-[11px] text-blue-700 bg-blue-50 hover:bg-blue-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-blue-200 shadow-sm flex items-center gap-2 no-print" title="Ctrl+Click rows to select, then export"><svg class="mini-svg" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Selected</button><button onclick="exportEditedOnly()" class="text-[11px] text-purple-700 bg-purple-50 hover:bg-purple-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-purple-200 shadow-sm flex items-center gap-2 no-print" title="Export เฉพาะรายการที่แก้ไขแล้ว"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Edited</button><button onclick="undoLastEdit()" class="text-[11px] text-amber-700 bg-amber-50 hover:bg-amber-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-amber-200 shadow-sm flex items-center gap-2 no-print" title="ย้อนกลับการแก้ไขล่าสุด (เผื่อกรอกผิด)"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg> ย้อนกลับ</button><button onclick="resetAllEdits()" class="text-[11px] text-rose-700 bg-rose-50 hover:bg-rose-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-rose-200 shadow-sm flex items-center gap-2 no-print" title="คืนค่าเดิมทั้งหมด จาก Excel ต้นฉบับ"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> คืนค่าเดิม</button><button class="hidden"
+                            <button onclick="undoLastEdit()" class="text-[11px] text-amber-700 bg-amber-50 hover:bg-amber-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-amber-200 shadow-sm flex items-center gap-2 no-print" title="ย้อนกลับการแก้ไขล่าสุด (เผื่อกรอกผิด)"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg> ย้อนกลับ</button><button onclick="askEditorName()" class="text-[11px] text-slate-600 bg-slate-50 hover:bg-slate-100 font-bold px-4 py-2.5 rounded-xl transition-colors border border-slate-200 shadow-sm flex items-center gap-2 no-print" title="เปลี่ยนชื่อผู้แก้ไข (จะแสดงใน Edit Log)"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <span id="editorNameLabel">ชื่อ</span></button><button onclick="refreshData(false)" class="text-[11px] text-cyan-700 bg-cyan-50 hover:bg-cyan-100 font-bold px-4 py-2.5 rounded-xl transition-colors border border-cyan-200 shadow-sm flex items-center gap-2 no-print" title="ดึงข้อมูลล่าสุดจาก Google Sheet (เห็นการแก้ไขของคนอื่น)"><svg class="mini-svg" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> รีเฟรช</button><label class="text-[10px] text-slate-500 flex items-center gap-1 px-2 no-print cursor-pointer" title="ดึงข้อมูลใหม่อัตโนมัติทุก 60 วินาที"><input type="checkbox" id="autoRefreshChk" onchange="toggleAutoRefresh(this.checked)" class="w-3.5 h-3.5"> อัตโนมัติ</label><button class="hidden"
 
                             </button>
 
@@ -961,7 +959,7 @@ function openStatusPicker(e, rawIdx, phaseName){
   p.style.left = x + 'px'; p.style.top = y + 'px';
 }
 function openStatusPickerPhase(e, rawIdx, phaseName){ openStatusPicker(e, rawIdx, phaseName); }
-function logEdit(activity, phase, field, newValue){ try{ var log=JSON.parse(localStorage.getItem('mwEditLog')||'[]'); log.unshift({t:new Date().toISOString(), activity:String(activity||''), phase:String(phase||''), sheet:currentSheetName, field:field, value:String(newValue)}); if(log.length>200) log=log.slice(0,200); localStorage.setItem('mwEditLog', JSON.stringify(log)); }catch(e){} }
+function logEdit(activity, phase, field, newValue, oldValue){ try{ var log=JSON.parse(localStorage.getItem('mwEditLog')||'[]'); log.unshift({t:new Date().toISOString(), activity:String(activity||''), phase:String(phase||''), sheet:currentSheetName, field:field, value:String(newValue), oldValue:(oldValue===undefined?null:String(oldValue))}); if(log.length>200) log=log.slice(0,200); localStorage.setItem('mwEditLog', JSON.stringify(log)); }catch(e){} }
 function isRowEdited(d){
   try{ var so=JSON.parse(localStorage.getItem('mwStatusOverrides')||'{}'); var fo=JSON.parse(localStorage.getItem('mwFieldOverrides')||'{}'); var isSum=currentSheetName.toLowerCase().includes('01 summary');
     var kMain=_statusKey(d.activity, currentSheetName);
@@ -984,6 +982,7 @@ function countEdited(){ try{ var so=JSON.parse(localStorage.getItem('mwStatusOve
                     if (fo[key]) { delete fo[key][last.field]; if (Object.keys(fo[key]).length===0) delete fo[key]; localStorage.setItem('mwFieldOverrides', JSON.stringify(fo)); }
                     if (last.field === 'progress') { var so2 = JSON.parse(localStorage.getItem('mwStatusOverrides')||'{}'); if(so2[key]){ delete so2[key]; localStorage.setItem('mwStatusOverrides', JSON.stringify(so2)); } }
                 }
+                if (last.oldValue !== null && last.oldValue !== undefined) { gsPost({action:'update', sheet:last.sheet||currentSheetName, activity:last.activity, code:'', phase:last.phase, field:last.field, value:last.oldValue}); }
                 log.shift(); localStorage.setItem('mwEditLog', JSON.stringify(log));
                 selectSheet(currentSheetName);
                 Swal.fire({toast:true,position:'top-end',icon:'success',title:'ย้อนกลับแล้ว: '+(String(last.activity||'').slice(0,28))+' ('+last.field+')',showConfirmButton:false,timer:1800,customClass:{popup:'rounded-xl'}});
@@ -1000,7 +999,8 @@ function countEdited(){ try{ var so=JSON.parse(localStorage.getItem('mwStatusOve
             }).then(function(res){
                 if(!res.isConfirmed) return;
                 try{ localStorage.removeItem('mwStatusOverrides'); localStorage.removeItem('mwFieldOverrides'); localStorage.removeItem('mwEditLog'); }catch(e){}
-                selectSheet(currentSheetName);
+                gsPost({action:'resetAll'});
+                setTimeout(function(){ try{ loadFromGoogleSheet(); }catch(e){ selectSheet(currentSheetName); } }, 1000);
                 Swal.fire({toast:true,position:'top-end',icon:'success',title:'คืนค่าเดิมเรียบร้อย',showConfirmButton:false,timer:1500,customClass:{popup:'rounded-xl'}});
             });
         };
@@ -1109,6 +1109,7 @@ function saveFieldEdit(){
   var target = d; var phName = null;
   if(isPhase && d.phases){ var ph = d.phases.find(function(x){return x.name===pen.phaseName;}); if(ph){ target = ph; phName = pen.phaseName; } }
   var keyPhase = phName || currentSheetName;
+  var _oldVal = (pen.field==='progress')?String(target.numPct||0):(pen.field==='expected'?String(target.expected||''):String(target.note||''));
   if(pen.field==='progress'){
     var num = parseInt(val); if(isNaN(num)) num=0; num = Math.max(0, Math.min(100, num));
     target.numPct = num; target.pct = num + '%';
@@ -1134,7 +1135,9 @@ function saveFieldEdit(){
     target.note = val;
     setFieldOverride(d.activity, keyPhase, 'note', val);
   }
-  logEdit(d.activity, phName||currentSheetName, pen.field, val);
+  gsPost({action:'update', sheet:currentSheetName, activity:d.activity, code:d.code, phase:keyPhase, field:pen.field, value:(pen.field==='progress'?num:val)});
+  if(pen.field==='progress'){ gsPost({action:'update', sheet:currentSheetName, activity:d.activity, code:d.code, phase:keyPhase, field:'status', value:target.statusRaw}); }
+  logEdit(d.activity, phName||currentSheetName, pen.field, val, _oldVal);
   hideFieldEditor(); updateView(); recomputeSummaryStats();
   Swal.fire({toast:true,position:'top-end',icon:'success',title:'บันทึกแล้ว (sync ข้ามแท็บ)',showConfirmButton:false,timer:1300});
 }
@@ -1157,7 +1160,11 @@ function pickStatus(statusGroup){
       setStatusOverride(d.activity, currentSheetName, statusGroup, labels[statusGroup]);
     }
   }
-  logEdit(d.activity, (pen.phaseName&&pen.phaseName!=='-1')?pen.phaseName:currentSheetName, 'status', labels[statusGroup]);
+  var _oldStat = '';
+  if(pen.phaseName && pen.phaseName!=='-1'){ var _ph = d.phases ? d.phases.find(function(x){return x.name===pen.phaseName;}) : null; _oldStat = _ph ? String(_ph.statusRaw||'') : ''; gsPost({action:'update', sheet:currentSheetName, activity:d.activity, code:d.code, phase:pen.phaseName, field:'status', value:labels[statusGroup]}); }
+  else if(isSum && d.phases){ _oldStat = String(d.statusRaw||''); d.phases.forEach(function(ph){ gsPost({action:'update', sheet:currentSheetName, activity:d.activity, code:d.code, phase:ph.name, field:'status', value:labels[statusGroup]}); }); }
+  else { _oldStat = String(d.statusRaw||''); gsPost({action:'update', sheet:currentSheetName, activity:d.activity, code:d.code, phase:currentSheetName, field:'status', value:labels[statusGroup]}); }
+  logEdit(d.activity, (pen.phaseName&&pen.phaseName!=='-1')?pen.phaseName:currentSheetName, 'status', labels[statusGroup], _oldStat);
   hideStatusPicker(); updateView(); recomputeSummaryStats();
   Swal.fire({toast:true,position:'top-end',icon:'success',title:'Status -> '+labels[statusGroup]+' (sync across tabs)',showConfirmButton:false,timer:1500});
 }
@@ -1213,6 +1220,45 @@ function pickStatus(statusGroup){
         const statusWeightMap = { 'late': 1, 'on schedule': 2, 'completed': 3 };
 
         const PHASE_WEIGHTS = { 'design':10, 'procurement':10, 'manudeli':10, 'conin':60, 'tc':5, 'testprocedure':1, 'inspection':1, 'testreport':3 };
+
+        const GSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJIv_rEAGOkiiDcB-ftvlq8644ZpKFVM_rbK7O54fEpwLYWQB0xYjyiTCoFZWX2bk/exec';
+        function gsGetUrl(){ return GSCRIPT_URL + (GSCRIPT_URL.indexOf('?')===-1?'?':'&') + '_t=' + Date.now(); }
+        function _setRefreshBtnBusy(busy){ try{ var b=document.querySelector('button[onclick*="refreshData"]'); if(b){ b.style.opacity = busy ? '0.5' : ''; b.style.pointerEvents = busy ? 'none' : ''; var ic=b.querySelector('svg'); if(ic){ if(busy){ b.classList.add('__refreshing'); if(!document.getElementById('__refreshSpinStyle')){ var st=document.createElement('style'); st.id='__refreshSpinStyle'; st.textContent='.__refreshing svg{animation:__rspin .7s linear infinite} @keyframes __rspin{to{transform:rotate(360deg)}}'; document.head.appendChild(st);} } else { b.classList.remove('__refreshing'); } } } }catch(e){} }
+        window.GS_EDITOR_NAME = (function(){ try{ return localStorage.getItem('mwEditorName') || ''; }catch(e){ return ''; } })();
+        function askEditorName(){
+            Swal.fire({
+                title: 'กรอกชื่อของคุณ',
+                input: 'text',
+                inputValue: window.GS_EDITOR_NAME || '',
+                inputPlaceholder: 'เช่น สมชาย / หัวหน้าทีม',
+                showCancelButton: true,
+                confirmButtonText: 'บันทึก',
+                cancelButtonText: 'ไม่ต้องกรอก',
+                customClass: { popup: 'rounded-2xl' },
+                inputValidator: function(value){ return null; }
+            }).then(function(res){
+                if(res.isConfirmed){
+                    var nm = String(res.value || '').trim();
+                    window.GS_EDITOR_NAME = nm || '-';
+                    try{ localStorage.setItem('mwEditorName', nm); }catch(e){}
+                    Swal.fire({toast:true, position:'top-end', icon:'success', title:'บันทึกชื่อ: '+(nm||'-'), showConfirmButton:false, timer:1200, customClass:{popup:'rounded-xl'}});
+                }
+            });
+        }
+        function ensureEditorName(){
+            if(!window.GS_EDITOR_NAME){ askEditorName(); }
+        }
+
+        function gsPost(payload){
+  try{
+    payload.user = window.GS_EDITOR_NAME || '-';
+    // ถ้าแก้ในแท็บเฟส (Design ฯลฯ) ให้เขียนกลับไปที่ชีต 01 summary คอลัมน์ของเฟสนั้นๆ
+    if (window.GS_SUMMARY_SHEET && payload.sheet && payload.sheet !== window.GS_SUMMARY_SHEET) {
+      payload.phase = payload.sheet; payload.sheet = window.GS_SUMMARY_SHEET;
+    }
+    fetch(GSCRIPT_URL, {method:'POST', body: JSON.stringify(payload), headers:{'Content-Type':'text/plain'}}).then(function(r){return r.text();}).then(function(t){ try{ var j=JSON.parse(t); console.log('gsPost resp:', j); if(j && j.ok===false){ Swal.fire({toast:true,position:'top-end',icon:'error',title:'เขียนกลับ Sheet ไม่สำเร็จ: '+(j.err||''),showConfirmButton:false,timer:3000,customClass:{popup:'rounded-xl'}}); } else if(j && j.ok){ Swal.fire({toast:true,position:'top-end',icon:'success',title:'อัปเดท Google Sheet แล้ว',showConfirmButton:false,timer:1200,customClass:{popup:'rounded-xl'}}); } }catch(e){ console.log('gsPost resp (non-json):', t); } }).catch(function(e){ console.error('gsPost network error:', e); });
+  }catch(e){ console.error('gsPost error:', e); }
+}
 
         function computeOverallStatus(d, checkedPhases, isAllPhase) {
             var pct = parseFloat(d.numPct) || 0;
@@ -1421,7 +1467,42 @@ function pickStatus(statusGroup){
 
         function getStatusGroup(val) { let s = String(val||'').trim().toLowerCase(); if (s==='' || s==='-' || s==='–') return ''; if (s.includes('late')) return 'late'; if (s.includes('completed')) return 'completed'; if (s.includes('schedule')) return 'on schedule'; return ''; }
 
-        function parseDateString(dateStr) { if (!dateStr || dateStr === '-' || dateStr.trim() === '') return 0; let dStr = dateStr.trim(); let parts = dStr.split(/[-\/ ]/); if (parts.length >= 2) { const monthMap = { 'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5, 'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11, 'ม.ค.':0, 'ก.พ.':1, 'มี.ค.':2, 'เม.ย.':3, 'พ.ค.':4, 'มิ.ย.':5, 'ก.ค.':6, 'ส.ค.':7, 'ก.ย.':8, 'ต.ค.':9, 'พ.ย.':10, 'ธ.ค.':11 }; let mIdx = -1; let monthVal = 0; for (let i = 0; i < parts.length; i++) { let p = parts[i].toLowerCase().substring(0, 4); if (monthMap[p] !== undefined || monthMap[parts[i]] !== undefined) { mIdx = i; monthVal = monthMap[p] !== undefined ? monthMap[p] : monthMap[parts[i]]; break; } } if (mIdx !== -1) { let day = null; let year = 2000; if (parts.length === 3) { if (mIdx === 1) { day = parseInt(parts[0]); year = parseInt(parts[2]); } else if (mIdx === 0) { day = parseInt(parts[1]); year = parseInt(parts[2]); } } else if (parts.length === 2) { if (mIdx === 0) year = parseInt(parts[1]); else year = parseInt(parts[0]); } if (year < 100) year += 2000; if (day !== null && !isNaN(day)) return new Date(year, monthVal, day).getTime(); else return new Date(year, monthVal + 1, 0).getTime(); } } let timestamp = Date.parse(dStr); return isNaN(timestamp) ? 0 : timestamp; }
+        function parseDateString(dateStr) {
+  if (!dateStr || dateStr === '-' || dateStr.trim() === '') return 0;
+  let dStr = dateStr.trim();
+  let parts = dStr.split(/[-\/ ]+/).filter(function(p){return p!=='';});
+  const monthMap = { 'jan':0,'feb':1,'mar':2,'apr':3,'may':4,'jun':5,'jul':6,'aug':7,'sep':8,'oct':9,'nov':10,'dec':11,
+    'ม.ค.':0,'ก.พ.':1,'มี.ค.':2,'เม.ย.':3,'พ.ค.':4,'มิ.ย.':5,'ก.ค.':6,'ส.ค.':7,'ก.ย.':8,'ต.ค.':9,'พ.ย.':10,'ธ.ค.':11,
+    'มกราคม':0,'กุมภาพันธ์':1,'มีนาคม':2,'เมษายน':3,'พฤษภาคม':4,'มิถุนายน':5,'กรกฎาคม':6,'สิงหาคม':7,'กันยายน':8,'ตุลาคม':9,'พฤศจิกายน':10,'ธันวาคม':11 };
+  const fixYear = function(y){ y = parseInt(y); if(isNaN(y)) return 2000; if(y>2400) y = y-543; else if(y<100) y = y+2000; return y; };
+  if (parts.length >= 2) {
+    let mIdx = -1, monthVal = 0;
+    for (let i=0;i<parts.length;i++){ let p = parts[i].toLowerCase().substring(0,4); if(monthMap[p]!==undefined){ mIdx=i; monthVal=monthMap[p]; break; } if(monthMap[parts[i]]!==undefined){ mIdx=i; monthVal=monthMap[parts[i]]; break; } }
+    if (mIdx !== -1) {
+      let day = null, year = 2000;
+      if (parts.length === 3) {
+        if (mIdx === 1) { day = parseInt(parts[0]); year = fixYear(parts[2]); }
+        else if (mIdx === 0) { day = parseInt(parts[1]); year = fixYear(parts[2]); }
+        else { day = parseInt(parts[0]); year = fixYear(parts[1]); }
+      } else if (parts.length === 2) {
+        if (mIdx === 0) year = fixYear(parts[1]); else year = fixYear(parts[0]);
+      }
+      if (day !== null && !isNaN(day)) return new Date(year, monthVal, day).getTime();
+      else return new Date(year, monthVal + 1, 0).getTime();
+    }
+    // numeric dd/mm/yyyy (หรือ mm/dd/yyyy — ถ้าเลขตัวแรก>12 ถือว่าเป็น dd/mm)
+    if (parts.length === 3) {
+      let a = parseInt(parts[0]), b = parseInt(parts[1]), y = fixYear(parts[2]);
+      if (!isNaN(a) && !isNaN(b)) {
+        let day, mon;
+        if (a > 12) { day = a; mon = b-1; } else { day = a; mon = b-1; }
+        if (mon>=0 && mon<=11 && day>=1 && day<=31) return new Date(y, mon, day).getTime();
+      }
+    }
+  }
+  let timestamp = Date.parse(dStr);
+  return isNaN(timestamp) ? 0 : timestamp;
+}
 
 
         function extractUniqueMonths(data) {
@@ -1830,6 +1911,97 @@ function pickStatus(statusGroup){
         };
 
 
+        function setupTabsAndLoad(sheetNames) {
+                        const container = document.getElementById('sheetTabsContainer'); container.innerHTML = ''; container.className = 'bg-slate-100 px-4 pt-3 flex items-end border-b border-slate-200 rounded-t-2xl w-full print:bg-white print:border-none';
+
+                        const tabsWrapper = document.createElement('div'); tabsWrapper.className = 'flex flex-wrap gap-1.5 flex-1'; container.appendChild(tabsWrapper);
+
+
+                        const manageBtnWrapper = document.createElement('div'); manageBtnWrapper.className = 'relative custom-dropdown mb-1 ml-2 shrink-0 no-print';
+
+                        manageBtnWrapper.innerHTML = `<button class="dropdown-toggle text-[11px] font-bold text-orange-600 hover:text-orange-700 px-3 py-1.5 rounded-xl border border-orange-200 bg-orange-50 hover:bg-orange-100 transition-colors shadow-sm flex items-center gap-1" data-target="tabManagerDropdown">⚙️ จัดการแท็บ<span class="text-[9px] text-orange-400">▼</span></button><div id="tabManagerDropdown" class="dropdown-menu absolute hidden right-0 top-full mt-1 w-64 bg-white border border-slate-200 rounded-xl shadow-2xl z-[9999] max-h-72 flex flex-col opacity-0 scale-95 transition-all"><div class="p-2.5 border-b border-slate-100 bg-slate-50 rounded-t-xl"><span class="text-xs font-black text-slate-800 px-1">เลือกแสดง/ซ่อนชีท (Sheet)</span></div><div id="tabManagerList" class="p-1.5 overflow-y-auto custom-scrollbar flex-1 flex flex-col gap-1 rounded-b-xl"></div></div>`;
+
+                        container.appendChild(manageBtnWrapper); const tabManagerList = manageBtnWrapper.querySelector('#tabManagerList');
+
+                        
+
+                        sheetNames.forEach(name => {
+
+                            const snLower = name.toLowerCase().trim(); const isCore = coreSheetsList.includes(snLower); const showByDefault = isCore;
+
+                            const tabId = `tab-${name.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+                            const tab = document.createElement('div'); tab.className = `sheet-tab ${showByDefault ? '' : 'hide'}`; tab.innerText = name; tab.id = tabId; tab.onclick = () => selectSheet(name); tabsWrapper.appendChild(tab);
+
+                            const cbLabel = document.createElement('label'); cbLabel.className = 'flex items-center gap-2 p-2 hover:bg-slate-50 cursor-pointer rounded-lg transition-colors border-b border-slate-50/50';
+
+                            cbLabel.innerHTML = `<input type="checkbox" data-tab="${tabId}" class="tab-vis-cb w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500" ${showByDefault ? 'checked' : ''}><span class="text-xs text-slate-700 truncate select-none font-bold" title="${name}">${name}</span>`;
+
+                            tabManagerList.appendChild(cbLabel);
+
+                        });
+
+
+                        let firstSheet = sheetNames.find(n => n.toLowerCase().trim() === '01 summary') || sheetNames.find(n => n.toLowerCase().trim() === 'design') || sheetNames.find(n => coreSheetsList.includes(n.toLowerCase().trim())) || sheetNames[0];
+
+                        if (firstSheet) selectSheet(firstSheet); preParseAllSheets();
+                        try{ localStorage.setItem("mwCachedWorkbook", JSON.stringify(workbookData)); localStorage.setItem("mwCachedTime", new Date().toISOString()); }catch(e){}
+        }
+
+        window.loadFromGoogleSheet = function() {
+            var skeleton = document.getElementById('skeletonOverlay');
+            if(skeleton){ skeleton.classList.remove('hide'); skeleton.classList.remove('opacity-0'); }
+            fetch(gsGetUrl(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(json){
+                try{
+                    workbookData = {}; sheetStates = {}; currentSheetName = ""; window._parsedCache = {}; window._summaryRows = null;
+                    var sheetNames = Object.keys(json);
+                    sheetNames.forEach(function(n){ workbookData[n] = json[n]; });
+                    try{ localStorage.removeItem('mwStatusOverrides'); localStorage.removeItem('mwFieldOverrides'); localStorage.removeItem('mwEditLog'); }catch(e){};
+                    window.GS_SUMMARY_SHEET = sheetNames.find(function(n){return n.toLowerCase().indexOf('01 summary')!==-1;}) || sheetNames[0];
+                    document.getElementById('startupView').classList.add('hide');
+                    document.getElementById('compactHeader').classList.remove('hide');
+                    document.getElementById('dashboardArea').classList.remove('hide');
+                    setupTabsAndLoad(sheetNames);
+                    if(skeleton){ skeleton.classList.add('opacity-0'); setTimeout(function(){ skeleton.classList.add('hide'); },500); }
+                    Swal.fire({ toast:true, position:'top-end', icon:'success', title:'โหลดจาก Google Sheet สำเร็จ', showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'} });
+                    setTimeout(ensureEditorName, 800);
+                }catch(err){
+                    if(skeleton) skeleton.classList.add('hide');
+                    Swal.fire({ icon:'error', title:'เชื่อม Google Sheet ไม่สำเร็จ', text:String(err&&err.message?err.message:err), customClass:{popup:'rounded-2xl'} });
+                }
+            }).catch(function(err){
+                if(skeleton) skeleton.classList.add('hide');
+                Swal.fire({ icon:'error', title:'ไม่สามารถเชื่อม Google Sheet ได้', text:'โปรดตรวจสอบ URL Apps Script หรืออัปโหลดไฟล์ Excel แทน', customClass:{popup:'rounded-2xl'} });
+            });
+        };
+
+        var _autoRefreshTimer = null;
+        window.refreshData = function(silent){
+            var cur = currentSheetName || '';
+            var _keepState = (typeof sheetStates !== 'undefined' && sheetStates && cur) ? sheetStates[cur] : null;
+            _setRefreshBtnBusy(true);
+            fetch(gsGetUrl(), {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(json){
+                try{
+                    workbookData = {}; sheetStates = {}; window._parsedCache = {}; window._summaryRows = null;
+                    if(_keepState && cur) sheetStates[cur] = _keepState;
+                    var sheetNames = Object.keys(json);
+                    sheetNames.forEach(function(n){ workbookData[n] = json[n]; });
+                    try{ localStorage.removeItem('mwStatusOverrides'); localStorage.removeItem('mwFieldOverrides'); localStorage.removeItem('mwEditLog'); }catch(e){};
+                    window.GS_SUMMARY_SHEET = sheetNames.find(function(n){return n.toLowerCase().indexOf('01 summary')!==-1;}) || sheetNames[0];
+                    setupTabsAndLoad(sheetNames);
+                    var target = sheetNames.find(function(n){return n===cur;}) || sheetNames[0];
+                    if(target) selectSheet(target);
+                    if(!silent){ Swal.fire({toast:true,position:'top-end',icon:'success',title:'รีเฟรชข้อมูลล่าสุดแล้ว',showConfirmButton:false,timer:1200,customClass:{popup:'rounded-xl'}}); }
+                }catch(err){ if(!silent) Swal.fire({icon:'error',title:'รีเฟรชไม่สำเร็จ',text:String(err&&err.message?err.message:err),customClass:{popup:'rounded-2xl'}}); }
+            }).catch(function(err){ if(!silent) Swal.fire({icon:'error',title:'รีเฟรชไม่สำเร็จ (เชื่อมต่อไม่ได้)',customClass:{popup:'rounded-2xl'}}); }).finally(function(){ _setRefreshBtnBusy(false); });
+        };
+        window.toggleAutoRefresh = function(on){
+            if(_autoRefreshTimer){ clearInterval(_autoRefreshTimer); _autoRefreshTimer=null; }
+            if(on){ _autoRefreshTimer = setInterval(function(){ refreshData(true); }, 60000); }
+            try{ localStorage.setItem('mwAutoRefresh', on ? '1' : '0'); }catch(e){}
+        };
+        window.restoreAutoRefresh = function(){ try{ if(localStorage.getItem('mwAutoRefresh')==='1'){ var cb=document.getElementById('autoRefreshChk'); if(cb) cb.checked = true; toggleAutoRefresh(true); } }catch(e){} };
+
         function handleFiles(file) {
 
             let fnDisp = document.getElementById('fileNameDisplay'); if(fnDisp) fnDisp.innerText = file.name;
@@ -1856,39 +2028,7 @@ function pickStatus(statusGroup){
 
                         
 
-                        const container = document.getElementById('sheetTabsContainer'); container.innerHTML = ''; container.className = 'bg-slate-100 px-4 pt-3 flex items-end border-b border-slate-200 rounded-t-2xl w-full print:bg-white print:border-none';
-
-                        const tabsWrapper = document.createElement('div'); tabsWrapper.className = 'flex flex-wrap gap-1.5 flex-1'; container.appendChild(tabsWrapper);
-
-
-                        const manageBtnWrapper = document.createElement('div'); manageBtnWrapper.className = 'relative custom-dropdown mb-1 ml-2 shrink-0 no-print';
-
-                        manageBtnWrapper.innerHTML = `<button class="dropdown-toggle text-[11px] font-bold text-orange-600 hover:text-orange-700 px-3 py-1.5 rounded-xl border border-orange-200 bg-orange-50 hover:bg-orange-100 transition-colors shadow-sm flex items-center gap-1" data-target="tabManagerDropdown">⚙️ จัดการแท็บ<span class="text-[9px] text-orange-400">▼</span></button><div id="tabManagerDropdown" class="dropdown-menu absolute hidden right-0 top-full mt-1 w-64 bg-white border border-slate-200 rounded-xl shadow-2xl z-[9999] max-h-72 flex flex-col opacity-0 scale-95 transition-all"><div class="p-2.5 border-b border-slate-100 bg-slate-50 rounded-t-xl"><span class="text-xs font-black text-slate-800 px-1">เลือกแสดง/ซ่อนชีท (Sheet)</span></div><div id="tabManagerList" class="p-1.5 overflow-y-auto custom-scrollbar flex-1 flex flex-col gap-1 rounded-b-xl"></div></div>`;
-
-                        container.appendChild(manageBtnWrapper); const tabManagerList = manageBtnWrapper.querySelector('#tabManagerList');
-
-                        
-
-                        workbook.SheetNames.forEach(name => {
-
-                            const snLower = name.toLowerCase().trim(); const isCore = coreSheetsList.includes(snLower); const showByDefault = isCore;
-
-                            const tabId = `tab-${name.replace(/[^a-zA-Z0-9]/g, '_')}`;
-
-                            const tab = document.createElement('div'); tab.className = `sheet-tab ${showByDefault ? '' : 'hide'}`; tab.innerText = name; tab.id = tabId; tab.onclick = () => selectSheet(name); tabsWrapper.appendChild(tab);
-
-                            const cbLabel = document.createElement('label'); cbLabel.className = 'flex items-center gap-2 p-2 hover:bg-slate-50 cursor-pointer rounded-lg transition-colors border-b border-slate-50/50';
-
-                            cbLabel.innerHTML = `<input type="checkbox" data-tab="${tabId}" class="tab-vis-cb w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500" ${showByDefault ? 'checked' : ''}><span class="text-xs text-slate-700 truncate select-none font-bold" title="${name}">${name}</span>`;
-
-                            tabManagerList.appendChild(cbLabel);
-
-                        });
-
-
-                        let firstSheet = workbook.SheetNames.find(n => n.toLowerCase().trim() === '01 summary') || workbook.SheetNames.find(n => n.toLowerCase().trim() === 'design') || workbook.SheetNames.find(n => coreSheetsList.includes(n.toLowerCase().trim())) || workbook.SheetNames[0];
-
-                        if (firstSheet) selectSheet(firstSheet); preParseAllSheets(); try{ localStorage.setItem("mwCachedWorkbook", JSON.stringify(workbookData)); localStorage.setItem("mwCachedTime", new Date().toISOString()); }catch(e){}
+                        setupTabsAndLoad(workbook.SheetNames); try{ localStorage.setItem("mwCachedWorkbook", JSON.stringify(workbookData)); localStorage.setItem("mwCachedTime", new Date().toISOString()); }catch(e){}
 
                         
 
@@ -3620,6 +3760,8 @@ document.addEventListener('change', function(e){
   </div>
 </div>
 
+
+<script>try{ window.addEventListener('load', function(){ if(window.loadFromGoogleSheet){ window.loadFromGoogleSheet(); } var lbl=document.getElementById('editorNameLabel'); if(lbl){ lbl.innerText = window.GS_EDITOR_NAME || 'ตั้งชื่อ'; } if(window.restoreAutoRefresh){ window.restoreAutoRefresh(); } }); }catch(e){}</script>
 </body>
 
 </html>
