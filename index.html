@@ -464,9 +464,6 @@
                             </div>
 
 
-                            <button id="overallPctToggleBtn" onclick="toggleOverallPctMode()" class="hide text-[11px] font-bold px-3 py-2.5 rounded-xl transition-colors border shadow-sm flex items-center gap-1 whitespace-nowrap bg-white text-slate-700 border-slate-300 hover:bg-slate-100">🧮 Overall: เฉลี่ยจากเฟส</button>
-
-
                             <div class="relative custom-dropdown hide" id="phaseFilterWrapper">
 
                                 <button class="dropdown-toggle text-[11px] border border-slate-300 rounded-xl p-2.5 w-28 bg-white text-left flex justify-between items-center hover:bg-slate-100 shadow-sm transition-colors" data-target="personDropdown">
@@ -689,7 +686,7 @@
 
                             <button onclick="exportExcelStyling()" class="text-[11px] text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-bold px-4 py-2.5 rounded-xl transition-colors border border-emerald-200 shadow-sm flex items-center gap-1.5">
 
-                                <span id="exportIcon">📥</span> <span id="exportText" class="hidden sm:inline">Export Excel</span></button><button onclick="exportSelected()" class="text-[11px] text-blue-700 bg-blue-50 hover:bg-blue-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-blue-200 shadow-sm flex items-center gap-2 no-print" title="Ctrl+Click rows to select, then export"><svg class="mini-svg" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Selected</button><button onclick="exportEditedOnly()" class="text-[11px] text-purple-700 bg-purple-50 hover:bg-purple-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-purple-200 shadow-sm flex items-center gap-2 no-print" title="Export เฉพาะรายการที่แก้ไขแล้ว"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Edited</button><button class="hidden"
+                                <span id="exportIcon">📥</span> <span id="exportText" class="hidden sm:inline">Export Excel</span></button><button onclick="exportSelected()" class="text-[11px] text-blue-700 bg-blue-50 hover:bg-blue-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-blue-200 shadow-sm flex items-center gap-2 no-print" title="Ctrl+Click rows to select, then export"><svg class="mini-svg" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Selected</button><button onclick="exportEditedOnly()" class="text-[11px] text-purple-700 bg-purple-50 hover:bg-purple-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-purple-200 shadow-sm flex items-center gap-2 no-print" title="Export เฉพาะรายการที่แก้ไขแล้ว"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Edited</button><button onclick="undoLastEdit()" class="text-[11px] text-amber-700 bg-amber-50 hover:bg-amber-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-amber-200 shadow-sm flex items-center gap-2 no-print" title="ย้อนกลับการแก้ไขล่าสุด (เผื่อกรอกผิด)"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg> ย้อนกลับ</button><button onclick="resetAllEdits()" class="text-[11px] text-rose-700 bg-rose-50 hover:bg-rose-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-rose-200 shadow-sm flex items-center gap-2 no-print" title="คืนค่าเดิมทั้งหมด จาก Excel ต้นฉบับ"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> คืนค่าเดิม</button><button class="hidden"
 
                             </button>
 
@@ -725,7 +722,7 @@
 
                     
 
-                    <div id="tableContainerView" class="w-full overflow-x-auto overflow-y-auto max-h-[65vh] custom-scrollbar rounded-xl border border-slate-200 print:border-none print:max-h-none print:overflow-visible block relative bg-white shadow-sm scroll-smooth">
+                    <div id="tableContainerView" class="w-full overflow-x-auto overflow-y-auto max-h-[85vh] custom-scrollbar rounded-xl border border-slate-200 print:border-none print:max-h-none print:overflow-visible block relative bg-white shadow-sm scroll-smooth">
 
                         <table id="mainTable" class="min-w-full divide-y divide-slate-200 text-xs table-fixed w-full transition-all duration-300">
 
@@ -739,7 +736,7 @@
 
                     
 
-                    <div id="ganttContainerView" class="hide w-full overflow-x-auto overflow-y-auto max-h-[65vh] custom-scrollbar cursor-grab rounded-xl border border-slate-200 no-print relative bg-white shadow-sm scroll-smooth">
+                    <div id="ganttContainerView" class="hide w-full overflow-x-auto overflow-y-auto max-h-[85vh] custom-scrollbar cursor-grab rounded-xl border border-slate-200 no-print relative bg-white shadow-sm scroll-smooth">
 
                         <table class="min-w-full divide-y divide-slate-200 text-xs w-full table-fixed select-none transition-all duration-300" id="mainGanttTable">
 
@@ -967,11 +964,47 @@ function openStatusPickerPhase(e, rawIdx, phaseName){ openStatusPicker(e, rawIdx
 function logEdit(activity, phase, field, newValue){ try{ var log=JSON.parse(localStorage.getItem('mwEditLog')||'[]'); log.unshift({t:new Date().toISOString(), activity:String(activity||''), phase:String(phase||''), sheet:currentSheetName, field:field, value:String(newValue)}); if(log.length>200) log=log.slice(0,200); localStorage.setItem('mwEditLog', JSON.stringify(log)); }catch(e){} }
 function isRowEdited(d){
   try{ var so=JSON.parse(localStorage.getItem('mwStatusOverrides')||'{}'); var fo=JSON.parse(localStorage.getItem('mwFieldOverrides')||'{}'); var isSum=currentSheetName.toLowerCase().includes('01 summary');
-    if(isSum && d.phases){ return d.phases.some(function(ph){ return so[_statusKey(d.activity, ph.name)] || fo[_statusKey(d.activity, ph.name)]; }); }
-    var k=_statusKey(d.activity, currentSheetName); return !!so[k] || !!fo[k];
+    var kMain=_statusKey(d.activity, currentSheetName);
+    if(isSum && d.phases){ return d.phases.some(function(ph){ return so[_statusKey(d.activity, ph.name)] || fo[_statusKey(d.activity, ph.name)]; }) || !!so[kMain] || !!fo[kMain]; }
+    return !!so[kMain] || !!fo[kMain];
   }catch(e){ return false; }
 }
 function countEdited(){ try{ var so=JSON.parse(localStorage.getItem('mwStatusOverrides')||'{}'); var fo=JSON.parse(localStorage.getItem('mwFieldOverrides')||'{}'); var keys={}; Object.keys(so).forEach(function(k){keys[k]=1;}); Object.keys(fo).forEach(function(k){keys[k]=1;}); return Object.keys(keys).length; }catch(e){return 0;} }
+
+        window.undoLastEdit = function() {
+            try {
+                var log = JSON.parse(localStorage.getItem('mwEditLog')||'[]');
+                if (log.length === 0) { Swal.fire({toast:true,position:'top-end',icon:'info',title:'ไม่มีการแก้ไขที่จะย้อนกลับ',showConfirmButton:false,timer:1500,customClass:{popup:'rounded-xl'}}); return; }
+                var last = log[0];
+                var key = _statusKey(last.activity, last.phase);
+                if (last.field === 'status') {
+                    var so = JSON.parse(localStorage.getItem('mwStatusOverrides')||'{}'); delete so[key]; localStorage.setItem('mwStatusOverrides', JSON.stringify(so));
+                } else {
+                    var fo = JSON.parse(localStorage.getItem('mwFieldOverrides')||'{}');
+                    if (fo[key]) { delete fo[key][last.field]; if (Object.keys(fo[key]).length===0) delete fo[key]; localStorage.setItem('mwFieldOverrides', JSON.stringify(fo)); }
+                    if (last.field === 'progress') { var so2 = JSON.parse(localStorage.getItem('mwStatusOverrides')||'{}'); if(so2[key]){ delete so2[key]; localStorage.setItem('mwStatusOverrides', JSON.stringify(so2)); } }
+                }
+                log.shift(); localStorage.setItem('mwEditLog', JSON.stringify(log));
+                selectSheet(currentSheetName);
+                Swal.fire({toast:true,position:'top-end',icon:'success',title:'ย้อนกลับแล้ว: '+(String(last.activity||'').slice(0,28))+' ('+last.field+')',showConfirmButton:false,timer:1800,customClass:{popup:'rounded-xl'}});
+            } catch(e) { Swal.fire({toast:true,position:'top-end',icon:'error',title:'Undo ไม่สำเร็จ',showConfirmButton:false,timer:1500,customClass:{popup:'rounded-xl'}}); }
+        };
+
+        window.resetAllEdits = function() {
+            Swal.fire({
+                title: 'คืนค่าเดิมทั้งหมด?',
+                text: 'การแก้ไขทั้งหมด (สถานะ / Progress / Plan Date / Note) จะถูกยกเลิก กลับไปใช้ค่าจาก Excel ต้นฉบับ',
+                icon: 'warning', showCancelButton: true, confirmButtonText: 'คืนค่าเดิม', cancelButtonText: 'ยกเลิก',
+                customClass: { popup: 'rounded-2xl', confirmButton: 'bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl px-5 py-2', cancelButton: 'bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl px-5 py-2' },
+                buttonsStyling: false
+            }).then(function(res){
+                if(!res.isConfirmed) return;
+                try{ localStorage.removeItem('mwStatusOverrides'); localStorage.removeItem('mwFieldOverrides'); localStorage.removeItem('mwEditLog'); }catch(e){}
+                selectSheet(currentSheetName);
+                Swal.fire({toast:true,position:'top-end',icon:'success',title:'คืนค่าเดิมเรียบร้อย',showConfirmButton:false,timer:1500,customClass:{popup:'rounded-xl'}});
+            });
+        };
+
 function exportEditedOnly(){ var n=countEdited(); if(n===0){ Swal.fire({icon:'warning',title:'ยังไม่มีรายการที่แก้ไข',text:'ลองเปลี่ยนสถานะหรือแก้ Progress/Plan Date ก่อน',customClass:{popup:'rounded-2xl'}}); return; } window._exportEditedOnly=true; exportExcelStyling(); }
 function _parseSheetMinimal(sheetName){
   try{
@@ -1164,9 +1197,6 @@ function pickStatus(statusGroup){
 
         let isPrintingNow = false;
 
-        let showExcelOverallPct = false;
-
-
         window.ganttMinTs = 0; window.ganttMaxTs = 0; window.ganttTotalMs = 0; window.ganttMonthsCount = 0;
 
 
@@ -1181,6 +1211,8 @@ function pickStatus(statusGroup){
         const predefinedCodes = ['GEN', 'PSD', 'AFC', 'SIG', 'DWE', 'PSY', 'COM', 'RST', 'MO-CK', 'MO-BEM'];
 
         const statusWeightMap = { 'late': 1, 'on schedule': 2, 'completed': 3 };
+
+        const PHASE_WEIGHTS = { 'design':10, 'procurement':10, 'manudeli':10, 'conin':60, 'tc':5, 'testprocedure':1, 'inspection':1, 'testreport':3 };
 
         function computeOverallStatus(d, checkedPhases, isAllPhase) {
             var pct = parseFloat(d.numPct) || 0;
@@ -1218,6 +1250,10 @@ function pickStatus(statusGroup){
             if (!isAllPhase && checkedPhases && checkedPhases.length > 0) {
                 phases = phases.filter(function(ph){ return checkedPhases.indexOf(ph.name) !== -1; });
             }
+            if (phases.length === 0 && (d.phases || []).length > 0) phases = (d.phases || []).slice();
+            var _allDone = true;
+            for (var _di = 0; _di < phases.length; _di++) { if ((parseFloat(phases[_di].numPct)||0) < 100) { _allDone = false; break; } }
+            if (_allDone && phases.length > 0) return { statusGroup: 'completed', statusRaw: 'Completed' };
             for (var _li = 0; _li < phases.length; _li++) { if (phases[_li].statusGroup === 'late') return { statusGroup: 'late', statusRaw: 'Late' }; }
             var maxTs = 0;
             for (var i = 0; i < phases.length; i++) { var ts = parseDateString(phases[i].expected); if (ts > maxTs) maxTs = ts; }
@@ -1353,77 +1389,33 @@ function pickStatus(statusGroup){
 
 
         function applyOverallPctMode() {
-
             if (!currentSheetName.toLowerCase().includes('01 summary')) return;
-
             let elPer = document.getElementById('selectAllPerson');
-
             const isAllPh = elPer ? elPer.checked : true;
-
             const checkedPh = Array.from(document.querySelectorAll('.person-cb:checked')).map(cb => cb.value);
-
             currentRawData.forEach(d => {
-
-                if (d.excelPct === undefined) return;
-
-                if (showExcelOverallPct) { d.pct = d.excelPct; d.numPct = d.excelNumPct; return; }
-
-                let phs = isAllPh ? (d.phases || []) : (d.phases || []).filter(ph => checkedPh.includes(ph.name));
-
-                let vals = [];
-
+                if (!d.phases || d.phases.length === 0) { d.pct = '-'; d.numPct = 0; return; }
+                let phs = isAllPh ? d.phases : d.phases.filter(ph => checkedPh.includes(ph.name));
+                if (phs.length === 0) phs = d.phases;
+                let wSum = 0, wTotal = 0;
                 phs.forEach(ph => {
-
-                    if (ph.pct !== '-' && ph.pct !== '') vals.push(Math.min(100, Math.max(0, Number(ph.numPct) || 0)));
-
-                    else if (ph.statusGroup === 'completed') vals.push(100);
-
-                    else if (ph.statusGroup === 'on schedule' || ph.statusGroup === 'late') vals.push(0);
-
+                    let pn = (ph.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                    let wt = PHASE_WEIGHTS[pn] || 0;
+                    if (wt === 0) return;
+                    let val;
+                    if (ph.pct !== '-' && ph.pct !== '') val = Math.min(100, Math.max(0, Number(ph.numPct) || 0));
+                    else if (ph.statusGroup === 'completed') val = 100;
+                    else if (ph.statusGroup === 'on schedule' || ph.statusGroup === 'late') val = 0;
+                    else return;
+                    wSum += wt; wTotal += val * wt;
                 });
-
-                if (vals.length === 0) { d.pct = '-'; d.numPct = 0; return; }
-
-                let avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-
+                if (wSum === 0) { d.pct = '-'; d.numPct = 0; return; }
+                let avg = wTotal / wSum;
                 let shown = avg >= 100 ? 100 : Math.floor(avg * 10) / 10;
-
                 d.numPct = shown;
-
                 d.pct = shown + '%';
-
             });
-
         }
-
-
-        function updateOverallPctBtn() {
-
-            const b = document.getElementById('overallPctToggleBtn'); if (!b) return;
-
-            const isHidden = b.classList.contains('hide');
-
-            const base = 'text-[11px] font-bold px-3 py-2.5 rounded-xl transition-colors border shadow-sm flex items-center gap-1 whitespace-nowrap ';
-
-            b.className = base + (showExcelOverallPct ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100') + (isHidden ? ' hide' : '');
-
-            b.innerHTML = showExcelOverallPct ? '📄 Overall: ค่าจาก Excel' : '🧮 Overall: เฉลี่ยจากเฟส';
-
-            b.setAttribute('data-tooltip', showExcelOverallPct ? 'กำลังแสดง % Overall จริงจาก Excel\nกดเพื่อกลับไปใช้ค่าเฉลี่ยจากเฟส' : 'กำลังแสดง % เฉลี่ยจากเฟสที่เลือก\nกดเพื่อดู % Overall จริงจาก Excel');
-
-        }
-
-
-        window.toggleOverallPctMode = function() {
-
-            showExcelOverallPct = !showExcelOverallPct;
-
-            updateOverallPctBtn();
-
-            updateView();
-
-        };
-
 
         function extractDate(val) { let exp = String(val||'').trim(); return exp === '' ? '-' : exp; }
 
@@ -2110,15 +2102,11 @@ function pickStatus(statusGroup){
 
                     if(btnGantt) btnGantt.classList.add('hide'); if (currentDataView === 'gantt') { currentDataView = 'table'; if(window.updateViewButtons) window.updateViewButtons('table'); }
 
-                    let opBtn = document.getElementById('overallPctToggleBtn'); if(opBtn) opBtn.classList.remove('hide'); updateOverallPctBtn();
-
                 } else { 
 
                     if(pFw) pFw.classList.add('hide'); 
 
                     if(btnGantt) btnGantt.classList.add('hide');
-
-                    let opBtn = document.getElementById('overallPctToggleBtn'); if(opBtn) opBtn.classList.add('hide');
 
                     if (currentDataView === 'gantt') { currentDataView = 'table'; if(window.updateViewButtons) window.updateViewButtons('table'); }
 
@@ -2323,6 +2311,7 @@ function pickStatus(statusGroup){
             const today = new Date(); const thisMonth = today.getMonth(); const thisYear = today.getFullYear(); let nextMonth = thisMonth + 1; let nextYear = thisYear; if(nextMonth > 11) { nextMonth = 0; nextYear++; } let lastMonth = thisMonth - 1; let lastYear = thisYear; if(lastMonth < 0) { lastMonth = 11; lastYear--; }
 
 
+            applyStatusOverrides(); applyFieldOverrides();
             applyOverallPctMode();
 
             window.hideMainExpected = false;
@@ -2332,7 +2321,6 @@ function pickStatus(statusGroup){
                 currentRawData.forEach(function(d) {
                     if (d._origSG === undefined) { d._origSG = d.statusGroup; d._origSR = d.statusRaw; }
                     else { d.statusGroup = d._origSG; d.statusRaw = d._origSR; }
-                    if (isAllPhase && d.excelPct && d.excelPct !== '-') { d.pct = d.excelPct; d.numPct = d.excelNumPct; }
                     if (d.phases && d.phases.length > 0) {
                         var c = computeOverallStatus(d, checkedPersons, isAllPhase);
                         if (c) { d.statusGroup = c.statusGroup; d.statusRaw = c.statusRaw; }
@@ -2357,7 +2345,6 @@ function pickStatus(statusGroup){
                 });
             }
 
-            applyStatusOverrides(); applyFieldOverrides();
 
             globalFilteredData = currentRawData.filter(d => {
 
@@ -2396,7 +2383,7 @@ function pickStatus(statusGroup){
 
             if(window._dueSoonOnly){ globalFilteredData = globalFilteredData.filter(function(d){return _isDueSoon(d);}); }
 
-            const total = globalFilteredData.length; const compCount = globalFilteredData.filter(d => d.statusGroup === 'completed').length; const onSchedCount = globalFilteredData.filter(d => d.statusGroup === 'on schedule').length; const lateCount = globalFilteredData.filter(d => d.statusGroup === 'late').length;
+            const _kpiData = globalFilteredData.filter(function(d){ return !((parseFloat(d.numPct)||0)===0 && (!d.phases || d.phases.length===0) && !d.statusGroup); }); const total = _kpiData.length; const compCount = _kpiData.filter(d => d.statusGroup === 'completed').length; const onSchedCount = _kpiData.filter(d => d.statusGroup === 'on schedule').length; const lateCount = _kpiData.filter(d => d.statusGroup === 'late').length;
 
             const compPct = total > 0 ? Math.round((compCount / total) * 100) : 0; const onSchedPct = total > 0 ? Math.round((onSchedCount / total) * 100) : 0; const latePct = total > 0 ? Math.round((lateCount / total) * 100) : 0;
 
@@ -2468,11 +2455,11 @@ function pickStatus(statusGroup){
 
             if(overallChartObj) overallChartObj.destroy();
 
-            const totalTasks = data.length;
+            const totalTasks = compCount + onSchedCount + lateCount;
 
-            const noStatusCount = totalTasks - (compCount + onSchedCount + lateCount);
+            const noStatusCount = 0;
 
-            const hasNoStatus = noStatusCount > 0;
+            const hasNoStatus = false;
 
             const isSummaryMode = currentSheetName.toLowerCase().includes('01 summary');
 
@@ -2535,7 +2522,24 @@ function pickStatus(statusGroup){
 
             const personStats = {}; 
 
-            if (isSummaryMode) { data.forEach(d => { let visiblePhases = d.phases || []; visiblePhases.forEach(ph => { if(!personStats[ph.name]) personStats[ph.name] = { completed: 0, on_schedule: 0, late: 0 }; if(ph.statusGroup === 'completed') personStats[ph.name].completed++; else if(ph.statusGroup === 'late') personStats[ph.name].late++; else if(ph.statusGroup === 'on schedule') personStats[ph.name].on_schedule++; }); }); } else { data.forEach(d => { let key = d.respPerson; if(!personStats[key]) personStats[key] = { completed: 0, on_schedule: 0, late: 0 }; if(d.statusGroup === 'completed') personStats[key].completed++; else if(d.statusGroup === 'late') personStats[key].late++; else if(d.statusGroup === 'on schedule') personStats[key].on_schedule++; }); }
+            if (isSummaryMode) {
+                let _elPer = document.getElementById('selectAllPerson'); let _isAllPh = _elPer ? _elPer.checked : true;
+                let _chkPh = Array.from(document.querySelectorAll('.person-cb:checked')).map(function(cb){ return cb.value; });
+                let _elStat = document.getElementById('selectAllStatus'); let _isAllStat = _elStat ? _elStat.checked : true;
+                let _chkStat = Array.from(document.querySelectorAll('.status-cb:checked')).map(function(cb){ return String(cb.value||'').toLowerCase().trim(); });
+                if (!_isAllPh && _chkPh.length > 0) { _chkPh.forEach(function(pn){ if(!personStats[pn]) personStats[pn] = { completed: 0, on_schedule: 0, late: 0 }; }); }
+                data.forEach(function(d){
+                    let visiblePhases = d.phases || [];
+                    if (!_isAllPh && _chkPh.length > 0) { visiblePhases = visiblePhases.filter(function(ph){ return _chkPh.indexOf(ph.name) !== -1; }); }
+                    visiblePhases.forEach(function(ph){
+                        if (!_isAllStat && _chkStat.length > 0) { if (_chkStat.indexOf(String(ph.statusGroup||'').toLowerCase().trim()) === -1) return; }
+                        if(!personStats[ph.name]) personStats[ph.name] = { completed: 0, on_schedule: 0, late: 0 };
+                        if(ph.statusGroup === 'completed') personStats[ph.name].completed++;
+                        else if(ph.statusGroup === 'late') personStats[ph.name].late++;
+                        else if(ph.statusGroup === 'on schedule') personStats[ph.name].on_schedule++;
+                    });
+                });
+            } else { data.forEach(d => { let key = d.respPerson; if(!personStats[key]) personStats[key] = { completed: 0, on_schedule: 0, late: 0 }; if(d.statusGroup === 'completed') personStats[key].completed++; else if(d.statusGroup === 'late') personStats[key].late++; else if(d.statusGroup === 'on schedule') personStats[key].on_schedule++; }); }
 
             const labels = Object.keys(personStats).sort((a,b) => { if (isSummaryMode) { let indexA = customPhaseOrder.indexOf(a); let indexB = customPhaseOrder.indexOf(b); if (indexA !== -1 && indexB !== -1) return indexA - indexB; return indexA !== -1 ? -1 : 1; } return (personStats[b].completed + personStats[b].late + personStats[b].on_schedule) - (personStats[a].completed + personStats[a].late + personStats[a].on_schedule); });
 
@@ -3408,7 +3412,7 @@ function pickStatus(statusGroup){
 
                 pageWrap.querySelectorAll('.dropdown-menu, .no-print').forEach(el => el.style.display = 'none');
 
-                pageWrap.querySelectorAll('.custom-scrollbar, .overflow-x-auto, .overflow-y-auto').forEach(el => { el.style.overflow = 'visible'; el.style.maxHeight = 'none'; el.classList.remove('max-h-[65vh]', 'overflow-y-auto', 'overflow-x-auto'); }); 
+                pageWrap.querySelectorAll('.custom-scrollbar, .overflow-x-auto, .overflow-y-auto').forEach(el => { el.style.overflow = 'visible'; el.style.maxHeight = 'none'; el.classList.remove('max-h-[85vh]', 'overflow-y-auto', 'overflow-x-auto'); }); 
 
                 
 
