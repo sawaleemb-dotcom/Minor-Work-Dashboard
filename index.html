@@ -1228,24 +1228,31 @@ function pickStatus(statusGroup){
         function askEditorName(required){
             required = !!required;
             Swal.fire({
-                title: required ? 'กรอกชื่อของคุณก่อนเข้าใช้งาน' : 'กรอกชื่อของคุณ',
-                input: 'text',
+                title: required ? 'กรอกอีเมล์ของคุณก่อนเข้าใช้งาน' : 'เปลี่ยนอีเมล์ของคุณ',
+                input: 'email',
                 inputValue: window.GS_EDITOR_NAME || '',
-                inputPlaceholder: 'เช่น สมชาย / หัวหน้าทีม',
+                inputPlaceholder: 'เช่น name@company.com',
                 showCancelButton: !required,
                 confirmButtonText: 'บันทึก',
                 cancelButtonText: 'ไม่ต้องกรอก',
                 allowOutsideClick: !required,
                 allowEscapeKey: !required,
                 customClass: { popup: 'rounded-2xl' },
-                inputValidator: function(value){ return (value && String(value).trim()) ? null : 'กรุณากรอกชื่อของคุณ'; }
+                inputValidator: function(value){
+                    var v = String(value||'').trim();
+                    if(!v) return 'กรุณากรอกอีเมล์ของคุณ';
+                    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'กรุณากรอกอีเมล์ให้ถูกต้อง (name@company.com)';
+                    return null;
+                }
             }).then(function(res){
                 if(res.isConfirmed){
-                    var nm = String(res.value || '').trim();
+                    var nm = String(res.value || '').trim().toLowerCase();
                     window.GS_EDITOR_NAME = nm || '-';
+                    window._approvalRequested = false;
                     try{ localStorage.setItem('mwEditorName', nm); }catch(e){}
                     var lbl=document.getElementById('editorNameLabel'); if(lbl){ lbl.innerText = nm || 'ตั้งชื่อ'; }
-                    Swal.fire({toast:true, position:'top-end', icon:'success', title:'บันทึกชื่อ: '+(nm||'-')+' — จำไว้ในคอมนี้แล้ว', showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'}});
+                    Swal.fire({toast:true, position:'top-end', icon:'success', title:'บันทึกอีเมล์: '+nm, showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'}});
+                    setTimeout(function(){ if(window.checkApprovalStatus) window.checkApprovalStatus(); }, 800);
                 } else if(required){
                     setTimeout(function(){ askEditorName(true); }, 300);
                 }
@@ -1257,12 +1264,16 @@ function pickStatus(statusGroup){
 
         function gsPost(payload){
   try{
+    if(window.VIEW_ONLY){
+      Swal.fire({icon:'warning', title:'ยังไม่ได้รับอนุญาตแก้ไข', text:'คุณดูได้อย่างเดียว — กดปุ่ม "ขออนุญาตแก้ไข" ที่แถบเหลืองด้านบน', confirmButtonText:'เข้าใจแล้ว', customClass:{popup:'rounded-2xl'}});
+      return;
+    }
     payload.user = window.GS_EDITOR_NAME || '-';
     // ถ้าแก้ในแท็บเฟส (Design ฯลฯ) ให้เขียนกลับไปที่ชีต 01 summary คอลัมน์ของเฟสนั้นๆ
     if (window.GS_SUMMARY_SHEET && payload.sheet && payload.sheet !== window.GS_SUMMARY_SHEET) {
       payload.phase = payload.sheet; payload.sheet = window.GS_SUMMARY_SHEET;
     }
-    fetch(GSCRIPT_URL, {method:'POST', body: JSON.stringify(payload), headers:{'Content-Type':'text/plain'}}).then(function(r){return r.text();}).then(function(t){ try{ var j=JSON.parse(t); console.log('gsPost resp:', j); if(j && j.ok===false){ Swal.fire({toast:true,position:'top-end',icon:'error',title:'เขียนกลับ Sheet ไม่สำเร็จ: '+(j.err||''),showConfirmButton:false,timer:3000,customClass:{popup:'rounded-xl'}}); } else if(j && j.ok){ Swal.fire({toast:true,position:'top-end',icon:'success',title:'อัปเดท Google Sheet แล้ว',showConfirmButton:false,timer:1200,customClass:{popup:'rounded-xl'}}); } }catch(e){ console.log('gsPost resp (non-json):', t); } }).catch(function(e){ console.error('gsPost network error:', e); });
+    fetch(GSCRIPT_URL, {method:'POST', body: JSON.stringify(payload), headers:{'Content-Type':'text/plain'}}).then(function(r){return r.text();}).then(function(t){ try{ var j=JSON.parse(t); if(j && j.needApproval){ window.VIEW_ONLY=true; if(window.showApprovalBanner_) window.showApprovalBanner_(); } console.log('gsPost resp:', j); if(j && j.ok===false){ Swal.fire({toast:true,position:'top-end',icon:'error',title:'เขียนกลับ Sheet ไม่สำเร็จ: '+(j.err||''),showConfirmButton:false,timer:3000,customClass:{popup:'rounded-xl'}}); } else if(j && j.ok){ Swal.fire({toast:true,position:'top-end',icon:'success',title:'อัปเดท Google Sheet แล้ว',showConfirmButton:false,timer:1200,customClass:{popup:'rounded-xl'}}); } }catch(e){ console.log('gsPost resp (non-json):', t); } }).catch(function(e){ console.error('gsPost network error:', e); });
   }catch(e){ console.error('gsPost error:', e); }
 }
 
@@ -2007,6 +2018,55 @@ function pickStatus(statusGroup){
             try{ localStorage.setItem('mwAutoRefresh', on ? '1' : '0'); }catch(e){}
         };
         window.restoreAutoRefresh = function(){ try{ if(localStorage.getItem('mwAutoRefresh')==='1'){ var cb=document.getElementById('autoRefreshChk'); if(cb) cb.checked = true; toggleAutoRefresh(true); } }catch(e){} };
+
+        // ===== 🔐 Approval System (view-only by default until admin approves email) =====
+        window.VIEW_ONLY = false;
+        window._approvalRequested = false;
+        window._ensureApprovalBanner = function(){
+            var b = document.getElementById('approvalBanner');
+            if(!b){
+                b = document.createElement('div');
+                b.id = 'approvalBanner';
+                b.className = 'fixed top-0 left-0 right-0 z-[99998] bg-amber-500 text-white px-4 py-2 text-center text-sm font-bold shadow-lg no-print';
+                b.style.display = 'none';
+                b.innerHTML = '<span id="approvalBannerText">🔒 คุณกำลังดูอย่างเดียว — ยังไม่ได้รับอนุญาตให้แก้ไข</span> <button onclick="requestEditAccess()" style="background:#fff;color:#b45309;padding:4px 12px;border-radius:8px;font-weight:900;font-size:11px;border:none;cursor:pointer;margin-left:8px;">ขออนุญาตแก้ไข</button>';
+                document.body.appendChild(b);
+            }
+            return b;
+        };
+        window.showApprovalBanner_ = function(){
+            window.VIEW_ONLY = true;
+            var b = window._ensureApprovalBanner();
+            b.style.display = 'block';
+            document.body.style.paddingTop = '42px';
+        };
+        window.hideApprovalBanner_ = function(){
+            window.VIEW_ONLY = false;
+            var b = document.getElementById('approvalBanner');
+            if(b){ b.style.display = 'none'; document.body.style.paddingTop = ''; }
+        };
+        window.checkApprovalStatus = function(){
+            var em = (window.GS_EDITOR_NAME || '').trim();
+            if(!em || em === '-' || em.indexOf('@') === -1){ return; }
+            fetch(gsGetUrl() + '&action=checkApproval&email=' + encodeURIComponent(em), {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+                if(j && j.approved){ window.hideApprovalBanner_(); }
+                else { window.showApprovalBanner_(); }
+            }).catch(function(){});
+        };
+        window.requestEditAccess = function(){
+            var em = (window.GS_EDITOR_NAME || '').trim();
+            if(!em || em.indexOf('@') === -1){ Swal.fire({icon:'warning', title:'กรอกอีเมล์ก่อน', text:'กดปุ่มอีเมล์ (เมย์) เพื่อกรอกอีเมล์ของคุณก่อน', customClass:{popup:'rounded-2xl'}}); return; }
+            if(window._approvalRequested){ Swal.fire({toast:true, icon:'info', title:'ส่งคำขอไปแล้ว รอเจ้าหน้าที่อนุมัติ', timer:2000}); return; }
+            fetch(gsGetUrl() + '&action=requestAccess&email=' + encodeURIComponent(em), {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+                window._approvalRequested = true;
+                var t = document.getElementById('approvalBannerText');
+                if(t){ t.innerHTML = '⌛ ส่งคำขอแล้ว รอเจ้าหน้าที่อนุมัติ (หลังได้รับอนุมัติให้กดรีเฟรช)'; }
+                var btn = document.querySelector('#approvalBanner button'); if(btn){ btn.style.display='none'; }
+                Swal.fire({toast:true, position:'top-end', icon:'success', title:'ส่งคำขออนุญาตแล้ว', showConfirmButton:false, timer:2500, customClass:{popup:'rounded-xl'}});
+            }).catch(function(){ Swal.fire({icon:'error', title:'ส่งคำขอไม่สำเร็จ ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}); });
+        };
+        setTimeout(function(){ window.checkApprovalStatus(); }, 3000);
+        setInterval(function(){ window.checkApprovalStatus(); }, 60000);
 
         function handleFiles(file) {
 
