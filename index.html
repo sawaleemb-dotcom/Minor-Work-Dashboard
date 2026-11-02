@@ -2034,17 +2034,39 @@ function pickStatus(statusGroup){
             }
             return b;
         };
+        window._injectViewOnlyCSS = function(){
+            if(document.getElementById('_viewOnlyStyle')) return;
+            var st = document.createElement('style'); st.id = '_viewOnlyStyle';
+            st.textContent = 'body.view-only #fieldEditorPopup, body.view-only #statusPickerPopup { display:none !important; } body.view-only input, body.view-only textarea, body.view-only [contenteditable], body.view-only .clickable-row { pointer-events:none !important; } body.view-only .clickable-row { cursor: default !important; }';
+            document.head.appendChild(st);
+        };
+        window._lastViewOnlyToast = 0;
         window.showApprovalBanner_ = function(){
             window.VIEW_ONLY = true;
+            window._injectViewOnlyCSS();
+            document.body.classList.add('view-only');
             var b = window._ensureApprovalBanner();
             b.style.display = 'block';
             document.body.style.paddingTop = '42px';
         };
         window.hideApprovalBanner_ = function(){
             window.VIEW_ONLY = false;
+            document.body.classList.remove('view-only');
             var b = document.getElementById('approvalBanner');
             if(b){ b.style.display = 'none'; document.body.style.paddingTop = ''; }
         };
+        // กดในพื้นที่ตารางตอน view-only → แจ้งเตือนสั้นๆ (ไม่ซ้ำบ่อย)
+        document.addEventListener('click', function(e){
+            if(!window.VIEW_ONLY) return;
+            var t = e.target;
+            var inTable = false;
+            while(t && t !== document.body){ if(t.id === 'contentArea' || t.tagName === 'TABLE' || t.classList && (t.classList.contains('clickable-row') || t.classList.contains('status-badge'))){ inTable = true; break; } t = t.parentElement; }
+            if(!inTable) return;
+            var now = Date.now();
+            if(now - window._lastViewOnlyToast < 4000) return;
+            window._lastViewOnlyToast = now;
+            Swal.fire({toast:true, position:'top-end', icon:'warning', title:'🔒 ดูอย่างเดียว — กด "ขออนุญาตแก้ไข" ที่แถบเหลืองด้านบน', showConfirmButton:false, timer:2500, customClass:{popup:'rounded-xl'}});
+        }, true);
         window.checkApprovalStatus = function(){
             var em = (window.GS_EDITOR_NAME || '').trim();
             if(!em || em === '-' || em.indexOf('@') === -1){ return; }
