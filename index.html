@@ -95,8 +95,18 @@
         /* ===== CLEAR GROUP SEPARATOR: visible boundary where each item (GEN1.1 / GEN1.2 ...) ends =====
            Applied to the LAST rendered row of every item group. Works correctly under any filter
            (phase / status / lot / search ...) because it is marked on the visible DOM after render. */
-        tr.group-end-sep > td { border-bottom: 2.5px solid #94a3b8 !important; }
+        tr.group-end-sep > td { border-bottom: 1.5px solid #94a3b8 !important; }
         tr.group-end-sep:hover > td { border-bottom-color: #64748b !important; }
+
+        /* ===== Collapse/Expand phase sub-rows + phase-count badge on group header ===== */
+        .grp-chevron { display:inline-block; cursor:pointer; color:#94a3b8; font-size:10px; margin-right:5px; transition:color .15s, transform .15s; user-select:none; vertical-align:middle; }
+        .grp-chevron:hover { color:#ea580c; transform:scale(1.2); }
+        .phase-count-badge { display:inline-block; margin-left:6px; padding:1px 7px; border-radius:9999px; font-size:9.5px; font-weight:800; background:#e2e8f0; color:#475569; border:1px solid #cbd5e1; vertical-align:middle; letter-spacing:.02em; }
+        .phase-count-badge.all-done { background:#d1fae5; color:#047857; border-color:#6ee7b7; }
+
+        /* ===== Sticky summary footer at the bottom of the table ===== */
+        #tableSummaryFoot tr.summary-foot-row > td { position:sticky; bottom:0; z-index:55; background:#f1f5f9; border-top:2px solid #94a3b8 !important; box-shadow:0 -3px 10px rgba(0,0,0,0.07); padding:8px 12px; font-size:11px; font-weight:800; color:#334155; }
+        @media print { #tableSummaryFoot tr.summary-foot-row > td { position:static; box-shadow:none; border-top:2px solid #64748b !important; } }
 
         
 
@@ -751,6 +761,8 @@
                         </div>
 
                         <span id="tableCount" class="text-xs font-black bg-orange-100 text-orange-800 py-2 px-4 rounded-xl border border-orange-200 shadow-sm whitespace-nowrap">0 รายการ</span>
+                            <button id="btnCollapseAll" onclick="collapseAllGroups()" class="text-[10px] font-bold px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-200 hover:-translate-y-0.5 transition-all shadow-sm whitespace-nowrap no-print" title="ย่อแถวเฟสของทุกรายการ">− ย่อทั้งหมด</button>
+                            <button id="btnExpandAll" onclick="expandAllGroups()" class="text-[10px] font-bold px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-200 hover:-translate-y-0.5 transition-all shadow-sm whitespace-nowrap no-print" title="ขยายแถวเฟสของทุกรายการ">+ ขยายทั้งหมด</button>
 
                     </div>
 
@@ -763,6 +775,7 @@
                             <thead id="tableHeaderArea" class="bg-slate-50 shadow-sm print:shadow-none print:border-b print:border-slate-300 sticky top-0 z-[60]"></thead>
 
                             <tbody id="detailTableBody" class="divide-y divide-slate-100 bg-white"></tbody>
+                            <tfoot id="tableSummaryFoot"></tfoot>
 
                         </table>
 
@@ -948,6 +961,7 @@
 
         // ===== FEATURE ADDITIONS =====
         window._selectedRows = new Set();
+        window._collapsedGroups = new Set();
         window._darkMode = false;
         function _parseDateFmt(s){ if(!s||s==='-') return null; s=String(s).trim(); var m=s.match(/(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{2,4})/); if(m){ var d=parseInt(m[1]), mo=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(m[2].toLowerCase()), y=parseInt(m[3]); if(y<100) y+=2000; if(mo>-1) return new Date(y,mo,d).getTime(); } var m2=s.match(/([A-Za-z]{3})[-\s](\d{2})/); if(m2){ var mo2=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(m2[1].toLowerCase()), y2=2000+parseInt(m2[2]); if(mo2>-1) return new Date(y2,mo2,1).getTime(); } var t=Date.parse(s); return isNaN(t)?null:t; }
         function _daysBadge(expectedStr, statusGroup){ var ts=_parseDateFmt(expectedStr); if(ts===null) return ''; var today=new Date(); today.setHours(0,0,0,0); var diff=Math.ceil((ts-today.getTime())/86400000); if(statusGroup==='completed') return ''; if(diff<0) return '<span class="days-badge days-late">late '+Math.abs(diff)+'d</span>'; if(diff<=7) return '<span class="days-badge days-soon">in '+diff+'d</span>'; return '<span class="days-badge days-ok">'+diff+'d</span>'; }
@@ -3124,12 +3138,57 @@ function pickStatus(statusGroup){
             if (!tbody) return;
             var rows = tbody.querySelectorAll('tr');
             if (!rows.length) return;
-            for (var i = 1; i < rows.length; i++) {
-                if (rows[i].classList.contains('clickable-row')) {
-                    rows[i - 1].classList.add('group-end-sep');
+            // Clear old separators first (re-run after collapse/expand toggles)
+            rows.forEach(function(r){ r.classList.remove('group-end-sep'); });
+            // Skip hidden (collapsed) phase rows so the separator always lands on
+            // the actual last VISIBLE row of each group, even after filtering.
+            var lastVisible = null;
+            for (var i = 0; i < rows.length; i++) {
+                var r = rows[i];
+                if (r.classList.contains('hide')) continue;
+                if (r.classList.contains('clickable-row') && lastVisible) {
+                    lastVisible.classList.add('group-end-sep');
                 }
+                lastVisible = r;
             }
-            rows[rows.length - 1].classList.add('group-end-sep');
+            if (lastVisible) lastVisible.classList.add('group-end-sep');
+        }
+
+        // ===== Collapse / Expand phase sub-rows of a single group =====
+        function toggleGroup(e, rawIdx) {
+            if (e) { e.stopPropagation(); if (e.preventDefault) e.preventDefault(); }
+            var set = window._collapsedGroups;
+            var rows = document.querySelectorAll('#detailTableBody tr.phase-row[data-parent="' + rawIdx + '"]');
+            var chev = document.querySelector('#detailTableBody .grp-chevron[data-parent="' + rawIdx + '"]');
+            if (set.has(rawIdx)) {
+                set.delete(rawIdx);
+                rows.forEach(function(r){ r.classList.remove('hide'); });
+                if (chev) { chev.textContent = '▼'; chev.classList.remove('collapsed'); }
+            } else {
+                set.add(rawIdx);
+                rows.forEach(function(r){ r.classList.add('hide'); });
+                if (chev) { chev.textContent = '▶'; chev.classList.add('collapsed'); }
+            }
+            applyGroupSeparators(document.getElementById('detailTableBody'));
+        }
+
+        function collapseAllGroups() {
+            var chev = document.querySelectorAll('#detailTableBody .grp-chevron');
+            if (!chev.length) return;
+            chev.forEach(function(c){
+                var pid = c.getAttribute('data-parent');
+                if (pid != null) window._collapsedGroups.add(Number(pid));
+                c.textContent = '▶'; c.classList.add('collapsed');
+            });
+            document.querySelectorAll('#detailTableBody tr.phase-row').forEach(function(r){ r.classList.add('hide'); });
+            applyGroupSeparators(document.getElementById('detailTableBody'));
+        }
+
+        function expandAllGroups() {
+            window._collapsedGroups.clear();
+            document.querySelectorAll('#detailTableBody .grp-chevron').forEach(function(c){ c.textContent = '▼'; c.classList.remove('collapsed'); });
+            document.querySelectorAll('#detailTableBody tr.phase-row').forEach(function(r){ r.classList.remove('hide'); });
+            applyGroupSeparators(document.getElementById('detailTableBody'));
         }
 
         function renderTable() {
@@ -3141,7 +3200,7 @@ function pickStatus(statusGroup){
 
             let tCount = document.getElementById('tableCount'); if(tCount) tCount.innerText = tableData.length + ' รายการ';
 
-            const tbody = document.getElementById('detailTableBody'); const thead = document.querySelector('#tableSection table thead'); const table = document.querySelector('#tableSection table'); if(!tbody) return;
+            const tbody = document.getElementById('detailTableBody'); const thead = document.querySelector('#tableSection table thead'); const table = document.querySelector('#tableSection table'); if(!tbody) return; let _footInit=document.getElementById('tableSummaryFoot'); if(_footInit) _footInit.innerHTML='';
 
             let visibleColCount = Object.values(columnVisibility).filter(v => v).length; 
 
@@ -3196,10 +3255,15 @@ function pickStatus(statusGroup){
                 let rawIdx = globalFilteredData.indexOf(d); let safeNote = (d.note || '').replace(/"/g, '&quot;');
 
                 let expectedClass = d.statusGroup === 'late' ? 'text-red-600 font-bold' : 'text-slate-600 font-bold';
+                let _allPhases = (d.phases || []); let _hasPhases = isSummaryMode && _allPhases.length > 0;
+                let _isCollapsed = _hasPhases && window._collapsedGroups.has(rawIdx);
+                let _grpChevron = _hasPhases ? '<span class="grp-chevron ' + (_isCollapsed?'collapsed':'') + '" data-parent="' + rawIdx + '" onclick="toggleGroup(event, ' + rawIdx + ')" title="ย่อ/ขยายแถวเฟส">' + (_isCollapsed?'▶':'▼') + '</span> ' : '';
+                let _phaseBadge = '';
+                if (_hasPhases) { let _phDone = _allPhases.filter(function(p){return p.statusGroup==='completed' || (p.numPct||0)>=100;}).length; let _allDone = (_phDone === _allPhases.length); _phaseBadge = ' <span class="phase-count-badge ' + (_allDone?'all-done':'') + '" title="เฟสที่เสร็จแล้ว / เฟสทั้งหมด">' + _phDone + '/' + _allPhases.length + '</span>'; }
 
                 
 
-                html += `<tr class="border-b border-slate-100/50 ${theme.bg} page-break-inside-avoid clickable-row group transition-colors row-fade-in ${theme.hover} ${window._selectedRows&&window._selectedRows.has(rawIdx)?'row-selected':''} ${_isDueSoon(d)?'row-due-soon':''}" style="animation-delay: ${animDelay}s;" onclick="handleRowClick(event, ${rawIdx})">${columnVisibility.lot ? `<td class="px-2 py-3.5 text-center whitespace-nowrap">${getLotBadge(d.lot, hl)}</td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-3.5 text-center text-slate-700 font-bold">${hl(d.designSubmission || '-')}</td>` : ''}${columnVisibility.code ? `<td class="px-2 py-3.5 text-center text-slate-700 font-bold">${hl(d.code)}</td>` : ''}<td class="px-4 py-3.5 text-left text-slate-800 font-black leading-tight break-words pr-4 sticky left-0 z-[20] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${theme.bg} ${theme.groupHoverBg} ${theme.textHover} transition-colors">${hl(d.activity)}</td>${columnVisibility.respPerson ? `<td class="px-2 py-3.5 text-center text-slate-600 whitespace-nowrap font-bold">${d._noProg?'':hl(d.respPerson)}</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-3.5 text-center whitespace-nowrap ${expectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'expected')" title="คลิกแก้ไข Plan Date">${(typeof hideMainExpected!=='undefined'&&hideMainExpected)||d._noProg?'':d.expected}${((typeof hideMainExpected==='undefined'||!hideMainExpected)&&!d._noProg)?getDaysBadge(d):''}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-3.5 text-center cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'progress')" title="คลิกแก้ไข Progress">${d._noProg?'':getProgressHtml(d.pct, d.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-3.5 text-center cursor-pointer" onclick="openStatusPicker(event, ${rawIdx}, '-1')" title="Click to change status">${d._noProg?'':getStatusBadge(d.statusGroup, d.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-3.5 text-left text-slate-500 leading-relaxed break-words font-medium ${theme.textHover} transition-colors cursor-pointer" data-tooltip="${safeNote}" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'note')" title="คลิกแก้ไข Note">${d._noProg?'':hl(d.note.substring(0,50))}${d._noProg?'':(d.note.length>50?'...':'')}</td>` : ''}</tr>`;
+                html += `<tr class="border-b border-slate-100/50 ${theme.bg} page-break-inside-avoid clickable-row group transition-colors row-fade-in ${theme.hover} ${window._selectedRows&&window._selectedRows.has(rawIdx)?'row-selected':''} ${_isDueSoon(d)?'row-due-soon':''}" style="animation-delay: ${animDelay}s;" onclick="handleRowClick(event, ${rawIdx})">${columnVisibility.lot ? `<td class="px-2 py-3.5 text-center whitespace-nowrap">${getLotBadge(d.lot, hl)}</td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-3.5 text-center text-slate-700 font-bold">${hl(d.designSubmission || '-')}</td>` : ''}${columnVisibility.code ? `<td class="px-2 py-3.5 text-center text-slate-700 font-bold">${hl(d.code)}</td>` : ''}<td class="px-4 py-3.5 text-left text-slate-800 font-black leading-tight break-words pr-4 sticky left-0 z-[20] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${theme.bg} ${theme.groupHoverBg} ${theme.textHover} transition-colors">${_grpChevron}${hl(d.activity)}${_phaseBadge}</td>${columnVisibility.respPerson ? `<td class="px-2 py-3.5 text-center text-slate-600 whitespace-nowrap font-bold">${d._noProg?'':hl(d.respPerson)}</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-3.5 text-center whitespace-nowrap ${expectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'expected')" title="คลิกแก้ไข Plan Date">${(typeof hideMainExpected!=='undefined'&&hideMainExpected)||d._noProg?'':d.expected}${((typeof hideMainExpected==='undefined'||!hideMainExpected)&&!d._noProg)?getDaysBadge(d):''}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-3.5 text-center cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'progress')" title="คลิกแก้ไข Progress">${d._noProg?'':getProgressHtml(d.pct, d.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-3.5 text-center cursor-pointer" onclick="openStatusPicker(event, ${rawIdx}, '-1')" title="Click to change status">${d._noProg?'':getStatusBadge(d.statusGroup, d.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-3.5 text-left text-slate-500 leading-relaxed break-words font-medium ${theme.textHover} transition-colors cursor-pointer" data-tooltip="${safeNote}" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'note')" title="คลิกแก้ไข Note">${d._noProg?'':hl(d.note.substring(0,50))}${d._noProg?'':(d.note.length>50?'...':'')}</td>` : ''}</tr>`;
 
                 
 
@@ -3207,7 +3271,7 @@ function pickStatus(statusGroup){
 
                     let visiblePhases = isAllPhase ? (d.phases || []) : (d.phases || []).filter(ph => checkedPersonsLocal.includes(ph.name));
 
-                    visiblePhases.forEach((ph, pIndex) => { let phExpectedClass = ph.statusGroup === 'late' ? 'text-red-600 font-bold' : 'text-slate-500 font-bold'; let childBg = pIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'; let safePhNote = (ph.note || '').replace(/"/g, '&quot;'); html += `<tr class="border-b border-slate-100 ${childBg} page-break-inside-avoid hover:bg-slate-100/50 transition-colors row-fade-in" style="animation-delay: ${animDelay + 0.05}s;">${columnVisibility.lot ? `<td class="px-2 py-2.5 text-center text-slate-300"></td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-2.5 text-center"></td>` : ''}${columnVisibility.code ? `<td class="px-2 py-2.5 text-right text-slate-300 font-bold text-xs">↳</td>` : ''}<td class="px-4 py-2.5 text-left text-slate-600 pl-6 border-l-[3px] border-orange-200 break-words font-bold">${hl(fullPhaseNames[ph.name] || ph.name)}</td>${columnVisibility.respPerson ? `<td class="px-2 py-2.5 text-center text-slate-400">-</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-2.5 text-center whitespace-nowrap ${phExpectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'expected')" title="คลิกแก้ไข Plan Date เฟสนี้">${ph.expected}${_daysBadge(ph.expected, ph.statusGroup)}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-2.5 text-center cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'progress')" title="คลิกแก้ไข Progress เฟสนี้">${getProgressHtml(ph.pct, ph.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-2.5 text-center cursor-pointer" onclick="openStatusPickerPhase(event, ${rawIdx}, '${ph.name}')" title="คลิกเปลี่ยนสถานะเฟสนี้">${getStatusBadge(ph.statusGroup, ph.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-2.5 text-center text-slate-300 transition-colors"></td>` : ''}</tr>`; });
+                    visiblePhases.forEach((ph, pIndex) => { let phExpectedClass = ph.statusGroup === 'late' ? 'text-red-600 font-bold' : 'text-slate-500 font-bold'; let childBg = pIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'; let safePhNote = (ph.note || '').replace(/"/g, '&quot;'); html += `<tr class="border-b border-slate-100 ${childBg} phase-row ${_isCollapsed?'hide':''} page-break-inside-avoid hover:bg-slate-100/50 transition-colors row-fade-in" data-parent="${rawIdx}" style="animation-delay: ${animDelay + 0.05}s;">${columnVisibility.lot ? `<td class="px-2 py-2.5 text-center text-slate-300"></td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-2.5 text-center"></td>` : ''}${columnVisibility.code ? `<td class="px-2 py-2.5 text-right text-slate-300 font-bold text-xs">↳</td>` : ''}<td class="px-4 py-2.5 text-left text-slate-600 pl-6 border-l-[3px] border-orange-200 break-words font-bold">${hl(fullPhaseNames[ph.name] || ph.name)}</td>${columnVisibility.respPerson ? `<td class="px-2 py-2.5 text-center text-slate-400">-</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-2.5 text-center whitespace-nowrap ${phExpectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'expected')" title="คลิกแก้ไข Plan Date เฟสนี้">${ph.expected}${_daysBadge(ph.expected, ph.statusGroup)}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-2.5 text-center cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'progress')" title="คลิกแก้ไข Progress เฟสนี้">${getProgressHtml(ph.pct, ph.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-2.5 text-center cursor-pointer" onclick="openStatusPickerPhase(event, ${rawIdx}, '${ph.name}')" title="คลิกเปลี่ยนสถานะเฟสนี้">${getStatusBadge(ph.statusGroup, ph.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-2.5 text-center text-slate-300 transition-colors"></td>` : ''}</tr>`; });
 
                 }
 
@@ -3216,6 +3280,16 @@ function pickStatus(statusGroup){
             tbody.innerHTML = html;
 
             applyGroupSeparators(tbody);
+
+            let _foot = document.getElementById('tableSummaryFoot');
+            if (_foot) {
+                let _tot = tableData.length;
+                let _done = tableData.filter(function(d){return d.statusGroup==='completed';}).length;
+                let _late = tableData.filter(function(d){return d.statusGroup==='late';}).length;
+                let _other = _tot - _done - _late;
+                let _avg = _tot ? Math.round(tableData.reduce(function(s,d){return s+(d.numPct||0);},0)/_tot) : 0;
+                _foot.innerHTML = '<tr class="summary-foot-row"><td colspan="' + visibleColCount + '"><div class="flex flex-wrap items-center gap-x-5 gap-y-1 justify-center"><span>ทั้งหมด <b class="text-slate-900">' + _tot + '</b> รายการ</span><span class="text-emerald-700">เสร็จ <b>' + _done + '</b></span><span class="text-red-600">ล่าช้า <b>' + _late + '</b></span><span class="text-amber-600">กำลังดำเนิน <b>' + _other + '</b></span><span>ความคืบหน้าเฉลี่ย <b class="text-orange-700">' + _avg + '%</b></span></div></td></tr>';
+            }
 
         }
 
