@@ -92,6 +92,12 @@
 
         .clickable-row:hover { transform: translateY(-1px); z-index: 10; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
+        /* ===== CLEAR GROUP SEPARATOR: visible boundary where each item (GEN1.1 / GEN1.2 ...) ends =====
+           Applied to the LAST rendered row of every item group. Works correctly under any filter
+           (phase / status / lot / search ...) because it is marked on the visible DOM after render. */
+        tr.group-end-sep > td { border-bottom: 2.5px solid #94a3b8 !important; }
+        tr.group-end-sep:hover > td { border-bottom-color: #64748b !important; }
+
         
 
         .highlight-text { background-color: #fef08a; color: #854d0e; font-weight: 700; padding: 0 4px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); animation: glowHighlight 2s infinite alternate; }
@@ -161,6 +167,7 @@
             th { background-color: #f8fafc !important; border-bottom: 2px solid #cbd5e1 !important; }
 
             td { border-bottom: 1px solid #f1f5f9 !important; }
+            tr.group-end-sep > td { border-bottom: 2px solid #475569 !important; }
 
             .status-badge { font-size: 7.5px !important; padding: 1.5px 4px !important; width: 80px !important; margin: 0 auto !important; border-radius: 4px !important; }
 
@@ -3109,6 +3116,22 @@ function pickStatus(statusGroup){
         }
 
 
+        // ===== Mark the LAST rendered row of each item group with a clear thick separator.
+        // Runs on the visible DOM after render, so it stays correct under ANY filter
+        // (phase / status / lot / code / search ...). A row with .clickable-row starts a
+        // new group; the row immediately before it (and the very last table row) ends a group.
+        function applyGroupSeparators(tbody) {
+            if (!tbody) return;
+            var rows = tbody.querySelectorAll('tr');
+            if (!rows.length) return;
+            for (var i = 1; i < rows.length; i++) {
+                if (rows[i].classList.contains('clickable-row')) {
+                    rows[i - 1].classList.add('group-end-sep');
+                }
+            }
+            rows[rows.length - 1].classList.add('group-end-sep');
+        }
+
         function renderTable() {
 
             let tableData = globalFilteredData; if(!currentTableStatusFilters.includes('all')) { tableData = globalFilteredData.filter(d => currentTableStatusFilters.includes(d.statusGroup)); }
@@ -3191,6 +3214,8 @@ function pickStatus(statusGroup){
             });
 
             tbody.innerHTML = html;
+
+            applyGroupSeparators(tbody);
 
         }
 
@@ -3418,6 +3443,8 @@ function pickStatus(statusGroup){
             });
 
             tbody.innerHTML = html;
+
+            applyGroupSeparators(tbody);
 
         }
 
