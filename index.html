@@ -1225,42 +1225,126 @@ function pickStatus(statusGroup){
         function gsGetUrl(){ return GSCRIPT_URL + (GSCRIPT_URL.indexOf('?')===-1?'?':'&') + '_t=' + Date.now(); }
         function _setRefreshBtnBusy(busy){ try{ var b=document.querySelector('button[onclick*="refreshData"]'); if(b){ b.style.opacity = busy ? '0.5' : ''; b.style.pointerEvents = busy ? 'none' : ''; var ic=b.querySelector('svg'); if(ic){ if(busy){ b.classList.add('__refreshing'); if(!document.getElementById('__refreshSpinStyle')){ var st=document.createElement('style'); st.id='__refreshSpinStyle'; st.textContent='.__refreshing svg{animation:__rspin .7s linear infinite} @keyframes __rspin{to{transform:rotate(360deg)}}'; document.head.appendChild(st);} } else { b.classList.remove('__refreshing'); } } } }catch(e){} }
         window.GS_EDITOR_NAME = (function(){ try{ return localStorage.getItem('mwEditorName') || ''; }catch(e){ return ''; } })();
+        window.GS_EDITOR_DISPLAYNAME = (function(){ try{ return localStorage.getItem('mwEditorDisplayName') || ''; }catch(e){ return ''; } })();
+        window._nameLocked = false;
+        function _updateEditorLabel(){
+            var lbl=document.getElementById('editorNameLabel');
+            if(lbl){ lbl.innerText = window.GS_EDITOR_DISPLAYNAME || window.GS_EDITOR_NAME || 'ตั้งชื่อ'; }
+        }
+        function _loginSuccess(em, nm){
+            window.GS_EDITOR_NAME = em;
+            window.GS_EDITOR_DISPLAYNAME = nm || '';
+            window._nameLocked = true;
+            window._approvalRequested = false;
+            try{ localStorage.setItem('mwEditorName', em); localStorage.setItem('mwEditorDisplayName', nm||''); }catch(e){}
+            _updateEditorLabel();
+            setTimeout(function(){ if(window.checkApprovalStatus) window.checkApprovalStatus(); }, 600);
+        }
+        // ขั้นที่ 2: ถ้ามีบัญชีแล้ว → ถามรหัสผ่าน
+        function _askPassword(em, required, attempt){
+            attempt = attempt || 0;
+            Swal.fire({
+                title: 'กรอกรหัสผ่าน (อีเมล์: ' + em + ')',
+                input: 'password',
+                inputPlaceholder: 'รหัสผ่านที่คุณตั้งไว้',
+                showCancelButton: !required,
+                confirmButtonText: 'เข้าสู่ระบบ',
+                cancelButtonText: 'ย้อนกลับ',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                customClass: { popup: 'rounded-2xl' },
+                inputValidator: function(v){ return v ? null : 'กรุณากรอกรหัสผ่าน'; }
+            }).then(function(res){
+                if(!res.isConfirmed){ if(required){ setTimeout(function(){ askEditorName(true); }, 300); } return; }
+                fetch(gsGetUrl() + '&action=verifyPassword&email=' + encodeURIComponent(em) + '&password=' + encodeURIComponent(res.value), {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+                    if(j && j.ok){
+                        _loginSuccess(em, j.name);
+                        Swal.fire({toast:true, position:'top-end', icon:'success', title:'ยินดีต้อนรับ ' + (j.name || em), showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'}});
+                    } else {
+                        Swal.fire({icon:'error', title:'รหัสผ่านไม่ถูกต้อง', text: attempt>=2 ? 'ถ้าลืมรหัส ให้ติดต่อแอดมินเพื่อรีเซ็ต', confirmButtonText:'ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ _askPassword(em, required, attempt+1); });
+                    }
+                }).catch(function(){ Swal.fire({icon:'error', title:'เชื่อมต่อไม่ได้ ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ _askPassword(em, required, attempt); }); });
+            });
+        }
+        // ขั้นที่ 2: ถ้ายังไม่มีบัญชี → ลงทะเบียน (ชื่อ + ตั้งรหัสผ่าน)
+        function _askNewUser(em, required){
+            Swal.fire({
+                title: 'ลงทะเบียนใหม่ (2/3) — กรอกชื่อ',
+                input: 'text',
+                inputPlaceholder: 'เช่น สมชาย / หัวหน้าทีม (จะแสดงใน Edit Log)',
+                showCancelButton: !required,
+                confirmButtonText: 'ถัดไป',
+                cancelButtonText: 'ย้อนกลับ',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                customClass: { popup: 'rounded-2xl' },
+                inputValidator: function(v){ return (v && String(v).trim()) ? null : 'กรุณากรอกชื่อของคุณ (บังคับ)'; }
+            }).then(function(res){
+                if(!res.isConfirmed){ if(required){ setTimeout(function(){ askEditorName(true); }, 300); } return; }
+                var nm = String(res.value || '').trim();
+                Swal.fire({
+                    title: 'ลงทะเบียน (3/3) — ตั้งรหัสผ่าน',
+                    input: 'password',
+                    inputPlaceholder: 'ตั้งรหัสผ่านของคุณ (จำไว้ด้วย จะต้องใส่ทุกครั้งที่เปิด)',
+                    showCancelButton: false,
+                    confirmButtonText: 'ลงทะเบียน',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    customClass: { popup: 'rounded-2xl' },
+                    inputValidator: function(v){ return (v && String(v).length >= 4) ? null : 'รหัสผ่านอย่างน้อย 4 ตัวอักษร'; }
+                }).then(function(res2){
+                    if(!res2.isConfirmed){ return; }
+                    fetch(gsGetUrl() + '&action=register&email=' + encodeURIComponent(em) + '&name=' + encodeURIComponent(nm) + '&password=' + encodeURIComponent(res2.value), {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+                        if(j && j.ok){
+                            _loginSuccess(em, nm);
+                            Swal.fire({toast:true, position:'top-end', icon:'success', title:'ลงทะเบียนเสร็จ: ' + nm, showConfirmButton:false, timer:2000, customClass:{popup:'rounded-xl'}});
+                        } else if(j && j.err === 'exists'){
+                            Swal.fire({icon:'info', title:'อีเมล์นี้มีบัญชีแล้ว', text:'กรุณาใส่รหัสผ่านแทน', customClass:{popup:'rounded-2xl'}}).then(function(){ _askPassword(em, required, 0); });
+                        } else {
+                            Swal.fire({icon:'error', title:'ลงทะเบียนไม่สำเร็จ ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ _askNewUser(em, required); });
+                        }
+                    }).catch(function(){ Swal.fire({icon:'error', title:'เชื่อมต่อไม่ได้ ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ _askNewUser(em, required); }); });
+                });
+            });
+        }
+        // ขั้นที่ 1: ถามอีเมล์ → ตรวจสอบว่ามีบัญชีหรือยัง
         function askEditorName(required){
             required = !!required;
             Swal.fire({
-                title: required ? 'กรอกอีเมล์ของคุณก่อนเข้าใช้งาน' : 'เปลี่ยนอีเมล์ของคุณ',
+                title: required ? 'เข้าสู่ระบบ / ลงทะเบียน (1/3) — กรอกอีเมล์' : 'เปลี่ยนผู้ใช้ — กรอกอีเมล์',
                 input: 'email',
                 inputValue: window.GS_EDITOR_NAME || '',
                 inputPlaceholder: 'เช่น name@company.com',
                 showCancelButton: !required,
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ไม่ต้องกรอก',
+                confirmButtonText: 'ถัดไป',
+                cancelButtonText: 'ยกเลิก',
                 allowOutsideClick: !required,
                 allowEscapeKey: !required,
                 customClass: { popup: 'rounded-2xl' },
                 inputValidator: function(value){
                     var v = String(value||'').trim();
                     if(!v) return 'กรุณากรอกอีเมล์ของคุณ';
-                    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'กรุณากรอกอีเมล์ให้ถูกต้อง (name@company.com)';
+                    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'กรุณากรอกอีเมล์ให้ถูกต้อง';
                     return null;
                 }
             }).then(function(res){
-                if(res.isConfirmed){
-                    var nm = String(res.value || '').trim().toLowerCase();
-                    window.GS_EDITOR_NAME = nm || '-';
-                    window._approvalRequested = false;
-                    try{ localStorage.setItem('mwEditorName', nm); }catch(e){}
-                    var lbl=document.getElementById('editorNameLabel'); if(lbl){ lbl.innerText = nm || 'ตั้งชื่อ'; }
-                    Swal.fire({toast:true, position:'top-end', icon:'success', title:'บันทึกอีเมล์: '+nm, showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'}});
-                    setTimeout(function(){ if(window.checkApprovalStatus) window.checkApprovalStatus(); }, 800);
-                } else if(required){
-                    setTimeout(function(){ askEditorName(true); }, 300);
-                }
+                if(!res.isConfirmed){ if(required){ setTimeout(function(){ askEditorName(true); }, 300); } return; }
+                var em = String(res.value || '').trim().toLowerCase();
+                fetch(gsGetUrl() + '&action=checkEmail&email=' + encodeURIComponent(em), {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+                    if(j && j.registered){ _askPassword(em, required, 0); }
+                    else { _askNewUser(em, required); }
+                }).catch(function(){
+                    Swal.fire({icon:'warning', title:'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', text:'ไม่สามารถตรวจสอบบัญชีได้ — ลองอีกครั้ง', confirmButtonText:'ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ askEditorName(required); });
+                });
             });
         }
+        // เปิดหน้าทุกครั้ง: ถ้ามีอีเมล์อยู่แล้ว → ให้ใส่รหัสผ่านทุกครั้ง (ตามที่ต้องการ)
         function ensureEditorName(){
             if(!window.GS_EDITOR_NAME){ askEditorName(true); }
+            else { _updateEditorLabel(); _askPassword(window.GS_EDITOR_NAME, true, 0); }
         }
+        // ปุ่มเปลี่ยนผู้ใช้/เปลี่ยนเมล์ (กดที่ปุ่ม "เมย์" ได้เลย)
+        window.logoutSwitchUser = function(){ askEditorName(false); };
 
         function gsPost(payload){
   try{
@@ -1268,7 +1352,8 @@ function pickStatus(statusGroup){
       Swal.fire({icon:'warning', title:'ยังไม่ได้รับอนุญาตแก้ไข', text:'คุณดูได้อย่างเดียว — กดปุ่ม "ขออนุญาตแก้ไข" ที่แถบเหลืองด้านบน', confirmButtonText:'เข้าใจแล้ว', customClass:{popup:'rounded-2xl'}});
       return;
     }
-    payload.user = window.GS_EDITOR_NAME || '-';
+    payload.user = window.GS_EDITOR_DISPLAYNAME || window.GS_EDITOR_NAME || '-';
+    payload.userEmail = window.GS_EDITOR_NAME || '-';
     // ถ้าแก้ในแท็บเฟส (Design ฯลฯ) ให้เขียนกลับไปที่ชีต 01 summary คอลัมน์ของเฟสนั้นๆ
     if (window.GS_SUMMARY_SHEET && payload.sheet && payload.sheet !== window.GS_SUMMARY_SHEET) {
       payload.phase = payload.sheet; payload.sheet = window.GS_SUMMARY_SHEET;
@@ -2079,7 +2164,8 @@ function pickStatus(statusGroup){
             var em = (window.GS_EDITOR_NAME || '').trim();
             if(!em || em.indexOf('@') === -1){ Swal.fire({icon:'warning', title:'กรอกอีเมล์ก่อน', text:'กดปุ่มอีเมล์ (เมย์) เพื่อกรอกอีเมล์ของคุณก่อน', customClass:{popup:'rounded-2xl'}}); return; }
             if(window._approvalRequested){ Swal.fire({toast:true, icon:'info', title:'ส่งคำขอไปแล้ว รอเจ้าหน้าที่อนุมัติ', timer:2000}); return; }
-            fetch(gsGetUrl() + '&action=requestAccess&email=' + encodeURIComponent(em), {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+            var nmDisp = encodeURIComponent(window.GS_EDITOR_DISPLAYNAME || '');
+            fetch(gsGetUrl() + '&action=requestAccess&email=' + encodeURIComponent(em) + '&name=' + nmDisp, {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
                 window._approvalRequested = true;
                 var t = document.getElementById('approvalBannerText');
                 if(t){ t.innerHTML = '⌛ ส่งคำขอแล้ว รอเจ้าหน้าที่อนุมัติ (หลังได้รับอนุมัติให้กดรีเฟรช)'; }
