@@ -284,13 +284,15 @@
 
                 <div id="startupDropZone" class="w-full max-w-2xl h-64 border-2 border-dashed border-orange-300 rounded-3xl p-6 bg-orange-50/50 hover:bg-orange-50 transition-all duration-300 relative cursor-pointer flex flex-col items-center justify-center group shadow-sm hover:shadow-md">
 
-                    <input type="file" id="startupFileInput" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"/>
+                    <input type="file" id="startupFileInput" accept=".xlsx, .xls" class="hidden"/>
 
-                    <div class="text-6xl mb-4 text-orange-400 group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300 drop-shadow-sm">📥</div>
+                    <div class="text-6xl mb-4 text-orange-500 drop-shadow-sm">🔐</div>
 
-                    <div class="text-slate-700 font-bold text-xl pointer-events-none mb-2">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</div>
+                    <div class="text-slate-700 font-bold text-xl mb-2 text-center">กรุณาเข้าสู่ระบบเพื่อดูข้อมูล</div>
 
-                    <div class="text-sm text-slate-500 font-medium pointer-events-none bg-white border border-slate-200 px-4 py-1.5 rounded-full shadow-sm mt-2 flex items-center gap-2"><span class="text-green-500">📊</span> รองรับไฟล์ .xlsx, .xls เท่านั้น</div>
+                    <div class="text-sm text-slate-500 mb-6 text-center leading-relaxed">ใช้อีเมล์และรหัสผ่านที่ลงทะเบียนไว้<br/>ถ้ายังไม่มีบัญชี ให้ลงทะเบียนใหม่ได้ในขั้นตอนถัดไป</div>
+
+                    <button onclick="askEditorName(true)" class="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-black px-10 py-3 rounded-2xl text-lg shadow-lg transition-all cursor-pointer">เข้าสู่ระบบ / ลงทะเบียน</button>
 
                 </div>
 
@@ -299,7 +301,7 @@
         </div>
 
 
-        <div id="compactHeader" class="hide bg-white rounded-2xl shadow-sm p-3 border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-3 relative overflow-hidden print-no-shadow print:mb-2 fade-in">
+        <div id="compactHeader" class="hide bg-white rounded-2xl shadow-sm p-3 border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-3 relative z-[80] print-no-shadow print:mb-2 fade-in">
 
             <div class="flex items-center gap-3 relative z-10 pl-2">
 
@@ -317,6 +319,25 @@
 
                     <div class="flex items-center justify-center gap-2"><span class="text-orange-600 text-sm drop-shadow-sm">📁</span><span class="text-xs text-orange-700 font-bold pointer-events-none truncate max-w-[150px]" id="fileNameDisplay">เปลี่ยนไฟล์ Excel</span></div>
 
+                </div>
+
+                <!-- ===== User chip (ชื่อผู้ใช้ + dropdown ออกจากระบบ) ===== -->
+                <div class="relative" id="userMenuContainer">
+                    <button id="userChipBtn" onclick="toggleUserMenu(event)" class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-300 transition-all cursor-pointer shadow-sm">
+                        <span id="userAvatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white text-xs font-black flex items-center justify-center shadow">?</span>
+                        <span id="editorNameLabel" class="text-xs font-bold text-slate-700 max-w-[110px] truncate">ผู้ใช้</span>
+                        <svg class="w-3 h-3 text-slate-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div id="userDropdown" class="hide absolute right-0 top-full mt-2 bg-white rounded-xl shadow-xl border border-slate-200 py-1 min-w-[190px] z-[9999] overflow-hidden">
+                        <div class="px-4 py-2.5 border-b border-slate-100 bg-slate-50/50">
+                            <div id="userDropdownName" class="text-xs font-bold text-slate-800 truncate">ผู้ใช้</div>
+                            <div id="userDropdownEmail" class="text-[10px] text-slate-400 truncate mt-0.5">-</div>
+                        </div>
+                        <button onclick="logoutUser()" class="w-full text-left px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            ออกจากระบบ
+                        </button>
+                    </div>
                 </div>
 
             </div>
@@ -453,9 +474,17 @@
 
                                 </button>
 
-                                <div id="progressDropdown" class="dropdown-menu absolute hidden w-56 bg-white border border-slate-200 mt-1 rounded-xl shadow-2xl max-h-64 flex flex-col left-0 xl:right-0 xl:left-auto z-[9999] opacity-0 scale-95 transition-all">
+                                <div id="progressDropdown" class="dropdown-menu absolute hidden w-64 bg-white border border-slate-200 mt-1 rounded-xl shadow-2xl max-h-80 flex flex-col left-0 xl:right-0 xl:left-auto z-[9999] opacity-0 scale-95 transition-all">
 
-                                    <div class="p-2 border-b border-slate-100 bg-slate-50 rounded-t-xl"><label class="flex items-center gap-2 cursor-pointer p-1"><input type="checkbox" id="selectAllProgress" checked class="w-3.5 h-3.5 text-orange-600 rounded focus:ring-orange-500"><span class="text-[11px] font-bold text-slate-800">เลือกทั้งหมด</span></label></div>
+                                    <div class="p-2 border-b border-sky-100 bg-sky-50/70 rounded-t-xl">
+                                        <div class="text-[10px] font-black text-sky-700 uppercase tracking-wide mb-1.5 px-0.5 flex justify-between items-center"><span>กรองหลายเฟสพร้อมกัน (AND)</span><button type="button" onclick="addProgressCondition()" class="text-[10px] font-black bg-sky-500 hover:bg-sky-600 text-white px-2 py-0.5 rounded-md transition-colors">+ เพิ่ม</button></div>
+                                        <div id="progressConditionsList" class="flex flex-col gap-1.5"></div>
+                                        <div class="text-[9px] text-slate-400 mt-1.5 px-0.5 leading-tight">เลือก "ทุก Progress" = ไม่กรองเงื่อนไขนั้น · เมื่อมีเงื่อนไขใดๆ จะใช้แบบ AND และไม่เอาเช็คบ็อกซ์ด้านล่างมาคิด</div>
+                                    </div>
+
+                                    <div class="p-2 border-b border-orange-100 bg-orange-50/70"><div class="text-[10px] font-black text-orange-700 uppercase tracking-wide mb-1 px-0.5">กรองเฟสเดียว (แบบเดิม)</div><select id="progressPhaseSelect" class="w-full text-[11px] font-bold text-slate-700 border border-orange-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-orange-400 cursor-pointer"><option value="overall">รวมทุกเฟส (Overall)</option></select></div>
+
+                                    <div class="p-2 border-b border-slate-100 bg-slate-50"><label class="flex items-center gap-2 cursor-pointer p-1"><input type="checkbox" id="selectAllProgress" checked class="w-3.5 h-3.5 text-orange-600 rounded focus:ring-orange-500"><span class="text-[11px] font-bold text-slate-800">เลือกทั้งหมด</span></label></div>
 
                                     <div id="progressList" class="p-1.5 overflow-y-auto custom-scrollbar flex-1 flex flex-col gap-0.5 rounded-b-xl"></div>
 
@@ -684,7 +713,7 @@
 
                             </div>
 
-                            <button onclick="undoLastEdit()" class="text-[11px] text-amber-700 bg-amber-50 hover:bg-amber-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-amber-200 shadow-sm flex items-center gap-2 no-print" title="ย้อนกลับการแก้ไขล่าสุด (เผื่อกรอกผิด)"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg> ย้อนกลับ</button><button onclick="askEditorName()" class="text-[11px] text-slate-600 bg-slate-50 hover:bg-slate-100 font-bold px-4 py-2.5 rounded-xl transition-colors border border-slate-200 shadow-sm flex items-center gap-2 no-print" title="เปลี่ยนชื่อผู้แก้ไข (จะแสดงใน Edit Log)"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <span id="editorNameLabel">ชื่อ</span></button><button onclick="refreshData(false)" class="text-[11px] text-cyan-700 bg-cyan-50 hover:bg-cyan-100 font-bold px-4 py-2.5 rounded-xl transition-colors border border-cyan-200 shadow-sm flex items-center gap-2 no-print" title="ดึงข้อมูลล่าสุดจาก Google Sheet (เห็นการแก้ไขของคนอื่น)"><svg class="mini-svg" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> รีเฟรช</button><label class="text-[10px] text-slate-500 flex items-center gap-1 px-2 no-print cursor-pointer" title="ดึงข้อมูลใหม่อัตโนมัติทุก 60 วินาที"><input type="checkbox" id="autoRefreshChk" onchange="toggleAutoRefresh(this.checked)" class="w-3.5 h-3.5"> อัตโนมัติ</label><button class="hidden"
+                            <button onclick="undoLastEdit()" class="text-[11px] text-amber-700 bg-amber-50 hover:bg-amber-100 font-black px-4 py-2.5 rounded-xl transition-colors border border-amber-200 shadow-sm flex items-center gap-2 no-print" title="ย้อนกลับการแก้ไขล่าสุด (เผื่อกรอกผิด)"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg> ย้อนกลับ</button><button onclick="refreshData(false)" class="text-[11px] text-cyan-700 bg-cyan-50 hover:bg-cyan-100 font-bold px-4 py-2.5 rounded-xl transition-colors border border-cyan-200 shadow-sm flex items-center gap-2 no-print" title="ดึงข้อมูลล่าสุดจาก Google Sheet (เห็นการแก้ไขของคนอื่น)"><svg class="mini-svg" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> รีเฟรช</button><label class="text-[10px] text-slate-500 flex items-center gap-1 px-2 no-print cursor-pointer" title="ดึงข้อมูลใหม่อัตโนมัติทุก 60 วินาที"><input type="checkbox" id="autoRefreshChk" onchange="toggleAutoRefresh(this.checked)" class="w-3.5 h-3.5"> อัตโนมัติ</label><button class="hidden"
 
                             </button>
 
@@ -1224,127 +1253,141 @@ function pickStatus(statusGroup){
         const GSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJIv_rEAGOkiiDcB-ftvlq8644ZpKFVM_rbK7O54fEpwLYWQB0xYjyiTCoFZWX2bk/exec';
         function gsGetUrl(){ return GSCRIPT_URL + (GSCRIPT_URL.indexOf('?')===-1?'?':'&') + '_t=' + Date.now(); }
         function _setRefreshBtnBusy(busy){ try{ var b=document.querySelector('button[onclick*="refreshData"]'); if(b){ b.style.opacity = busy ? '0.5' : ''; b.style.pointerEvents = busy ? 'none' : ''; var ic=b.querySelector('svg'); if(ic){ if(busy){ b.classList.add('__refreshing'); if(!document.getElementById('__refreshSpinStyle')){ var st=document.createElement('style'); st.id='__refreshSpinStyle'; st.textContent='.__refreshing svg{animation:__rspin .7s linear infinite} @keyframes __rspin{to{transform:rotate(360deg)}}'; document.head.appendChild(st);} } else { b.classList.remove('__refreshing'); } } } }catch(e){} }
-        window.GS_EDITOR_NAME = (function(){ try{ return localStorage.getItem('mwEditorName') || ''; }catch(e){ return ''; } })();
-        window.GS_EDITOR_DISPLAYNAME = (function(){ try{ return localStorage.getItem('mwEditorDisplayName') || ''; }catch(e){ return ''; } })();
+        // ใช้ sessionStorage — จำการล็อกอินแค่ในเซสชันเดียว ปิดเบราเซอร์/แท็บแล้วลืมทันที ต้องล็อกอินใหม่เสมอ
+        try{ localStorage.removeItem('mwEditorName'); localStorage.removeItem('mwEditorDisplayName'); }catch(e){}
+        window.GS_EDITOR_NAME = (function(){ try{ return sessionStorage.getItem('mwEditorName') || ''; }catch(e){ return ''; } })();
+        window.GS_EDITOR_DISPLAYNAME = (function(){ try{ return sessionStorage.getItem('mwEditorDisplayName') || ''; }catch(e){ return ''; } })();
         window._nameLocked = false;
+        window._dataLoaded = false;          // true ก็ต่อเมื่อโหลดข้อมูลจากชีทสำเร็จจริงๆ
+        window._loginDialogOpen = false;     // ป้องกันป๊อปล็อกอินเปิดซ้ำซ้อน
+        window._loginReopenTimer = null;     // ไทม์เมอร์เด้งกลับล็อกอิน — ยกเลิกได้เมื่อล็อกอินผ่าน
+        window._progressTargetPhase = 'overall'; // เฟสที่ใช้กรอง Progress (overall=รวมทุกเฟส) — แยกจากฟิลเตอร์เฟสที่แสดงผล
+        window._progressConditions = [{phase:'overall', bucket:'all'}]; // หลายเงื่อนไข progress (AND)
+        window._forgotFlowActive = false; // กันป๊อปล็อกอินเด้งซ้ำตอนทำฟลาวลืมรหัสผ่าน
         function _updateEditorLabel(){
             var lbl=document.getElementById('editorNameLabel');
-            if(lbl){ lbl.innerText = window.GS_EDITOR_DISPLAYNAME || window.GS_EDITOR_NAME || 'ตั้งชื่อ'; }
+            var disp = window.GS_EDITOR_DISPLAYNAME || window.GS_EDITOR_NAME || '';
+            if(lbl){ lbl.innerText = disp || 'ผู้ใช้'; }
+            // อัปเดต avatar + ชื่อ/อีเมล์ใน dropdown ด้วย
+            var av=document.getElementById('userAvatar'); if(av){ av.innerText = (disp||window.GS_EDITOR_NAME||'?').charAt(0).toUpperCase(); }
+            var dn=document.getElementById('userDropdownName'); if(dn){ dn.innerText = disp || 'ผู้ใช้'; }
+            var de=document.getElementById('userDropdownEmail'); if(de){ de.innerText = window.GS_EDITOR_NAME || '-'; }
         }
+        // ===== เปิด/ปิด dropdown เมนูผู้ใช้ที่มุมบนขวา =====
+        window.toggleUserMenu = function(e){
+            if(e){ e.stopPropagation(); }
+            var dd=document.getElementById('userDropdown');
+            if(!dd) return;
+            dd.classList.toggle('hide');
+        };
+        // คลิกที่อื่นปิด dropdown อัตโนมัติ
+        document.addEventListener('click', function(e){
+            var dd=document.getElementById('userDropdown');
+            var cont=document.getElementById('userMenuContainer');
+            if(dd && !dd.classList.contains('hide') && cont && !cont.contains(e.target)){ dd.classList.add('hide'); }
+        });
+        // ===== ออกจากระบบ — เคลียร์ข้อมูลแล้วเด้งกลับหน้าแรก (หน้ากดล็อกอิน) =====
+        window.logoutUser = function(){
+            try{ sessionStorage.removeItem('mwEditorName'); sessionStorage.removeItem('mwEditorDisplayName'); localStorage.removeItem('mwEditorName'); localStorage.removeItem('mwEditorDisplayName'); }catch(e){}
+            try{ localStorage.removeItem('mwStatusOverrides'); localStorage.removeItem('mwFieldOverrides'); localStorage.removeItem('mwEditLog'); }catch(e){}
+            window.GS_EDITOR_NAME=''; window.GS_EDITOR_DISPLAYNAME=''; window._nameLocked=false; window._dataLoaded=false; window._approvalRequested=false;
+            if(window._loginReopenTimer){ clearTimeout(window._loginReopenTimer); window._loginReopenTimer=null; }
+            var dd=document.getElementById('userDropdown'); if(dd) dd.classList.add('hide');
+            var sk=document.getElementById('skeletonOverlay'); if(sk) sk.classList.add('hide');
+            var ch=document.getElementById('compactHeader'); if(ch) ch.classList.add('hide');
+            var da=document.getElementById('dashboardArea'); if(da) da.classList.add('hide');
+            var sv=document.getElementById('startupView'); if(sv) sv.classList.remove('hide');
+            if(window.hideApprovalBanner_) window.hideApprovalBanner_();
+            window.VIEW_ONLY=false;
+            _updateEditorLabel();
+            try{ Swal.fire({toast:true, position:'top-end', icon:'info', title:'ออกจากระบบแล้ว', showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'}}); }catch(e){}
+        };
         function _loginSuccess(em, nm){
             window.GS_EDITOR_NAME = em;
             window.GS_EDITOR_DISPLAYNAME = nm || '';
             window._nameLocked = true;
             window._approvalRequested = false;
-            try{ localStorage.setItem('mwEditorName', em); localStorage.setItem('mwEditorDisplayName', nm||''); }catch(e){}
+            try{ sessionStorage.setItem('mwEditorName', em); sessionStorage.setItem('mwEditorDisplayName', nm||''); localStorage.removeItem('mwEditorName'); localStorage.removeItem('mwEditorDisplayName'); }catch(e){}
             _updateEditorLabel();
-            setTimeout(function(){ if(window.checkApprovalStatus) window.checkApprovalStatus(); }, 600);
+            // ยกเลิกการเด้งกลับเข้าหน้าล็อกอินอัตโนมัติทันทีที่ล็อกอินผ่าน
+            if(window._loginReopenTimer){ clearTimeout(window._loginReopenTimer); window._loginReopenTimer = null; }
+            // ปิดป๊อปรอโหลด แล้วให้ skeleton overlay ของการโหลดข้อมูลทำงานต่อ
+            try{ Swal.close(); }catch(e){}
+            // โหลดข้อมูลจากชีท — ถ้ายังไม่เคยโหลดสำเร็จ หรือหน้าเริ่มต้นยังแสดงอยู่ ให้โหลดใหม่
+            var sv = document.getElementById('startupView');
+            var needLoad = !window._dataLoaded || (sv && !sv.classList.contains('hide'));
+            if(needLoad && window.loadFromGoogleSheet){ window.loadFromGoogleSheet(); }
+            setTimeout(function(){ if(window.checkApprovalStatus) window.checkApprovalStatus(); }, 1500);
         }
-        // ขั้นที่ 2: ถ้ามีบัญชีแล้ว → ถามรหัสผ่าน
-        function _askPassword(em, required, attempt){
-            attempt = attempt || 0;
-            Swal.fire({
-                title: 'กรอกรหัสผ่าน (อีเมล์: ' + em + ')',
-                input: 'password',
-                inputPlaceholder: 'รหัสผ่านที่คุณตั้งไว้',
-                showCancelButton: !required,
-                confirmButtonText: 'เข้าสู่ระบบ',
-                cancelButtonText: 'ย้อนกลับ',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                customClass: { popup: 'rounded-2xl' },
-                inputValidator: function(v){ return v ? null : 'กรุณากรอกรหัสผ่าน'; }
-            }).then(function(res){
-                if(!res.isConfirmed){ if(required){ setTimeout(function(){ askEditorName(true); }, 300); } return; }
-                fetch(gsGetUrl() + '&action=verifyPassword&email=' + encodeURIComponent(em) + '&password=' + encodeURIComponent(res.value), {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
-                    if(j && j.ok){
-                        _loginSuccess(em, j.name);
-                        Swal.fire({toast:true, position:'top-end', icon:'success', title:'ยินดีต้อนรับ ' + (j.name || em), showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'}});
-                    } else {
-                        Swal.fire({icon:'error', title:'รหัสผ่านไม่ถูกต้อง', text: attempt>=2 ? 'ถ้าลืมรหัส ให้ติดต่อแอดมินเพื่อรีเซ็ต' : 'กรุณาลองอีกครั้ง', confirmButtonText:'ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ _askPassword(em, required, attempt+1); });
-                    }
-                }).catch(function(){ Swal.fire({icon:'error', title:'เชื่อมต่อไม่ได้ ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ _askPassword(em, required, attempt); }); });
-            });
-        }
-        // ขั้นที่ 2: ถ้ายังไม่มีบัญชี → ลงทะเบียน (ชื่อ + ตั้งรหัสผ่าน)
-        function _askNewUser(em, required){
-            Swal.fire({
-                title: 'ลงทะเบียนใหม่ (2/3) — กรอกชื่อ',
-                input: 'text',
-                inputPlaceholder: 'เช่น สมชาย / หัวหน้าทีม (จะแสดงใน Edit Log)',
-                showCancelButton: !required,
-                confirmButtonText: 'ถัดไป',
-                cancelButtonText: 'ย้อนกลับ',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                customClass: { popup: 'rounded-2xl' },
-                inputValidator: function(v){ return (v && String(v).trim()) ? null : 'กรุณากรอกชื่อของคุณ (บังคับ)'; }
-            }).then(function(res){
-                if(!res.isConfirmed){ if(required){ setTimeout(function(){ askEditorName(true); }, 300); } return; }
-                var nm = String(res.value || '').trim();
-                Swal.fire({
-                    title: 'ลงทะเบียน (3/3) — ตั้งรหัสผ่าน',
-                    input: 'password',
-                    inputPlaceholder: 'ตั้งรหัสผ่านของคุณ (จำไว้ด้วย จะต้องใส่ทุกครั้งที่เปิด)',
-                    showCancelButton: false,
-                    confirmButtonText: 'ลงทะเบียน',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    customClass: { popup: 'rounded-2xl' },
-                    inputValidator: function(v){ return (v && String(v).length >= 4) ? null : 'รหัสผ่านอย่างน้อย 4 ตัวอักษร'; }
-                }).then(function(res2){
-                    if(!res2.isConfirmed){ return; }
-                    fetch(gsGetUrl() + '&action=register&email=' + encodeURIComponent(em) + '&name=' + encodeURIComponent(nm) + '&password=' + encodeURIComponent(res2.value), {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
-                        if(j && j.ok){
-                            _loginSuccess(em, nm);
-                            Swal.fire({toast:true, position:'top-end', icon:'success', title:'ลงทะเบียนเสร็จ: ' + nm, showConfirmButton:false, timer:2000, customClass:{popup:'rounded-xl'}});
-                        } else if(j && j.err === 'exists'){
-                            Swal.fire({icon:'info', title:'อีเมล์นี้มีบัญชีแล้ว', text:'กรุณาใส่รหัสผ่านแทน', customClass:{popup:'rounded-2xl'}}).then(function(){ _askPassword(em, required, 0); });
-                        } else {
-                            Swal.fire({icon:'error', title:'ลงทะเบียนไม่สำเร็จ ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ _askNewUser(em, required); });
-                        }
-                    }).catch(function(){ Swal.fire({icon:'error', title:'เชื่อมต่อไม่ได้ ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ _askNewUser(em, required); }); });
-                });
-            });
-        }
-        // ขั้นที่ 1: ถามอีเมล์ → ตรวจสอบว่ามีบัญชีหรือยัง
-        function askEditorName(required){
+        // ===== หน้าล็อกอินเดียว: กรอกอีเมล์ ชื่อ รหัสผ่าน ครบในป๊อปเดียว =====
+        function showLoginDialog(required){
             required = !!required;
+            if(window._loginDialogOpen) return;          // ป้องกันป๊อปเปิดซ้อนกัน
+            if(window._dataLoaded && required){ return; } // ล็อกอินแล้ว ไม่ต้องเด้งซ้ำ
+            window._loginDialogOpen = true;
             Swal.fire({
-                title: required ? 'เข้าสู่ระบบ / ลงทะเบียน (1/3) — กรอกอีเมล์' : 'เปลี่ยนผู้ใช้ — กรอกอีเมล์',
-                input: 'email',
-                inputValue: window.GS_EDITOR_NAME || '',
-                inputPlaceholder: 'เช่น name@company.com',
-                showCancelButton: !required,
-                confirmButtonText: 'ถัดไป',
-                cancelButtonText: 'ยกเลิก',
-                allowOutsideClick: !required,
-                allowEscapeKey: !required,
+                title: 'เข้าสู่ระบบ / ลงทะเบียน',
+                html:
+                    '<input id="swalEmail" type="email" placeholder="อีเมล์ (name@company.com)" class="swal2-input" style="display:block;width:100%;margin:8px 0;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;">' +
+                    '<input id="swalName" type="text" placeholder="ชื่อ (กรอกเฉพาะลงทะเบียนใหม่)" class="swal2-input" style="display:block;width:100%;margin:8px 0;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;">' +
+                    '<input id="swalPwd" type="password" placeholder="รหัสผ่าน" class="swal2-input" style="display:block;width:100%;margin:8px 0;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;">' +
+                    '<div style="text-align:right;margin-top:2px;"><a href="#" onclick="event.preventDefault(); startForgotPassword();" style="font-size:11px;color:#ea580c;font-weight:700;text-decoration:underline;cursor:pointer;">ลืมรหัสผ่าน?</a></div>' +
+                    '<div style="font-size:12px;color:#64748b;margin-top:6px;text-align:left;line-height:1.6;">• มีบัญชีแล้ว: กรอกแค่ <b>อีเมล์ + รหัสผ่าน</b> (ชื่อปล่อยว่าง)<br>• ยังไม่มีบัญชี: กรอก <b>ครบทั้ง 3 ช่อง</b> เพื่อลงทะเบียนใหม่</div>',
+                focusConfirm: false,
+                confirmButtonText: 'เข้าสู่ระบบ',
+                showCancelButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showCloseButton: true,
                 customClass: { popup: 'rounded-2xl' },
-                inputValidator: function(value){
-                    var v = String(value||'').trim();
-                    if(!v) return 'กรุณากรอกอีเมล์ของคุณ';
-                    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'กรุณากรอกอีเมล์ให้ถูกต้อง';
-                    return null;
+                preConfirm: function(){
+                    return {
+                        email: String(document.getElementById('swalEmail').value || '').trim().toLowerCase(),
+                        name: String(document.getElementById('swalName').value || '').trim(),
+                        password: String(document.getElementById('swalPwd').value || '')
+                    };
                 }
-            }).then(function(res){
-                if(!res.isConfirmed){ if(required){ setTimeout(function(){ askEditorName(true); }, 300); } return; }
-                var em = String(res.value || '').trim().toLowerCase();
-                fetch(gsGetUrl() + '&action=checkEmail&email=' + encodeURIComponent(em), {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
-                    if(j && j.registered){ _askPassword(em, required, 0); }
-                    else { _askNewUser(em, required); }
-                }).catch(function(){
-                    Swal.fire({icon:'warning', title:'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', text:'ไม่สามารถตรวจสอบบัญชีได้ — ลองอีกครั้ง', confirmButtonText:'ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ askEditorName(required); });
-                });
+            }).then(function(result){
+                window._loginDialogOpen = false;
+                if(!result.isConfirmed){ 
+                    // ถ้ากดกากบาท (X) ปิดทิ้งไว้ก่อน — ไม่เด้งซ้ำอัตโนมัติ ให้ผู้ใช้กดปุ่มล็อกอินเอง (แต่เข้า dashboard ได้ต้องล็อกอินเหมือนเดิม)
+                    var dismissedByX = (result.dismiss === 'close');
+                    if(required && !dismissedByX && !window._dataLoaded && !window._forgotFlowActive){ 
+                        window._loginReopenTimer = setTimeout(function(){ window._loginReopenTimer = null; showLoginDialog(true); }, 300); 
+                    } 
+                    return; 
+                }
+                var v = result.value;
+                if(!v.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)){
+                    Swal.fire({icon:'error', title:'กรุณากรอกอีเมล์ให้ถูกต้อง', confirmButtonText:'ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ showLoginDialog(required); });
+                    return;
+                }
+                if(!v.password){
+                    Swal.fire({icon:'error', title:'กรุณากรอกรหัสผ่าน', confirmButtonText:'ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ showLoginDialog(required); });
+                    return;
+                }
+                // ===== แอนิเมชั่นรอโหลดหลังกดเข้าสู่ระบบ (ไม่ให้หน้านิ่งเหมือนค้าง) =====
+                Swal.fire({ title:'กำลังเข้าสู่ระบบ', html:'<div style="padding:10px 0;font-size:13px;color:#64748b;line-height:1.7;">กำลังตรวจสอบบัญชีและโหลดข้อมูลจากชีท<br>กรุณารอสักครู่...</div>', didOpen: function(){ Swal.showLoading(); }, allowOutsideClick:false, allowEscapeKey:false, showConfirmButton:false, customClass:{popup:'rounded-2xl'} });
+                fetch(gsGetUrl() + '&action=checkEmail&email=' + encodeURIComponent(v.email), {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+                    if(j && j.registered){
+                        fetch(gsGetUrl() + '&action=verifyPassword&email=' + encodeURIComponent(v.email) + '&password=' + encodeURIComponent(v.password), {cache:'no-store'}).then(function(r2){return r2.json();}).then(function(j2){
+                            if(j2 && j2.ok){ _loginSuccess(v.email, j2.name); }
+                            else { Swal.fire({icon:'error', title:'รหัสผ่านไม่ถูกต้อง', text:'ถ้าลืมรหัส ให้ติดต่อแอดมินรีเซ็ต', confirmButtonText:'ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ showLoginDialog(required); }); }
+                        });
+                    } else {
+                        if(!v.name){ Swal.fire({icon:'warning', title:'ยังไม่มีบัญชี — กรุณากรอกชื่อด้วยเพื่อลงทะเบียน', confirmButtonText:'ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ showLoginDialog(required); }); return; }
+                        if(v.password.length < 4){ Swal.fire({icon:'warning', title:'รหัสผ่านอย่างน้อย 4 ตัวอักษร', confirmButtonText:'ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ showLoginDialog(required); }); return; }
+                        fetch(gsGetUrl() + '&action=register&email=' + encodeURIComponent(v.email) + '&name=' + encodeURIComponent(v.name) + '&password=' + encodeURIComponent(v.password), {cache:'no-store'}).then(function(r3){return r3.json();}).then(function(j3){
+                            if(j3 && j3.ok){ _loginSuccess(v.email, v.name); }
+                            else { Swal.fire({icon:'error', title:'ลงทะเบียนไม่สำเร็จ ลองอีกครั้ง', confirmButtonText:'ตกลง', customClass:{popup:'rounded-2xl'}}).then(function(){ showLoginDialog(required); }); }
+                        });
+                    }
+                }).catch(function(){ Swal.fire({icon:'error', title:'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองอีกครั้ง', confirmButtonText:'ตกลง', customClass:{popup:'rounded-2xl'}}).then(function(){ showLoginDialog(required); }); });
             });
         }
-        // เปิดหน้าทุกครั้ง: ถ้ามีอีเมล์อยู่แล้ว → ให้ใส่รหัสผ่านทุกครั้ง (ตามที่ต้องการ)
-        function ensureEditorName(){
-            if(!window.GS_EDITOR_NAME){ askEditorName(true); }
-            else { _updateEditorLabel(); _askPassword(window.GS_EDITOR_NAME, true, 0); }
-        }
-        // ปุ่มเปลี่ยนผู้ใช้/เปลี่ยนเมล์ (กดที่ปุ่ม "เมย์" ได้เลย)
-        window.logoutSwitchUser = function(){ askEditorName(false); };
+        function askEditorName(required){ showLoginDialog(required); }
+        function ensureEditorName(){ if(!window._dataLoaded){ showLoginDialog(true); } else { _updateEditorLabel(); } }
+        window.logoutSwitchUser = function(){ showLoginDialog(false); };
 
         function gsPost(payload){
   try{
@@ -1534,6 +1577,78 @@ function pickStatus(statusGroup){
             return '76-99%';
 
         }
+
+        // ===== กรอง Progress ตามเฟสเป้าหมาย (แยกจากฟิลเตอร์เฟสที่แสดงผล — เฟสอื่นยังแสดงครบตามที่เลือก) =====
+        function getProgressBucketForTarget(d){
+            var tp = (typeof window._progressTargetPhase !== 'undefined') ? window._progressTargetPhase : 'overall';
+            if(tp === 'overall' || !d || !d.phases || !d.phases.length) return getProgressBucket(d);
+            for(var i=0;i<d.phases.length;i++){ if(d.phases[i].name === tp){ return getProgressBucket({ pct: d.phases[i].pct, numPct: d.phases[i].numPct }); } }
+            return 'ไม่ระบุ'; // รายการนั้นๆ ไม่มีเฟสนี้ ให้นับว่าไม่ระบุ
+        }
+
+        // ===== ฟิลเตอร์ Progress หลายเงื่อนไข (AND) =====
+        window.addProgressCondition = function(){
+            window._progressConditions.push({phase:'overall', bucket:'all'});
+            if(window.renderProgressConditions) window.renderProgressConditions();
+        };
+        window.removeProgressCondition = function(i){
+            window._progressConditions.splice(i,1);
+            if(window._progressConditions.length===0) window._progressConditions=[{phase:'overall',bucket:'all'}];
+            if(window.renderProgressConditions) window.renderProgressConditions();
+            if(window.selectSheet) window.selectSheet(currentSheetName);
+        };
+        window.renderProgressConditions = function(){
+            var list = document.getElementById('progressConditionsList');
+            if(!list) return;
+            if(!window._progressConditions || window._progressConditions.length===0) window._progressConditions=[{phase:'overall',bucket:'all'}];
+            var phaseOpts = '<option value="overall">รวม (Overall)</option>' + customPhaseOrder.map(function(k){ return '<option value="'+k+'">'+(fullPhaseNames[k]||k)+'</option>'; }).join('');
+            var bucketOpts = '<option value="all">ทุก Progress</option>' + PROGRESS_BUCKETS.map(function(b){ return '<option value="'+b+'">'+b+'</option>'; }).join('');
+            list.innerHTML = '';
+            window._progressConditions.forEach(function(c, i){
+                var row = document.createElement('div');
+                row.className = 'flex gap-1 items-center';
+                var phSel = phaseOpts.replace('value="'+c.phase+'"', 'value="'+c.phase+'" selected');
+                var bkSel = bucketOpts.replace('value="'+c.bucket+'"', 'value="'+c.bucket+'" selected');
+                row.innerHTML = '<select data-idx="'+i+'" data-f="phase" class="flex-1 min-w-0 text-[10px] font-bold text-slate-700 border border-sky-200 rounded-md px-1 py-1 bg-white outline-none">'+phSel+'</select>'
+                    + '<select data-idx="'+i+'" data-f="bucket" class="flex-1 min-w-0 text-[10px] font-bold text-slate-700 border border-sky-200 rounded-md px-1 py-1 bg-white outline-none">'+bkSel+'</select>'
+                    + '<button type="button" data-idx="'+i+'" class="del-cond-btn text-[10px] font-black text-red-500 hover:bg-red-50 w-5 h-5 rounded flex items-center justify-center flex-shrink-0 border border-red-200">✕</button>';
+                list.appendChild(row);
+            });
+            list.querySelectorAll('select').forEach(function(sel){
+                sel.addEventListener('change', function(){
+                    var idx = parseInt(this.getAttribute('data-idx')), f = this.getAttribute('data-f');
+                    window._progressConditions[idx][f] = this.value;
+                    if(window.selectSheet) window.selectSheet(currentSheetName);
+                });
+            });
+            list.querySelectorAll('.del-cond-btn').forEach(function(btn){
+                btn.addEventListener('click', function(){ window.removeProgressCondition(parseInt(this.getAttribute('data-idx'))); });
+            });
+        };
+        // ===== ลืมรหัสผ่าน — ส่งโค้ด 6 หลักทางอีเมล์ =====
+        window.startForgotPassword = function(){
+            window._forgotFlowActive = true;
+            var endFlow = function(){ window._forgotFlowActive=false; setTimeout(function(){ showLoginDialog(true); }, 300); };
+            Swal.fire({ title:'ลืมรหัสผ่าน', html:'<input id="swalFEmail" type="email" placeholder="อีเมล์ที่ลงทะเบียน" class="swal2-input" style="display:block;width:100%;margin:8px 0;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;">', confirmButtonText:'ส่งโค้ดรีเซ็ต', showCancelButton:true, cancelButtonText:'ยกเลิก', customClass:{popup:'rounded-2xl'}, preConfirm:function(){ return String(document.getElementById('swalFEmail').value||'').trim().toLowerCase(); } }).then(function(r){
+                if(!r.isConfirmed){ endFlow(); return; }
+                var em = r.value;
+                if(!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ Swal.fire({icon:'error', title:'กรุณากรอกอีเมล์ให้ถูกต้อง', customClass:{popup:'rounded-2xl'}}).then(endFlow); return; }
+                Swal.fire({title:'กำลังส่งโค้ด...', didOpen:function(){ Swal.showLoading(); }, showConfirmButton:false, allowOutsideClick:false, allowEscapeKey:false});
+                fetch(gsGetUrl() + '&action=forgotPassword&email=' + encodeURIComponent(em), {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+                    Swal.fire({icon:'info', title:'ส่งโค้ดแล้ว', text:'ถ้าอีเมล์ '+em+' มีในระบบ จะได้รับโค้ด 6 หลักทางอีเมล์ (ใช้ได้ 15 นาที)', confirmButtonText:'ตกลง', customClass:{popup:'rounded-2xl'}}).then(function(){
+                        Swal.fire({ title:'ตั้งรหัสผ่านใหม่', html:'<input id="swalFCode" type="text" inputmode="numeric" maxlength="6" placeholder="โค้ด 6 หลัก" class="swal2-input" style="display:block;width:100%;margin:8px 0;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;letter-spacing:4px;text-align:center;"><input id="swalFPwd" type="password" placeholder="รหัสผ่านใหม่ (อย่างน้อย 4 ตัว)" class="swal2-input" style="display:block;width:100%;margin:8px 0;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;">', confirmButtonText:'ยืนยันรีเซ็ต', showCancelButton:true, cancelButtonText:'ยกเลิก', customClass:{popup:'rounded-2xl'}, preConfirm:function(){ return {code:String(document.getElementById('swalFCode').value||'').trim(), pwd:String(document.getElementById('swalFPwd').value||'')}; } }).then(function(r2){
+                            if(!r2.isConfirmed){ endFlow(); return; }
+                            var v2 = r2.value;
+                            if(!v2.code || !v2.pwd || v2.pwd.length<4){ Swal.fire({icon:'warning', title:'กรอกโค้ดและรหัสผ่านใหม่ให้ครบ (รหัสอย่างน้อย 4 ตัว)', customClass:{popup:'rounded-2xl'}}).then(endFlow); return; }
+                            fetch(gsGetUrl() + '&action=resetPassword&email=' + encodeURIComponent(em) + '&code=' + encodeURIComponent(v2.code) + '&password=' + encodeURIComponent(v2.pwd), {cache:'no-store'}).then(function(r3){return r3.json();}).then(function(j3){
+                                if(j3 && j3.ok){ Swal.fire({icon:'success', title:'รีเซ็ตรหัสผ่านสำเร็จ', text:'เข้าสู่ระบบด้วยรหัสผ่านใหม่ได้เลย', customClass:{popup:'rounded-2xl'}}).then(endFlow); }
+                                else { Swal.fire({icon:'error', title:'รีเซ็ตไม่สำเร็จ', text:(j3&&j3.err)||'โค้ดไม่ถูกต้องหรือหมดอายุ', customClass:{popup:'rounded-2xl'}}).then(endFlow); }
+                            }).catch(function(){ Swal.fire({icon:'error', title:'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', customClass:{popup:'rounded-2xl'}}).then(endFlow); });
+                        });
+                    });
+                }).catch(function(){ Swal.fire({icon:'error', title:'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(endFlow); });
+            });
+        };
 
 
         function applyOverallPctMode() {
@@ -1990,7 +2105,7 @@ function pickStatus(statusGroup){
 
             let rBt = document.getElementById('respPersonBtnText'); if(rBt) rBt.innerText = 'ทุกผู้รับผิดชอบ'; 
 
-            let prBt = document.getElementById('progressBtnText'); if(prBt) prBt.innerText = 'ทุก Progress';
+            let prBt = document.getElementById('progressBtnText'); if(prBt) prBt.innerText = 'ทุก Progress'; window._progressTargetPhase='overall'; var _ppsR=document.getElementById('progressPhaseSelect'); if(_ppsR) _ppsR.value='overall'; window._progressConditions=[{phase:'overall',bucket:'all'}];
 
             let pBt = document.getElementById('personBtnText'); if(pBt) pBt.innerText = 'ทุก Phase';
 
@@ -2064,15 +2179,18 @@ function pickStatus(statusGroup){
                     document.getElementById('compactHeader').classList.remove('hide');
                     document.getElementById('dashboardArea').classList.remove('hide');
                     setupTabsAndLoad(sheetNames);
+                    window._dataLoaded = true;   // โหลดสำเร็จจริงๆ จึงตั้งค่านี้
                     if(skeleton){ skeleton.classList.add('opacity-0'); setTimeout(function(){ skeleton.classList.add('hide'); },500); }
                     Swal.fire({ toast:true, position:'top-end', icon:'success', title:'โหลดจาก Google Sheet สำเร็จ', showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'} });
                     /* ensureEditorName ถูกเรียกตอนโหลดหน้าแล้ว */
                 }catch(err){
                     if(skeleton) skeleton.classList.add('hide');
+                    window._dataLoaded = false;   // ล้มเหลว — ให้ล็อกอิน/โหลดใหม่ได้อีกครั้ง
                     Swal.fire({ icon:'error', title:'เชื่อม Google Sheet ไม่สำเร็จ', text:String(err&&err.message?err.message:err), customClass:{popup:'rounded-2xl'} });
                 }
             }).catch(function(err){
                 if(skeleton) skeleton.classList.add('hide');
+                window._dataLoaded = false;   // ล้มเหลว — ให้ล็อกอิน/โหลดใหม่ได้อีกครั้ง
                 Swal.fire({ icon:'error', title:'ไม่สามารถเชื่อม Google Sheet ได้', text:'โปรดตรวจสอบ URL Apps Script หรืออัปโหลดไฟล์ Excel แทน', customClass:{popup:'rounded-2xl'} });
             });
         };
@@ -2592,6 +2710,26 @@ function pickStatus(statusGroup){
 
             populateDropdown('progressList', progressBuckets, 'progress-cb', 'selectAllProgress', 'progressBtnText', 'ทุก Progress');
 
+            // ===== เติมตัวเลือกเฟสใน progress dropdown + แสดงชื่อเฟสที่ปุ่ม =====
+            var _pps = document.getElementById('progressPhaseSelect');
+            if(_pps){
+                if(_pps.options.length <= 1){
+                    customPhaseOrder.forEach(function(k){ var o=document.createElement('option'); o.value=k; o.textContent=fullPhaseNames[k]||k; _pps.appendChild(o); });
+                    _pps.addEventListener('change', function(){ window._progressTargetPhase = this.value; if(window.selectSheet){ window.selectSheet(currentSheetName); } else if(window.updateSummaryUI){ window.updateSummaryUI(); } });
+                }
+                _pps.value = window._progressTargetPhase || 'overall';
+                var _tp = _pps.value;
+                var _bt = document.getElementById('progressBtnText');
+                if(_bt){ var _cur = _bt.innerText.split(' · ')[0]; _bt.innerText = (_tp==='overall') ? _cur : (_cur + ' · ' + (fullPhaseNames[_tp]||_tp)); }
+            }
+
+            // ===== หลายเงื่อนไข progress (AND) — ถ้ามีจะ override ข้อความปุ่ม =====
+            if(window.renderProgressConditions) window.renderProgressConditions();
+            var _condsOn = (window._progressConditions||[]).filter(function(c){ return c && c.bucket && c.bucket !== 'all'; });
+            if(_condsOn.length > 0){
+                var _bt2 = document.getElementById('progressBtnText');
+                if(_bt2){ _bt2.innerText = _condsOn.map(function(c){ return (fullPhaseNames[c.phase]||c.phase) + ' ' + c.bucket; }).join(' · '); }
+            }
 
             const uniqueMonths = extractUniqueMonths(currentRawData); populateMonthDropdown(uniqueMonths);
 
@@ -2688,7 +2826,18 @@ function pickStatus(statusGroup){
 
                 let passStatus = isAllStatus ? true : (checkedStatuses.some(function(s){ var sl=String(s||'').toLowerCase().trim(); return sl===d.statusGroup || sl===String(d.statusRaw||'').toLowerCase().trim(); }) || d.statusRaw==='-' || d.statusRaw==='' || !d.statusRaw); let passCode = isAllCodes ? true : checkedCodes.includes(d.codePrefix); let passLot = isAllLots ? true : checkedLots.includes(d.lot); let passResp = isAllResp ? true : checkedRespPersons.includes(d.respPerson);
 
-                let passProgress = isAllProgress ? true : checkedProgress.includes(getProgressBucket(d));
+                let passProgress = true;
+                var _conds = (window._progressConditions||[]).filter(function(c){ return c && c.bucket && c.bucket !== 'all'; });
+                if(_conds.length > 0){
+                    // หลายเงื่อนไข (AND) — ทุกเงื่อนไขต้องตรง เฟสอื่นๆ ยังแสดงครบตามฟิลเตอร์เฟส
+                    passProgress = _conds.every(function(c){
+                        if(c.phase === 'overall' || !d.phases || !d.phases.length){ return getProgressBucket(d) === c.bucket; }
+                        for(var _ci=0;_ci<d.phases.length;_ci++){ if(d.phases[_ci].name === c.phase){ return getProgressBucket({pct:d.phases[_ci].pct, numPct:d.phases[_ci].numPct}) === c.bucket; } }
+                        return c.bucket === 'ไม่ระบุ';
+                    });
+                } else {
+                    passProgress = isAllProgress ? true : checkedProgress.includes(getProgressBucketForTarget(d));
+                }
 
                 return passSearch && passPhase && passStatus && passCode && passLot && passResp && passProgress && passDate;
 
@@ -2754,7 +2903,8 @@ function pickStatus(statusGroup){
 
             if (!isAllResps && checkedResps.length < 5) checkedResps.forEach(r => html += createPill('resp', r, `👤 ${r}`, 'bg-purple-50 text-purple-700 border-purple-200'));
 
-            let elPg = document.getElementById('selectAllProgress'); if (elPg && !elPg.checked) { Array.from(document.querySelectorAll('.progress-cb:checked')).forEach(cb => html += createPill('progress', cb.value, `📈 Progress: ${cb.value}`, 'bg-orange-50 text-orange-700 border-orange-200')); }
+            var _multiOn = (window._progressConditions||[]).filter(function(c){ return c && c.bucket && c.bucket !== 'all'; }).length > 0;
+            let elPg = document.getElementById('selectAllProgress'); if (!_multiOn && elPg && !elPg.checked) { var _tpLbl = (window._progressTargetPhase && window._progressTargetPhase!=='overall') ? (' · ' + (fullPhaseNames[window._progressTargetPhase]||window._progressTargetPhase)) : ''; Array.from(document.querySelectorAll('.progress-cb:checked')).forEach(cb => html += createPill('progress', cb.value, `📈 Progress: ${cb.value}${_tpLbl}`, 'bg-orange-50 text-orange-700 border-orange-200')); }
 
             if (isSummaryMode && !isAllPhase && checkedPhases.length < 5) checkedPhases.forEach(p => html += createPill('phase', p, `Phase: ${fullPhaseNames[p]||p}`, 'bg-teal-50 text-teal-700 border-teal-200'));
 
@@ -3935,7 +4085,7 @@ document.addEventListener('change', function(e){
 </div>
 
 
-<script>try{ window.addEventListener('load', function(){ if(window.ensureEditorName){ window.ensureEditorName(); } if(window.loadFromGoogleSheet){ window.loadFromGoogleSheet(); } var lbl=document.getElementById('editorNameLabel'); if(lbl){ lbl.innerText = window.GS_EDITOR_NAME || 'ตั้งชื่อ'; } if(window.restoreAutoRefresh){ window.restoreAutoRefresh(); } }); }catch(e){}</script>
+<script>try{ window.addEventListener('load', function(){ var lbl=document.getElementById('editorNameLabel'); if(lbl){ lbl.innerText = window.GS_EDITOR_DISPLAYNAME || window.GS_EDITOR_NAME || 'ตั้งชื่อ'; } if(window.restoreAutoRefresh){ window.restoreAutoRefresh(); } /* Auto-login: ถ้ามีอีเมล์ใน session (เซสชันเดียวกัน ยังไม่ปิดเบราเซอร์) ให้โหลดทันที — ปิดเบราเซอร์/แท็บแล้วจะหายไปต้องล็อกอินใหม่เสมอ */ try{ var em=(sessionStorage.getItem('mwEditorName')||'').trim(); if(em && em.indexOf('@')!==-1 && window.loadFromGoogleSheet && !window._dataLoaded){ window.GS_EDITOR_NAME=em; window.GS_EDITOR_DISPLAYNAME=sessionStorage.getItem('mwEditorDisplayName')||''; window._nameLocked=true; if(window._updateEditorLabel) window._updateEditorLabel(); window.loadFromGoogleSheet(); } }catch(e){} }); }catch(e){}</script>
 </body>
 
 </html>
