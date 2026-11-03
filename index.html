@@ -1261,7 +1261,7 @@ function pickStatus(statusGroup){
                         _loginSuccess(em, j.name);
                         Swal.fire({toast:true, position:'top-end', icon:'success', title:'ยินดีต้อนรับ ' + (j.name || em), showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'}});
                     } else {
-                        Swal.fire({icon:'error', title:'รหัสผ่านไม่ถูกต้อง', text: attempt>=2 ? 'ถ้าลืมรหัส ให้ติดต่อแอดมินเพื่อรีเซ็ต', confirmButtonText:'ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ _askPassword(em, required, attempt+1); });
+                        Swal.fire({icon:'error', title:'รหัสผ่านไม่ถูกต้อง', text: attempt>=2 ? 'ถ้าลืมรหัส ให้ติดต่อแอดมินเพื่อรีเซ็ต' : 'กรุณาลองอีกครั้ง', confirmButtonText:'ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ _askPassword(em, required, attempt+1); });
                     }
                 }).catch(function(){ Swal.fire({icon:'error', title:'เชื่อมต่อไม่ได้ ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}).then(function(){ _askPassword(em, required, attempt); }); });
             });
