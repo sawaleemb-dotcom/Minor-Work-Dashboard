@@ -430,17 +430,37 @@
 
                 <h2 class="text-sm font-bold text-slate-500 mb-10 text-center uppercase tracking-widest bg-slate-100 px-4 py-1.5 rounded-full border border-slate-200">MRT Orange Line Project</h2>
 
-                <div id="startupDropZone" class="w-full max-w-2xl h-64 border-2 border-dashed border-orange-300 rounded-3xl p-6 bg-orange-50/50 hover:bg-orange-50 transition-all duration-300 relative cursor-pointer flex flex-col items-center justify-center group shadow-sm hover:shadow-md">
+                <div id="startupDropZone" class="w-full max-w-2xl min-h-[300px] border-2 border-dashed border-orange-300 rounded-3xl p-6 bg-orange-50/50 hover:bg-orange-50 transition-all duration-300 relative flex flex-col items-center justify-center group shadow-sm hover:shadow-md">
 
                     <input type="file" id="startupFileInput" accept=".xlsx, .xls" class="hidden"/>
 
-                    <div class="text-6xl mb-4 text-orange-500 drop-shadow-sm">🔐</div>
+                    <div class="text-5xl mb-3 text-orange-500 drop-shadow-sm">👁️</div>
 
-                    <div class="text-slate-700 font-bold text-xl mb-2 text-center">กรุณาเข้าสู่ระบบเพื่อดูข้อมูล</div>
+                    <div class="text-slate-700 font-bold text-xl mb-2 text-center">เลือกโหมดการเข้าชม</div>
 
-                    <div class="text-sm text-slate-500 mb-6 text-center leading-relaxed">ใช้อีเมล์และรหัสผ่านที่ลงทะเบียนไว้<br/>ถ้ายังไม่มีบัญชี ให้ลงทะเบียนใหม่ได้ในขั้นตอนถัดไป</div>
+                    <div class="text-sm text-slate-500 mb-6 text-center leading-relaxed">เข้าชมข้อมูลได้ทันทีโดยไม่ต้องล็อกอิน (ดูได้อย่างเดียว)<br/>หรือล็อกอินเพื่อขอสิทธิ์แก้ไขข้อมูล</div>
 
-                    <button onclick="askEditorName(true)" class="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-black px-10 py-3 rounded-2xl text-lg shadow-lg transition-all cursor-pointer">เข้าสู่ระบบ / ลงทะเบียน</button>
+                    <div class="w-full max-w-md flex flex-col gap-3">
+
+                        <button onclick="enterPublicView()" class="w-full flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black px-5 py-3.5 rounded-2xl text-base shadow-lg transition-all cursor-pointer">
+                            <span class="text-2xl leading-none flex-shrink-0">👁️</span>
+                            <span class="flex flex-col items-center min-w-0 leading-tight text-center">
+                                <span>เข้าชมข้อมูลเลย</span>
+                                <span class="text-[11px] font-semibold opacity-90">ดูได้ทันทีโดยไม่ต้องล็อกอิน — สำหรับทุกคน</span>
+                            </span>
+                        </button>
+
+                        <button onclick="showLoginDialog(false)" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-orange-50 active:scale-95 text-orange-600 font-black px-5 py-3.5 rounded-2xl text-base shadow-md border-2 border-orange-300 transition-all cursor-pointer">
+                            <span class="text-2xl leading-none flex-shrink-0">🔑</span>
+                            <span class="flex flex-col items-center min-w-0 leading-tight text-center">
+                                <span>ล็อกอินเพื่อแก้ไขข้อมูล</span>
+                                <span class="text-[11px] font-semibold text-orange-400">เฉพาะผู้ที่ได้รับอนุมัติจากแอดมิน — ยังไม่มีบัญชีลงทะเบียนได้</span>
+                            </span>
+                        </button>
+
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 mt-4 text-center">ลากไฟล์ Excel มาวางที่นี่ได้ (ทางเลือกสำรอง)</div>
 
                 </div>
 
@@ -468,6 +488,9 @@
                     <div class="flex items-center justify-center gap-2"><span class="text-orange-600 text-sm drop-shadow-sm">📁</span><span class="text-xs text-orange-700 font-bold pointer-events-none truncate max-w-[150px]" id="fileNameDisplay">เปลี่ยนไฟล์ Excel</span></div>
 
                 </div>
+
+                <!-- ===== ปุ่มล็อกอินสำหรับโหมดเข้าชมสาธารณะ (ยังไม่ล็อกอิน) ===== -->
+                <button id="headerLoginBtn" onclick="showLoginDialog(false)" class="hide inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-black shadow-sm transition-all cursor-pointer">🔑 ล็อกอินเพื่อแก้ไข</button>
 
                 <!-- ===== User chip (ชื่อผู้ใช้ + dropdown ออกจากระบบ) ===== -->
                 <div class="relative" id="userMenuContainer">
@@ -1426,6 +1449,7 @@ function pickStatus(statusGroup){
             var av=document.getElementById('userAvatar'); if(av){ av.innerText = (disp||window.GS_EDITOR_NAME||'?').charAt(0).toUpperCase(); }
             var dn=document.getElementById('userDropdownName'); if(dn){ dn.innerText = disp || 'ผู้ใช้'; }
             var de=document.getElementById('userDropdownEmail'); if(de){ de.innerText = window.GS_EDITOR_NAME || '-'; }
+            if(window._updateHeaderAuthUI) window._updateHeaderAuthUI();
         }
         // ===== เปิด/ปิด dropdown เมนูผู้ใช้ที่มุมบนขวา =====
         window.toggleUserMenu = function(e){
@@ -1444,7 +1468,7 @@ function pickStatus(statusGroup){
         window.logoutUser = function(){
             try{ sessionStorage.removeItem('mwEditorName'); sessionStorage.removeItem('mwEditorDisplayName'); localStorage.removeItem('mwEditorName'); localStorage.removeItem('mwEditorDisplayName'); }catch(e){}
             try{ localStorage.removeItem('mwStatusOverrides'); localStorage.removeItem('mwFieldOverrides'); localStorage.removeItem('mwEditLog'); }catch(e){}
-            window.GS_EDITOR_NAME=''; window.GS_EDITOR_DISPLAYNAME=''; window._nameLocked=false; window._dataLoaded=false; window._approvalRequested=false;
+            window.GS_EDITOR_NAME=''; window.GS_EDITOR_DISPLAYNAME=''; window._nameLocked=false; window._dataLoaded=false; window._approvalRequested=false; window._publicView=false;
             if(window._loginReopenTimer){ clearTimeout(window._loginReopenTimer); window._loginReopenTimer=null; }
             var dd=document.getElementById('userDropdown'); if(dd) dd.classList.add('hide');
             var sk=document.getElementById('skeletonOverlay'); if(sk) sk.classList.add('hide');
@@ -1454,6 +1478,7 @@ function pickStatus(statusGroup){
             if(window.hideApprovalBanner_) window.hideApprovalBanner_();
             window.VIEW_ONLY=false;
             _updateEditorLabel();
+            if(window._updateHeaderAuthUI) window._updateHeaderAuthUI();
             try{ Swal.fire({toast:true, position:'top-end', icon:'info', title:'ออกจากระบบแล้ว', showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'}}); }catch(e){}
         };
         function _loginSuccess(em, nm){
@@ -1463,6 +1488,10 @@ function pickStatus(statusGroup){
             window._approvalRequested = false;
             try{ sessionStorage.setItem('mwEditorName', em); sessionStorage.setItem('mwEditorDisplayName', nm||''); localStorage.removeItem('mwEditorName'); localStorage.removeItem('mwEditorDisplayName'); }catch(e){}
             _updateEditorLabel();
+            // เคลียร์โหมดเข้าชมสาธารณะ — ล็อกอินแล้วรอผลอนุมัติจากแอดมินแทน
+            window._publicView = false;
+            if(window.hideApprovalBanner_) window.hideApprovalBanner_();
+            if(window._updateHeaderAuthUI) window._updateHeaderAuthUI();
             // ยกเลิกการเด้งกลับเข้าหน้าล็อกอินอัตโนมัติทันทีที่ล็อกอินผ่าน
             if(window._loginReopenTimer){ clearTimeout(window._loginReopenTimer); window._loginReopenTimer = null; }
             // ปิดป๊อปรอโหลด แล้วให้ skeleton overlay ของการโหลดข้อมูลทำงานต่อ
@@ -1543,10 +1572,30 @@ function pickStatus(statusGroup){
         function ensureEditorName(){ if(!window._dataLoaded){ showLoginDialog(true); } else { _updateEditorLabel(); } }
         window.logoutSwitchUser = function(){ showLoginDialog(false); };
 
+        // ===== ปุ่ม "เข้าชมข้อมูลเลย" — เปิดดูได้ทันทีแบบสาธารณะ โดยไม่ต้องล็อกอิน =====
+        window.enterPublicView = function(){
+            window._publicView = true;
+            window.GS_EDITOR_NAME=''; window.GS_EDITOR_DISPLAYNAME='';
+            try{ sessionStorage.removeItem('mwEditorName'); sessionStorage.removeItem('mwEditorDisplayName'); localStorage.removeItem('mwEditorName'); localStorage.removeItem('mwEditorDisplayName'); }catch(e){}
+            if(window._updateHeaderAuthUI) window._updateHeaderAuthUI();
+            if(window._dataLoaded){ if(window.showApprovalBanner_) window.showApprovalBanner_(); return; }
+            if(window.loadFromGoogleSheet){ window.loadFromGoogleSheet(); }
+        };
+        // ===== สลับแถบส่วนหัว: ยังไม่ล็อกอิน = ปุ่มล็อกอิน / ล็อกอินแล้ว = ชื่อผู้ใช้ =====
+        window._updateHeaderAuthUI = function(){
+            var em = (window.GS_EDITOR_NAME||'').trim();
+            var loggedIn = em && em.indexOf('@')!==-1;
+            var btn = document.getElementById('headerLoginBtn');
+            var chip = document.getElementById('userMenuContainer');
+            if(btn){ if(loggedIn){ btn.classList.add('hide'); } else { btn.classList.remove('hide'); } }
+            if(chip){ if(loggedIn){ chip.classList.remove('hide'); } else { chip.classList.add('hide'); } }
+        };
+
         function gsPost(payload){
   try{
     if(window.VIEW_ONLY){
-      Swal.fire({icon:'warning', title:'ยังไม่ได้รับอนุญาตแก้ไข', text:'คุณดูได้อย่างเดียว — กดปุ่ม "ขออนุญาตแก้ไข" ที่แถบเหลืองด้านบน', confirmButtonText:'เข้าใจแล้ว', customClass:{popup:'rounded-2xl'}});
+      var emOk = (window.GS_EDITOR_NAME||'').indexOf('@')!==-1;
+      Swal.fire({icon:'warning', title: emOk ? 'ยังไม่ได้รับอนุญาตแก้ไข' : 'โหมดเข้าชมอย่างเดียว', text: emOk ? 'คุณดูได้อย่างเดียว — กดปุ่ม "ขออนุญาตแก้ไข" ที่แถบเหลืองด้านบน' : 'ยังไม่ได้ล็อกอิน — กดปุ่ม "ล็อกอินเพื่อแก้ไข" ที่แถบด้านบนเพื่อขอสิทธิ์แก้ไข', confirmButtonText:'เข้าใจแล้ว', customClass:{popup:'rounded-2xl'}});
       return;
     }
     payload.user = window.GS_EDITOR_DISPLAYNAME || window.GS_EDITOR_NAME || '-';
@@ -2334,6 +2383,8 @@ function pickStatus(statusGroup){
                     document.getElementById('dashboardArea').classList.remove('hide');
                     setupTabsAndLoad(sheetNames);
                     window._dataLoaded = true;   // โหลดสำเร็จจริงๆ จึงตั้งค่านี้
+                    // ยังไม่ได้ล็อกอิน (โหมดเข้าชมสาธารณะ) → บังคับดูอย่างเดียว พร้อมแถบแจ้งเตือนปุ่มล็อกอิน
+                    if(!(window.GS_EDITOR_NAME||'').trim()){ window._publicView = true; if(window.showApprovalBanner_) window.showApprovalBanner_(); }
                     if(skeleton){ skeleton.classList.add('opacity-0'); setTimeout(function(){ skeleton.classList.add('hide'); },500); }
                     Swal.fire({ toast:true, position:'top-end', icon:'success', title:'โหลดจาก Google Sheet สำเร็จ', showConfirmButton:false, timer:1500, customClass:{popup:'rounded-xl'} });
                     /* ensureEditorName ถูกเรียกตอนโหลดหน้าแล้ว */
@@ -2394,17 +2445,32 @@ function pickStatus(statusGroup){
         window._injectViewOnlyCSS = function(){
             if(document.getElementById('_viewOnlyStyle')) return;
             var st = document.createElement('style'); st.id = '_viewOnlyStyle';
-            st.textContent = 'body.view-only #fieldEditorPopup, body.view-only #statusPickerPopup { display:none !important; } body.view-only input, body.view-only textarea, body.view-only [contenteditable], body.view-only .clickable-row { pointer-events:none !important; } body.view-only .clickable-row { cursor: default !important; }';
+            st.textContent = 'body.view-only #fieldEditorPopup, body.view-only #statusPickerPopup { display:none !important; } body.view-only .clickable-row, body.view-only [contenteditable] { pointer-events:none !important; cursor: default !important; } body.view-only #fieldEditorInput { pointer-events:none !important; }';
             document.head.appendChild(st);
         };
         window._lastViewOnlyToast = 0;
+        // แสดงเนื้อหาแถบแจ้งเตือนตามสถานะ: ยังไม่ล็อกอิน (สาธารณะ) / ล็อกอินแล้วรออนุมัติ / ส่งคำขอแล้ว
+        window.renderApprovalBannerContent = function(){
+            var b = document.getElementById('approvalBanner'); if(!b) return;
+            var em = (window.GS_EDITOR_NAME||'').trim();
+            var loggedIn = em && em.indexOf('@')!==-1;
+            if(!loggedIn){
+                b.innerHTML = '<span id="approvalBannerText">👁 โหมดเข้าชมสาธารณะ — ดูข้อมูลได้อย่างเดียว (ยังไม่ได้ล็อกอิน)</span> <button onclick="showLoginDialog(false)" style="background:#fff;color:#b45309;padding:4px 12px;border-radius:8px;font-weight:900;font-size:11px;border:none;cursor:pointer;margin-left:8px;">ล็อกอินเพื่อขอสิทธิ์แก้ไข</button>';
+            } else if(window._approvalRequested){
+                b.innerHTML = '<span id="approvalBannerText">⌛ ส่งคำขอแล้ว รอเจ้าหน้าที่อนุมัติ (หลังได้รับอนุมัติให้กดรีเฟรช)</span>';
+            } else {
+                b.innerHTML = '<span id="approvalBannerText">🔒 คุณกำลังดูอย่างเดียว — ยังไม่ได้รับอนุญาตให้แก้ไข</span> <button onclick="requestEditAccess()" style="background:#fff;color:#b45309;padding:4px 12px;border-radius:8px;font-weight:900;font-size:11px;border:none;cursor:pointer;margin-left:8px;">ขออนุญาตแก้ไข</button>';
+            }
+        };
         window.showApprovalBanner_ = function(){
             window.VIEW_ONLY = true;
             window._injectViewOnlyCSS();
             document.body.classList.add('view-only');
             var b = window._ensureApprovalBanner();
+            window.renderApprovalBannerContent();
             b.style.display = 'block';
             setTimeout(function(){ try{ document.body.style.paddingTop = (b.offsetHeight + 6) + 'px'; }catch(err){ document.body.style.paddingTop = '42px'; } }, 30);
+            if(window._updateHeaderAuthUI) window._updateHeaderAuthUI();
         };
         window.hideApprovalBanner_ = function(){
             window.VIEW_ONLY = false;
@@ -2422,7 +2488,8 @@ function pickStatus(statusGroup){
             var now = Date.now();
             if(now - window._lastViewOnlyToast < 4000) return;
             window._lastViewOnlyToast = now;
-            Swal.fire({toast:true, position:'top-end', icon:'warning', title:'🔒 ดูอย่างเดียว — กด "ขออนุญาตแก้ไข" ที่แถบเหลืองด้านบน', showConfirmButton:false, timer:2500, customClass:{popup:'rounded-xl'}});
+            var emOk = (window.GS_EDITOR_NAME||'').indexOf('@')!==-1;
+            Swal.fire({toast:true, position:'top-end', icon:'warning', title: emOk ? '🔒 ดูอย่างเดียว — กด "ขออนุญาตแก้ไข" ที่แถบเหลืองด้านบน' : '🔒 โหมดเข้าชมอย่างเดียว — กด "ล็อกอินเพื่อแก้ไข" ที่แถบด้านบนเพื่อขอสิทธิ์', showConfirmButton:false, timer:2500, customClass:{popup:'rounded-xl'}});
         }, true);
         window.checkApprovalStatus = function(){
             var em = (window.GS_EDITOR_NAME || '').trim();
@@ -2439,9 +2506,7 @@ function pickStatus(statusGroup){
             var nmDisp = encodeURIComponent(window.GS_EDITOR_DISPLAYNAME || '');
             fetch(gsGetUrl() + '&action=requestAccess&email=' + encodeURIComponent(em) + '&name=' + nmDisp, {cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
                 window._approvalRequested = true;
-                var t = document.getElementById('approvalBannerText');
-                if(t){ t.innerHTML = '⌛ ส่งคำขอแล้ว รอเจ้าหน้าที่อนุมัติ (หลังได้รับอนุมัติให้กดรีเฟรช)'; }
-                var btn = document.querySelector('#approvalBanner button'); if(btn){ btn.style.display='none'; }
+                if(window.renderApprovalBannerContent) window.renderApprovalBannerContent();
                 Swal.fire({toast:true, position:'top-end', icon:'success', title:'ส่งคำขออนุญาตแล้ว', showConfirmButton:false, timer:2500, customClass:{popup:'rounded-xl'}});
             }).catch(function(){ Swal.fire({icon:'error', title:'ส่งคำขอไม่สำเร็จ ลองอีกครั้ง', customClass:{popup:'rounded-2xl'}}); });
         };
