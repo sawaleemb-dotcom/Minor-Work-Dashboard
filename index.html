@@ -158,6 +158,11 @@
 
             .donut-box { max-width: 220px !important; max-height: 220px !important; height: 220px !important; margin: 0 auto !important; width: 100% !important; }
 
+            #summaryDonutCenter span { margin-top: 1px !important; }
+            #summaryDonutCenter span:nth-child(1) { font-size: 7px !important; }
+            #summaryDonutCenter span:nth-child(2) { font-size: 15px !important; }
+            #summaryDonutCenter span:nth-child(3) { font-size: 7.5px !important; }
+
             canvas { max-width: 100% !important; max-height: 100% !important; object-fit: contain !important; }
 
             
@@ -203,6 +208,11 @@
         .trend-bar { display:flex; align-items:center; gap:12px; padding:8px 14px; background:linear-gradient(90deg,#f8fafc,#fff); border:1px solid #e2e8f0; border-radius:12px; font-size:10px; font-weight:700; color:#64748b; flex-wrap:wrap; }
         .trend-up { color:#059669; } .trend-down { color:#dc2626; }
         .mini-svg { width:16px; height:16px; stroke-width:2; fill:none; stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; }
+
+        /* ===== Donut polish: clean reference-style ring + tidy center text ===== */
+        .donut-box canvas { filter: drop-shadow(0 5px 9px rgba(15, 23, 42, 0.07)); }
+        #summaryDonutCenter span { letter-spacing: 0; }
+        #summaryDonutCenter #summaryDonutPct { letter-spacing: -0.02em; }
 
 
         #statusPickerPopup { background:#fff; border:1px solid #e2e8f0; border-radius:14px; box-shadow:0 20px 50px rgba(0,0,0,.18); padding:8px; min-width:170px; z-index:999999; }
@@ -1114,15 +1124,14 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full print:flex print:flex-row print:gap-3 print-chart-section">
 
-                    <div class="print-donut-col lg:col-span-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col self-start relative w-full group hover:shadow-md transition-all">
+                    <div class="print-donut-col lg:col-span-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col self-stretch relative w-full group hover:shadow-md transition-all">
 
                         <button onclick="exportChartAsPNG('summaryDonutChart', 'Summary_Donut')" class="absolute top-4 right-4 p-1.5 bg-slate-50 hover:bg-orange-50 rounded-lg text-slate-400 hover:text-orange-600 transition-all opacity-0 group-hover:opacity-100 shadow-sm border border-slate-200 no-print transform hover:scale-110">📸</button>
 
                         <h3 id="summaryDonutTitle" class="font-black text-slate-800 text-base flex items-center gap-2 mb-1"><span class="text-xl drop-shadow-sm">📊</span> สัดส่วนสถานะงานภาพรวม</h3>
 
-                        <p id="summaryDonutDesc" class="text-[11px] text-slate-500 mb-4 font-semibold bg-slate-50 px-2 py-0.5 rounded w-fit">สัดส่วน เสร็จสิ้น / ตามแผน / ล่าช้า / N/A เทียบจำนวน Activity ทั้งหมด</p>
 
-                        <div class="relative w-full flex items-center justify-center flex-1 min-h-[320px]"><div class="donut-box w-full max-w-[320px] aspect-square relative flex justify-center items-center drop-shadow-sm"><canvas id="summaryDonutChart"></canvas><div id="summaryDonutCenter" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"><span id="summaryDonutTotal" class="text-2xl font-black text-slate-800 leading-none">0</span><span class="text-[10px] font-bold text-slate-500 mt-1">รายการทั้งหมด</span></div></div></div>
+                        <div class="relative w-full flex items-center justify-center flex-1 min-h-[320px] mt-2"><div class="donut-box w-full max-w-[320px] aspect-square relative flex justify-center items-center drop-shadow-sm"><canvas id="summaryDonutChart"></canvas><div id="summaryDonutCenter" class="absolute inset-0 z-[1] flex flex-col items-center justify-center pointer-events-none text-center px-3 leading-none"><span class="text-[9px] font-bold uppercase tracking-[0.14em] text-emerald-600/90">เสร็จสิ้นแล้ว</span><span id="summaryDonutPct" class="text-[30px] font-black text-slate-800 mt-1 leading-none">0%</span><span id="summaryDonutTotal" class="text-[10px] font-bold text-slate-500 mt-1.5 leading-tight">0 รายการ</span></div></div></div>
 
                     </div>
 
@@ -1132,9 +1141,8 @@
 
                         <h3 id="summaryBarTitle" class="font-black text-slate-800 text-base flex items-center gap-2 mb-1"><span class="text-xl drop-shadow-sm">📈</span> เปรียบเทียบสถานะแต่ละหมวดงาน</h3>
 
-                        <p id="summaryBarDesc" class="text-[11px] text-slate-500 mb-4 font-semibold bg-slate-50 px-2 py-0.5 rounded w-fit">แท่งซ้อนแต่ละเฟส: เสร็จสิ้น + ตามแผน + ล่าช้า เทียบยอดงานของเฟสนั้น</p>
 
-                        <div class="w-full flex-1 flex flex-col justify-center min-h-[320px]"><div id="summaryBarWrapper" class="bar-wrapper relative w-full h-full min-h-[320px]"><canvas id="summaryBarChart"></canvas></div></div>
+                        <div class="w-full flex-1 flex flex-col justify-center min-h-[320px] mt-2"><div id="summaryBarWrapper" class="bar-wrapper relative w-full h-full min-h-[320px]"><canvas id="summaryBarChart"></canvas></div></div>
 
                     </div>
 
@@ -1182,20 +1190,21 @@
 
         const centerTextPlugin = {
 
-            id: 'centerText', 
+            id: 'centerText',
 
             beforeDraw: function(chart) {
 
                 if (chart.config.type !== 'doughnut') return;
 
+                // โดนัทหน้าตารางสรุปมีข้อความกึ่งกลางเป็น HTML overlay เองอยู่แล้ว ห้ามวาดข้อความซ้อนจากปลั๊กอินนี้ (เลขจะทับซ้อนกัน)
+                if (chart.canvas && chart.canvas.id === 'summaryDonutChart') return;
+
                 let ctx = chart.ctx;
+                let area = chart.chartArea;
+                if (!area) return;
 
-                let chartArea = chart.chartArea;
-
-                let centerX = (chartArea.left + chartArea.right) / 2;
-
-                let centerY = (chartArea.top + chartArea.bottom) / 2;
-
+                let centerX = (area.left + area.right) / 2;
+                let centerY = (area.top + area.bottom) / 2;
 
                 ctx.restore();
 
@@ -1203,32 +1212,31 @@
                 let mainText = (ds._centerMain !== undefined && ds._centerMain !== null) ? ds._centerMain : null;
                 let subText = ds._centerSub || null;
                 if (mainText === null) {
-                    let total = chart.config.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                    if (total === 0) total = "N/A";
-                    mainText = total.toString(); subText = "Tasks";
+                    let total = ds.data.reduce((a, b) => a + b, 0);
+                    mainText = total === 0 ? 'N/A' : total.toLocaleString();
+                    if (!subText) subText = 'งานทั้งหมด';
                 }
 
-                let fontSize = (chart.height / 114).toFixed(2);
+                // จัดเลย์เอาต์สองบรรทัดให้อยู่กึ่งกลางวงพอดี (บล็อกรวมอยู่กลาง คำหลักใหญ่ คำอธิบายเล็ก เว้นระยะไม่ให้ทับกัน)
+                const h = chart.height;
+                const mainSize = Math.max(22, Math.min(40, Math.round(h * 0.155)));
+                const subSize = Math.max(10, Math.min(13, Math.round(h * 0.056)));
+                const gap = 3;
+                const blockH = mainSize + (subText ? gap + subSize : 0);
+                const yTop = centerY - blockH / 2;
 
-                ctx.font = "900 " + fontSize + "em Prompt"; 
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
 
-                ctx.textBaseline = "middle"; 
+                ctx.font = '800 ' + mainSize + 'px Prompt, "Segoe UI", sans-serif';
+                ctx.fillStyle = '#1e293b';
+                ctx.fillText(mainText, centerX, yTop + mainSize / 2);
 
-                ctx.textAlign = "center"; 
-
-                ctx.fillStyle = "#1e293b"; 
-
-                
-
-                ctx.fillText(mainText, centerX, centerY - (chart.height * 0.02)); 
-
-                
-
-                ctx.font = "bold " + (fontSize * 0.35).toFixed(2) + "em Prompt"; 
-
-                ctx.fillStyle = "#94a3b8"; 
-
-                ctx.fillText(subText, centerX, centerY + (chart.height * 0.12)); 
+                if (subText) {
+                    ctx.font = '600 ' + subSize + 'px Prompt, "Segoe UI", sans-serif';
+                    ctx.fillStyle = '#64748b';
+                    ctx.fillText(subText, centerX, yTop + mainSize + gap + subSize / 2);
+                }
 
                 ctx.save();
 
@@ -1237,6 +1245,18 @@
         };
 
         Chart.register(centerTextPlugin);
+
+        const summaryCenterAlignPlugin = {
+            id: 'summaryCenterAlign',
+            afterLayout: function(chart) {
+                if (chart.canvas && chart.canvas.id !== 'summaryDonutChart') return;
+                const ov = document.getElementById('summaryDonutCenter');
+                if (ov && chart.chartArea) {
+                    ov.style.top = chart.chartArea.top + 'px';
+                    ov.style.height = Math.max(0, chart.chartArea.bottom - chart.chartArea.top) + 'px';
+                }
+            }
+        };
 
         // ===== FEATURE ADDITIONS =====
         window._selectedRows = new Set();
@@ -1605,11 +1625,11 @@ function pickStatus(statusGroup){
         function renderTrendChart(){ var c=document.getElementById('trendLineChart'); if(!c) return; try{ var s=JSON.parse(localStorage.getItem('mwSnapshots')||'{}'); var keys=Object.keys(s).sort(); if(keys.length<2) return; var labels=keys.slice(-20), comp=labels.map(function(k){return s[k].comp;}), on=labels.map(function(k){return s[k].on;}), late=labels.map(function(k){return s[k].late;}); if(_trendChartObj) _trendChartObj.destroy(); _trendChartObj=new Chart(c.getContext('2d'),{type:'line',data:{labels:labels.map(function(k){return k.slice(5);}),datasets:[{label:'Completed',data:comp,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.1)',fill:true,tension:.3},{label:'On Schedule',data:on,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',fill:true,tension:.3},{label:'Late',data:late,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.1)',fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{family:'Prompt',size:10}}}},scales:{y:{beginAtZero:true}}}}); }catch(e){} }
         function toggleDueSoon(){ window._dueSoonOnly = !window._dueSoonOnly; var b=document.getElementById('dueSoonBtn'); if(b){ b.style.background = window._dueSoonOnly ? '#fef3c7' : ''; b.style.borderColor = window._dueSoonOnly ? '#f59e0b' : ''; b.style.color = window._dueSoonOnly ? '#b45309' : ''; b.style.fontWeight = window._dueSoonOnly ? '900' : ''; } updateView(); Swal.fire({toast:true,position:'top-end',icon:'info',title: window._dueSoonOnly ? 'กรองงานใกล้ครบ 15 วัน: ON' : 'ปิดกรอง Due Soon', showConfirmButton:false, timer:1500}); }
 
-        function applyPreset(name){ var search=document.getElementById('searchInput'); if(name==='late'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=(cb.value==='late');}); } else if(name==='duesoon'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=true;}); } else if(name==='mine'){ if(search) search.value=''; } var all=document.getElementById('selectAllStatus'); if(all){ var _tot=document.querySelectorAll('.status-cb').length; var _chk=document.querySelectorAll('.status-cb:checked').length; all.checked=(_tot>0 && _chk===_tot); } updateView(); var nm={late:'Late only',duesoon:'Due within 15 days',mine:'My tasks'}; Swal.fire({toast:true,position:'top-end',icon:'success',title:'Filter: '+(nm[name]||name),showConfirmButton:false,timer:1200}); }
+        function applyPreset(name){ var search=document.getElementById('searchInput'); if(name==='late'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=(cb.value==='late');}); } else if(name==='duesoon'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=true;}); } else if(name==='mine'){ if(search) search.value=''; } var all=document.getElementById('selectAllStatus'); if(all){ var _tot=document.querySelectorAll('.status-cb').length; var _chk=document.querySelectorAll('.status-cb:checked').length; all.checked=(_tot>0 && _chk===_tot); } if(typeof updateStatusFilterLabel==='function') updateStatusFilterLabel(); updateView(); var nm={late:'Late only',duesoon:'Due within 15 days',mine:'My tasks'}; Swal.fire({toast:true,position:'top-end',icon:'success',title:'Filter: '+(nm[name]||name),showConfirmButton:false,timer:1200}); }
         function togglePresentation(){ document.body.classList.toggle('presentation-mode'); var eb=document.getElementById('exitPresentationBtn'); if(eb) eb.classList.toggle('hide', !document.body.classList.contains('presentation-mode')); Swal.fire({toast:true,position:'top-end',icon:'info',title:document.body.classList.contains('presentation-mode')?'Presentation ON - press Esc or red button to exit':'Presentation OFF',showConfirmButton:false,timer:1800}); }
         function toggleDark(){ _darkMode=!_darkMode; document.body.classList.toggle('dark-mode',_darkMode); try{localStorage.setItem('mwDark',_darkMode?'1':'0');}catch(e){} }
         function copyShareLink(){ var params=new URLSearchParams(); var s=document.getElementById('searchInput'); if(s&&s.value) params.set('q',s.value); var stats=Array.from(document.querySelectorAll('.status-cb:checked')).map(function(c){return c.value;}).join(','); if(stats) params.set('st',stats); var url=location.origin+location.pathname+'#'+params.toString(); try{ navigator.clipboard.writeText(url); Swal.fire({toast:true,position:'top-end',icon:'success',title:'Share link copied',showConfirmButton:false,timer:1500}); }catch(e){ prompt('Copy link:', url); } }
-        function loadFromURL(){ try{ if(!location.hash||location.hash.length<2) return; var params=new URLSearchParams(location.hash.slice(1)); var q=params.get('q'); if(q){ var s=document.getElementById('searchInput'); if(s) s.value=q; } var st=params.get('st'); if(st){ var want=st.split(','); document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=want.includes(cb.value);}); } }catch(e){} }
+        function loadFromURL(){ try{ if(!location.hash||location.hash.length<2) return; var params=new URLSearchParams(location.hash.slice(1)); var q=params.get('q'); if(q){ var s=document.getElementById('searchInput'); if(s) s.value=q; } var st=params.get('st'); if(st){ var want=st.split(','); document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=want.includes(cb.value);}); } if(typeof updateStatusFilterLabel==='function') updateStatusFilterLabel(); }catch(e){} }
         function exportSelected(){ if(_selectedRows.size===0){ Swal.fire({icon:'warning',title:'No rows selected',text:'Ctrl+Click rows to select',customClass:{popup:'rounded-2xl'}}); return; } window._exportSelSet=new Set(_selectedRows); window._exportOnlySelected=true; exportExcelStyling(); }
         function checkDiffPrev(){ try{ var cur=JSON.stringify({t:currentRawData.length,c:currentRawData.filter(function(d){return d.statusGroup==='completed';}).length,l:currentRawData.filter(function(d){return d.statusGroup==='late';}).length}); var prev=localStorage.getItem('mwLastData'); if(prev&&prev!==cur){ var p=JSON.parse(prev); var dt=currentRawData.length-p.t, dc=currentRawData.filter(function(d){return d.statusGroup==='completed';}).length-p.c, dl=currentRawData.filter(function(d){return d.statusGroup==='late';}).length-p.l; Swal.fire({toast:true,position:'top-end',icon:'info',title:'vs last file: tasks '+(dt>=0?'+':'')+dt+', done '+(dc>=0?'+':'')+dc+', late '+(dl>=0?'+':'')+dl,showConfirmButton:false,timer:4000}); } localStorage.setItem('mwLastData',cur); }catch(e){} }
         setTimeout(function(){ try{ loadFromURL(); checkDiffPrev(); }catch(e){} }, 1200);
@@ -2412,9 +2432,32 @@ function pickStatus(statusGroup){
 
             if(bttBtn) {
 
-                window.addEventListener('scroll', function() { if(window.scrollY > 300) { bttBtn.classList.remove('opacity-0', 'pointer-events-none'); bttBtn.classList.add('translate-y-0'); } else { bttBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4'); } });
+                // ปุ่มลูกศรขึ้นเลื่อนกลับไปบนสุดของ "ตารางข้อมูล" (scroll ภายใน container) ไม่ใช่เลื่อนหน้าจอทั้งหมด
+                const bttScrollSources = ['tableContainerView', 'ganttContainerView', 'boardContainerView'];
 
-                bttBtn.addEventListener('click', () => { window.scrollTo({top: 0, behavior: 'smooth'}); });
+                function bttCurrentScrollEl() {
+                    for (var i = 0; i < bttScrollSources.length; i++) {
+                        var el = document.getElementById(bttScrollSources[i]);
+                        if (el && !el.classList.contains('hide') && el.scrollHeight > el.clientHeight + 4) return el;
+                    }
+                    return null;
+                }
+
+                function bttRefreshVisibility() {
+                    var el = bttCurrentScrollEl();
+                    var sy = el ? el.scrollTop : window.scrollY;
+                    if (sy > 300) { bttBtn.classList.remove('opacity-0', 'pointer-events-none'); bttBtn.classList.add('translate-y-0'); }
+                    else { bttBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4'); }
+                }
+
+                window.addEventListener('scroll', bttRefreshVisibility);
+                bttScrollSources.forEach(function(id){ var el = document.getElementById(id); if(el) el.addEventListener('scroll', bttRefreshVisibility); });
+
+                bttBtn.addEventListener('click', function() {
+                    var el = bttCurrentScrollEl();
+                    if (el) { el.scrollTo({ top: 0, behavior: 'smooth' }); }
+                    else { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                });
 
             }
 
@@ -2534,7 +2577,7 @@ function pickStatus(statusGroup){
 
             
 
-            let sBt = document.getElementById('statusBtnText'); if(sBt) sBt.innerText = 'ทุกสถานะ'; 
+            let sBt = document.getElementById('statusBtnText'); if(sBt) sBt.innerText = 'ทุกสถานะ'; if(typeof updateStatusFilterLabel==='function') updateStatusFilterLabel();
 
             let lBt = document.getElementById('lotBtnText'); if(lBt) lBt.innerText = 'ทุก Lot'; 
 
@@ -2827,7 +2870,7 @@ function pickStatus(statusGroup){
 
             else if (type === 'date') { document.querySelector('.date-filter-btn[data-date="all"]').click(); return; }
 
-            else { let cbClass = type === 'lot' ? '.lot-cb' : type === 'code' ? '.code-cb' : type === 'resp' ? '.resp-cb' : type === 'status' ? '.status-cb' : type === 'phase' ? '.person-cb' : type === 'progress' ? '.progress-cb' : ''; if(cbClass) { let cb = document.querySelector(`${cbClass}[value="${value}"]`); if(cb) { cb.checked = false; cb.dispatchEvent(new Event('change')); } } }
+            else { let cbClass = type === 'lot' ? '.lot-cb' : type === 'code' ? '.code-cb' : type === 'resp' ? '.resp-cb' : type === 'status' ? '.status-cb' : type === 'phase' ? '.person-cb' : type === 'progress' ? '.progress-cb' : ''; if(cbClass) { let cb = document.querySelector(`${cbClass}[value="${value}"]`); if(cb) { cb.checked = false; cb.dispatchEvent(new Event('change', {bubbles:true})); } } if(type==='status' && typeof updateStatusFilterLabel==='function') updateStatusFilterLabel(); }
 
             updateView();
 
@@ -2905,7 +2948,7 @@ function pickStatus(statusGroup){
 
                 
 
-                const allStat = document.querySelectorAll('.status-cb'); allStat.forEach(cb => cb.checked = state.statuses.includes(cb.value)); const chkdStat = document.querySelectorAll('.status-cb:checked'); const btStat = document.getElementById('statusBtnText'); if(chkdStat.length===0){ if(btStat) btStat.innerText='ว่าง'; safeCheck('selectAllStatus',false); }else if(chkdStat.length===allStat.length){ if(btStat) btStat.innerText='ทุกสถานะ'; safeCheck('selectAllStatus',true); }else{ safeCheck('selectAllStatus',false); const sMap={'completed':'เสร็จสิ้น','on schedule':'ตามแผน','late':'ล่าช้า','na':'N/A'}; if(btStat) btStat.innerText = chkdStat.length<=2 ? Array.from(chkdStat).map(c=>sMap[c.value]||c.value).join(', ') : `เลือก ${chkdStat.length} สถานะ`; }
+                const allStat = document.querySelectorAll('.status-cb'); const _savedStatuses = state.statuses || []; allStat.forEach(cb => cb.checked = _savedStatuses.includes(cb.value)); if(typeof updateStatusFilterLabel==='function') updateStatusFilterLabel();
 
                 
 
@@ -2923,7 +2966,7 @@ function pickStatus(statusGroup){
 
                 document.querySelectorAll('.status-cb, .lot-cb, .resp-cb, .code-cb').forEach(cb => cb.checked = true); if(isSummary) document.querySelectorAll('.person-cb').forEach(cb => cb.checked = true);
 
-                let sBt = document.getElementById('statusBtnText'); if(sBt) sBt.innerText = 'ทุกสถานะ'; let lBt = document.getElementById('lotBtnText'); if(lBt) lBt.innerText = 'ทุก Lot'; let cBt = document.getElementById('codeBtnText'); if(cBt) cBt.innerText = 'ทุก Code'; let rBt = document.getElementById('respPersonBtnText'); if(rBt) rBt.innerText = 'ทุกผู้รับผิดชอบ'; if(isSummary) { let pBt = document.getElementById('personBtnText'); if(pBt) pBt.innerText = 'ทุก Phase'; }
+                let sBt = document.getElementById('statusBtnText'); if(sBt) sBt.innerText = 'ทุกสถานะ'; let lBt = document.getElementById('lotBtnText'); if(lBt) lBt.innerText = 'ทุก Lot'; let cBt = document.getElementById('codeBtnText'); if(cBt) cBt.innerText = 'ทุก Code'; let rBt = document.getElementById('respPersonBtnText'); if(rBt) rBt.innerText = 'ทุกผู้รับผิดชอบ'; if(isSummary) { let pBt = document.getElementById('personBtnText'); if(pBt) pBt.innerText = 'ทุก Phase'; } if(typeof updateStatusFilterLabel==='function') updateStatusFilterLabel();
 
                 document.querySelectorAll('.table-filter-btn').forEach(b => { b.classList.remove('active', 'bg-white', 'shadow-sm', 'text-slate-800', 'border-slate-200'); b.classList.add('text-slate-500', 'border-transparent'); }); let btnAll = document.querySelector(`.table-filter-btn[data-status="all"]`); if(btnAll) { btnAll.classList.remove('text-slate-500', 'border-transparent'); btnAll.classList.add('active', 'bg-white', 'shadow-sm', 'text-slate-800', 'border-slate-200'); } currentTableStatusFilters = ['all'];
 
@@ -3043,7 +3086,7 @@ function pickStatus(statusGroup){
             } else if (isSummary) {
 
                 let pChartTitleText = document.getElementById('personChartTitleText'); if(pChartTitleText) pChartTitleText.textContent = 'ภาพรวมแต่ละหมวดงาน';
-                let pChartDesc = document.getElementById('personChartDesc'); if(pChartDesc) pChartDesc.textContent = 'แท่งซ้อนแยกตามหมวดงาน (เฟส) · แสดงความคืบหน้าเฉลี่ยรวมที่ป้ายด้านขวา';
+                let pChartDesc = document.getElementById('personChartDesc'); if(pChartDesc) pChartDesc.textContent = 'แท่งซ้อนแยกตามหมวดงาน (เฟส) · ป้ายด้านขวาแสดงสัดส่วนงานที่เสร็จสิ้น (เสร็จ / ทั้งหมด)';
 
                 let osIdx = headers.findIndex(h => cleanHeaderStr(h).includes('overall') && (cleanHeaderStr(h).includes('status') || cleanHeaderStr(h).includes('สถานะ'))); if(osIdx === -1) osIdx = headers.findIndex(h => cleanHeaderStr(h).includes('overall'));
 
@@ -3413,23 +3456,68 @@ function pickStatus(statusGroup){
 
             const isSummaryMode = currentSheetName.toLowerCase().includes('01 summary');
 
-            // ความคืบหน้าเฉลี่ยรวม (ใช้กับป้ายในกรอบกราฟแท่ง และโดนัทหน้า 01 summary)
+            // หน้า 01 Summary: นับระดับหมวดงาน (เฟส) จากชุดข้อมูลเดียวกับโดนัทหน้าตารางสรุป Summary (เสร็จสิ้น / รายการทั้งหมด)
+            // ส่วนหน้าเฟส (Design … Test Report) ยังใช้จำนวนงานระดับแถวตามเดิม (ถูกต้องแล้ว)
+            let phaseAgg = null;
+            if (isSummaryMode) {
+                try {
+                    if (typeof recomputeSummaryStats === 'function') recomputeSummaryStats();
+                    let base = summaryStatsOverall;
+                    const lotAllCb = document.getElementById('selectAllLot');
+                    const lotVals = Array.from(document.querySelectorAll('.lot-cb:checked')).map(cb => cb.value);
+                    if (lotAllCb && !lotAllCb.checked && lotVals.length > 0) {
+                        const only1 = lotVals.every(v => String(v).toLowerCase().indexOf('2') === -1);
+                        const only2 = lotVals.every(v => String(v).toLowerCase().indexOf('2') !== -1);
+                        if (only1) base = summaryStatsLot1; else if (only2) base = summaryStatsLot2;
+                    }
+                    const phAllCb = document.getElementById('selectAllPerson');
+                    const phVals = Array.from(document.querySelectorAll('.person-cb:checked')).map(cb => cb.value);
+                    const usePhFilter = !(phAllCb && phAllCb.checked) && phVals.length > 0;
+                    let _t = 0, _c = 0, _o = 0, _l = 0, _n = 0;
+                    customPhaseOrder.forEach(function(k) {
+                        if (usePhFilter && phVals.indexOf(k) === -1) return;
+                        const st = base[k] || {};
+                        _t += st.total || 0; _c += st.comp || 0; _o += st.on || 0; _l += st.late || 0; _n += st.na || 0;
+                    });
+                    phaseAgg = { total: _t, comp: _c, on: _o, late: _l, na: _n, pct: _t > 0 ? Math.round((_c / _t) * 100) : 0 };
+                } catch (e) { phaseAgg = null; }
+            }
+
             let progAvg = 0;
-            if (validData.length > 0) { let _sp = 0; validData.forEach(d => { _sp += (parseFloat(d.numPct) || 0); }); progAvg = Math.round(_sp / validData.length); }
+            if (isSummaryMode && phaseAgg && phaseAgg.total > 0) { progAvg = phaseAgg.pct; }
+            else if (totalTasks > 0) { progAvg = Math.round((compCount / totalTasks) * 100); }
+
             let avgBadge = document.getElementById('personChartAvgBadge');
             if (avgBadge) {
-                if (totalTasks > 0) { avgBadge.classList.remove('hidden'); avgBadge.innerHTML = '📈 ความคืบหน้ารวมเฉลี่ย <span class="text-sm font-black">' + progAvg + '%</span>'; }
-                else { avgBadge.classList.add('hidden'); avgBadge.innerHTML = ''; }
+                const hasData = (isSummaryMode && phaseAgg && phaseAgg.total > 0) || totalTasks > 0;
+                if (hasData) {
+                    avgBadge.classList.remove('hidden');
+                    if (isSummaryMode && phaseAgg) {
+                        avgBadge.innerHTML = '📈 ความคืบหน้าเฉลี่ย ' + phaseAgg.comp.toLocaleString() + ' / ' + phaseAgg.total.toLocaleString() + ' · <span class="text-sm font-black">' + progAvg + '%</span>';
+                    } else {
+                        avgBadge.innerHTML = '📈 ความคืบหน้าเฉลี่ย <span class="text-sm font-black">' + progAvg + '%</span>';
+                    }
+                } else { avgBadge.classList.add('hidden'); avgBadge.innerHTML = ''; }
             }
 
             let odTitle = document.getElementById('overallDonutTitle');
             let odDesc = document.getElementById('overallDonutDesc');
             let donutLabels, donutData, donutColors, donutCenterMain = null, donutCenterSub = null;
-            if (isSummaryMode) {
-                if (odTitle) odTitle.innerHTML = '<span class="text-xl drop-shadow-sm">🍩</span> ความคืบหน้างานภาพรวม (เฉลี่ย)';
-                if (odDesc) odDesc.textContent = 'แสดงความคืบหน้าเฉลี่ย Progress ของงานทั้งหมด เทียบกับส่วนที่ยังไม่ถึงเป้า (กล่อง KPI ยังนับตามจำนวนรายการจริง)';
+            if (isSummaryMode && phaseAgg && phaseAgg.total > 0) {
+                if (odTitle) odTitle.innerHTML = '<span class="text-xl drop-shadow-sm">🍩</span> สัดส่วนสถานะงานภาพรวม (ตามหมวดงาน)';
+                if (odDesc) odDesc.textContent = 'สัดส่วน เสร็จสิ้น / ตามแผน / ล่าช้า / N/A นับจากรายการของทุกหมวดงาน (เฟส) ใช้ข้อมูลชุดเดียวกับหน้าตารางสรุป Summary';
+                const d = phaseAgg;
+                // ใช้ 4 สถานะเหมือนโดนัทหน้าตารางสรุป Summary เป๊ะ (N/A อาจเป็น 0 แต่ยังแสดงใน legend)
+                donutLabels = ['เสร็จสิ้น', 'ตามแผน', 'ล่าช้า', 'N/A (ไม่เกี่ยวข้อง)'];
+                donutData = [d.comp, d.on, d.late, d.na];
+                donutColors = ['#10b981', '#f59e0b', '#ef4444', '#94a3b8'];
+                donutCenterMain = progAvg + '%';
+                donutCenterSub = 'เสร็จสิ้น / ทั้งหมด';
+            } else if (isSummaryMode) {
+                if (odTitle) odTitle.innerHTML = '<span class="text-xl drop-shadow-sm">🍩</span> ความคืบหน้างานภาพรวม (งานเสร็จสิ้น)';
+                if (odDesc) odDesc.textContent = 'สัดส่วนงานที่เสร็จสิ้น (Completed) เทียบกับงานทั้งหมด';
                 const remainPct = Math.max(0, 100 - progAvg);
-                donutLabels = totalTasks === 0 ? ['ไม่มีข้อมูล'] : ['ความคืบหน้าเฉลี่ย', 'ยังไม่ถึงเป้า'];
+                donutLabels = totalTasks === 0 ? ['ไม่มีข้อมูล'] : ['งานที่เสร็จสิ้น', 'ยังไม่เสร็จ'];
                 donutData = totalTasks === 0 ? [1] : [progAvg, remainPct];
                 donutColors = totalTasks === 0 ? ['#e2e8f0'] : ['#10b981', '#e2e8f0'];
                 donutCenterMain = totalTasks === 0 ? null : (progAvg + '%');
@@ -3458,7 +3546,7 @@ function pickStatus(statusGroup){
 
                         backgroundColor: donutColors, 
 
-                        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 4, _centerMain: donutCenterMain, _centerSub: donutCenterSub
+                        borderWidth: 0, hoverOffset: 6, borderRadius: 0, spacing: 0, _centerMain: donutCenterMain, _centerSub: donutCenterSub
 
                     }] 
 
@@ -3466,9 +3554,9 @@ function pickStatus(statusGroup){
 
                 options: { 
 
-                    responsive: true, maintainAspectRatio: false, cutout: '65%', layout: { padding: 10 }, 
+                    responsive: true, maintainAspectRatio: false, cutout: '62%', layout: { padding: 14 },
 
-                    animation: { animateScale: true, animateRotate: true, duration: 800, easing: 'easeOutQuart' }, 
+                    animation: { animateScale: true, animateRotate: true, duration: 800, easing: 'easeOutQuart' },
 
                     onClick: (e, activeElements) => {
 
@@ -3490,9 +3578,9 @@ function pickStatus(statusGroup){
 
                     plugins: { 
 
-                        legend: { position: 'bottom', labels: { font: { family: 'Prompt', size: 11, weight: 'bold' }, usePointStyle: true, padding: 15 } }, 
+                        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 7, boxHeight: 7, padding: 13, color: '#475569', font: { family: 'Prompt', size: 10.5, weight: 'bold' } } }, 
 
-                        datalabels: { color: (c) => { if (isSummaryMode) return c.dataIndex === 1 ? '#64748b' : 'white'; return (hasNA && c.dataIndex === 3) ? '#1e293b' : 'white'; }, font: { family: 'Prompt', weight: 'bold', size: 12 }, formatter: (value) => { if (totalTasks === 0 || value === 0) return ''; if (isSummaryMode) return Math.round(value) + '%'; return Math.round((value / totalTasks) * 100) + '%'; } }
+                        datalabels: { display: (c) => { const arr = c.dataset.data; const sum = arr.reduce((a, b) => a + (b || 0), 0); const v = arr[c.dataIndex] || 0; return sum > 0 && v !== 0 && v / sum >= 0.04; }, color: (c) => { const col = donutColors[c.dataIndex]; if (col === '#94a3b8' || col === '#e2e8f0') return '#475569'; return '#ffffff'; }, font: { family: 'Prompt', weight: '700', size: 11 }, anchor: 'center', align: 'center', formatter: (value) => { if (!value) return ''; if (isSummaryMode && phaseAgg && phaseAgg.total > 0) return Math.round((value / phaseAgg.total) * 100) + '%'; if (totalTasks === 0) return ''; return Math.round((value / totalTasks) * 100) + '%'; } }
 
                     } 
 
@@ -3794,9 +3882,9 @@ function pickStatus(statusGroup){
                 let _done = _countRows.filter(function(d){return d.statusGroup==='completed' || (!_naAllowed && d.statusGroup==='na');}).length;
                 let _late = _countRows.filter(function(d){return d.statusGroup==='late';}).length;
                 let _other = Math.max(0, _tot - _done - _late - (_naAllowed ? _na : 0));
-                let _avg = _tot ? Math.round(_countRows.reduce(function(s,d){return s+(d.numPct||0);},0)/_tot) : 0;
+                let _avg = _tot ? Math.round((_done / _tot) * 100) : 0;
                 let _naChip = _naAllowed && _na>0 ? '<span class="text-slate-500">⚪ N/A <b>' + _na + '</b></span>' : '';
-                _foot.innerHTML = '<tr class="summary-foot-row"><td colspan="' + visibleColCount + '"><div class="flex flex-wrap items-center gap-x-5 gap-y-1 justify-center"><span>ทั้งหมด <b class="text-slate-900">' + _tot + '</b> รายการ</span><span class="text-emerald-700">เสร็จ <b>' + _done + '</b></span>' + _naChip + '<span class="text-red-600">ล่าช้า <b>' + _late + '</b></span><span class="text-amber-600">กำลังดำเนิน <b>' + _other + '</b></span><span>ความคืบหน้าเฉลี่ย <b class="text-orange-700">' + _avg + '%</b></span></div></td></tr>';
+                _foot.innerHTML = '<tr class="summary-foot-row"><td colspan="' + visibleColCount + '"><div class="flex flex-wrap items-center gap-x-5 gap-y-1 justify-center"><span>ทั้งหมด <b class="text-slate-900">' + _tot + '</b> รายการ</span><span class="text-emerald-700">เสร็จ <b>' + _done + '</b></span>' + _naChip + '<span class="text-red-600">ล่าช้า <b>' + _late + '</b></span><span class="text-amber-600">กำลังดำเนิน <b>' + _other + '</b></span><span>สัดส่วนเสร็จสิ้น <b class="text-orange-700">' + _avg + '%</b></span></div></td></tr>';
             }
 
         }
@@ -4286,7 +4374,7 @@ function pickStatus(statusGroup){
 
                             backgroundColor: total === 0 ? ['#e2e8f0'] : ['#10b981', '#f59e0b', '#ef4444', '#94a3b8'],
 
-                            borderWidth: 2, borderColor: '#ffffff', hoverOffset: 4
+                            borderWidth: 0, hoverOffset: 6, borderRadius: 0, spacing: 0
 
                         }]
 
@@ -4294,25 +4382,28 @@ function pickStatus(statusGroup){
 
                     options: {
 
-                        responsive: true, maintainAspectRatio: false, cutout: '65%', layout: { padding: 10 },
+                        responsive: true, maintainAspectRatio: false, cutout: '62%', layout: { padding: 14 },
 
                         animation: { animateScale: true, animateRotate: true, duration: 800, easing: 'easeOutQuart' },
 
                         plugins: {
 
-                            legend: { position: 'bottom', labels: { font: { family: 'Prompt', size: 11, weight: 'bold' }, usePointStyle: true, padding: 15 } },
+                            legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 7, boxHeight: 7, padding: 13, color: '#475569', font: { family: 'Prompt', size: 10.5, weight: 'bold' } } },
 
-                            datalabels: { color: 'white', font: { family: 'Prompt', weight: 'bold', size: 12 }, formatter: (value) => total === 0 || value === 0 ? '' : Math.round((value / total) * 100) + '%' }
+                            datalabels: { display: (c) => { const arr = c.dataset.data; const sum = arr.reduce((a, b) => a + (b || 0), 0); const v = arr[c.dataIndex] || 0; return total !== 0 && sum > 0 && v !== 0 && v / sum >= 0.04; }, color: (c) => c.dataIndex === 3 ? '#334155' : '#ffffff', font: { family: 'Prompt', weight: '700', size: 11 }, anchor: 'center', align: 'center', formatter: (value) => total === 0 || value === 0 ? '' : Math.round((value / total) * 100) + '%' }
 
                         }
 
-                    }
+                    },
+
+                    plugins: [summaryCenterAlignPlugin]
 
                 });
 
             }
 
-            var _dcTotal = document.getElementById('summaryDonutTotal'); if(_dcTotal) _dcTotal.textContent = total.toLocaleString();
+            var _dcTotal = document.getElementById('summaryDonutTotal'); if(_dcTotal) _dcTotal.textContent = total.toLocaleString() + ' รายการ';
+            var _dcPct = document.getElementById('summaryDonutPct'); if(_dcPct) _dcPct.textContent = total > 0 ? Math.round((comp / total) * 100) + '%' : '0%';
 
             let ctxBar = document.getElementById('summaryBarChart');
 
@@ -4669,16 +4760,41 @@ function tryFetchDefaultFile(){
 
 
 
+// อัปเดตข้อความบนปุ่มฟิลเตอร์สถานะให้ตรงกับตัวเลือกจริง (ว่าง / ทุกสถานะ / ชื่อสถานะที่เลือก)
+function updateStatusFilterLabel() {
+  var cbs = document.querySelectorAll('.status-cb');
+  var chkd = document.querySelectorAll('.status-cb:checked');
+  var btn = document.getElementById('statusBtnText');
+  var allCb = document.getElementById('selectAllStatus');
+  if (chkd.length === 0) {
+    if (btn) btn.innerText = 'ว่าง';
+    if (allCb) allCb.checked = false;
+  } else if (chkd.length === cbs.length) {
+    if (btn) btn.innerText = 'ทุกสถานะ';
+    if (allCb) allCb.checked = true;
+  } else {
+    if (allCb) allCb.checked = false;
+    var sMap = { 'completed': 'เสร็จสิ้น', 'on schedule': 'ตามแผน', 'late': 'ล่าช้า', 'na': 'N/A' };
+    if (btn) btn.innerText = chkd.length <= 2 ? Array.from(chkd).map(function(c){ return sMap[c.value] || c.value; }).join(', ') : 'เลือก ' + chkd.length + ' สถานะ';
+  }
+}
+
 document.addEventListener('change', function(e){
   var t = e.target;
-  if(t && t.classList && (t.classList.contains('status-cb') || t.classList.contains('lot-cb') || t.classList.contains('resp-cb') || t.classList.contains('code-cb') || t.classList.contains('person-cb') || t.classList.contains('month-cb') || t.classList.contains('progress-cb'))){
-    if(t.classList.contains('status-cb')){
-      var allS = document.getElementById('selectAllStatus');
-      if(allS){ var totalS = document.querySelectorAll('.status-cb').length; var chkdS = document.querySelectorAll('.status-cb:checked').length; allS.checked = (totalS > 0 && chkdS === totalS); }
-    }
-    if(t.id === 'selectAllStatus'){
-      document.querySelectorAll('.status-cb').forEach(function(cb){ cb.checked = t.checked; });
-    }
+  if(!t || !t.classList) return;
+  // ปุ่ม "เลือกทั้งหมด" ของฟิลเตอร์สถานะ: เลือก/ลบทุกสถานะพร้อมกัน แล้วรีเฟรชข้อความบนปุ่ม
+  if (t.id === 'selectAllStatus') {
+    document.querySelectorAll('.status-cb').forEach(function(cb){ cb.checked = t.checked; });
+    updateStatusFilterLabel();
+    try{ updateView(); }catch(err){}
+    return;
+  }
+  if (t.classList.contains('status-cb')) {
+    updateStatusFilterLabel();
+    try{ updateView(); }catch(err){}
+    return;
+  }
+  if (t.classList.contains('lot-cb') || t.classList.contains('resp-cb') || t.classList.contains('code-cb') || t.classList.contains('person-cb') || t.classList.contains('month-cb') || t.classList.contains('progress-cb')) {
     try{ updateView(); }catch(err){}
   }
 });
