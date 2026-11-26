@@ -312,9 +312,9 @@
   #mainTable .cell-date .days-badge{display:inline-block; margin:2px 0 0;}
   #mainTable .cell-person{white-space:normal !important; word-break:break-word; overflow:visible; text-overflow:clip; max-width:100%; font-size:10px !important; line-height:1.3;}
   #mainTable td.cell-activity{line-height:1.35; word-break:break-word; white-space:normal;}
-  /* progress widget: fluid width instead of fixed 95px inline box */
-  .prog-wrap{width:100% !important; gap:6px !important;}
-  .prog-bar{flex:1 1 auto !important; width:auto !important; min-width:26px;}
+  /* progress widget: fixed short equal-width track for every row, centered */
+  .prog-wrap{width:100% !important; gap:6px !important; justify-content:center !important;}
+  .prog-bar{flex:0 0 auto !important; width:90px !important; min-width:90px !important; max-width:90px !important;}
   .prog-num{width:auto !important; flex:0 0 auto !important;}
   /* status badge hugs the status label text — pill box fits the whole word on phones */
   #mainTable .cell-status{white-space:nowrap !important;}
@@ -370,8 +370,8 @@
 
 /* 1) Progress widget: fluid at every width (replaces fixed px widths
     emitted by getProgressHtml so the bar + % label never overflow the cell) */
-.prog-wrap{width:100% !important; max-width:100% !important; gap:6px !important; justify-content:flex-start !important;}
-.prog-bar{flex:1 1 auto !important; width:auto !important; min-width:28px !important;}
+.prog-wrap{width:100% !important; max-width:100% !important; gap:6px !important; justify-content:center !important;}
+.prog-bar{flex:0 0 auto !important; width:90px !important; min-width:90px !important; max-width:90px !important;}
 .prog-num{flex:0 0 auto !important; width:auto !important;}
 
 /* 2) Floating edit popups always stay inside the screen edges */
@@ -1950,7 +1950,7 @@ function pickStatus(statusGroup){
 
                 let icon = isDone ? ' <span class="text-[#10b981] drop-shadow-sm ml-0.5 font-black text-[12px]">&#10003;</span>' : '';
 
-                return `<div class="flex items-center gap-2 justify-start mx-auto group prog-wrap" style="width:100%;max-width:100%;"><div class="h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300 shadow-inner relative prog-bar"><div class="${barClass} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${barWidth}%;"></div></div><span class="text-[10px] font-bold ${isDone ? 'text-emerald-700' : 'text-slate-700'} text-left whitespace-nowrap inline-block prog-num">${pct}${icon}</span></div>`;
+                return `<div class="flex items-center gap-2 justify-start mx-auto group prog-wrap" style="width:100%;max-width:100%;"><div class="h-4 bg-slate-200 rounded-full overflow-hidden border border-slate-300 shadow-inner relative prog-bar"><div class="${barClass} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${barWidth}%;"></div></div><span class="text-[10px] font-bold ${isDone ? 'text-emerald-700' : 'text-slate-700'} text-left whitespace-nowrap inline-block prog-num">${pct}${icon}</span></div>`;
 
             }
 
@@ -4301,7 +4301,7 @@ function pickStatus(statusGroup){
 
                     let remainInner = st.remain; if ((st.na || 0) > 0) remainInner += ` <span class="inline-block text-[9px] text-slate-500 font-black bg-slate-100 border border-slate-200 rounded px-1 py-0.5 ml-1" title="งานที่ระบุ N/A ในเฟสนี้ (ไม่ใช่เสร็จสิ้น)">⚪ N/A ${st.na}</span>`;
 
-                    html += `<tr class="border-b border-slate-100 ${rowBg} page-break-inside-avoid transition-colors hover:bg-orange-50/50 row-fade-in" style="animation-delay: ${index * 0.05}s;"><td class="px-4 py-4 align-middle text-left font-black text-slate-700">${fullPhaseNames[k]}${NA_EXCEPTION_PHASES[k] ? '<span class="block text-[9px] font-bold text-slate-400">นับตามงานจริงใน Sheet</span>' : ''}</td><td class="px-3 py-4 align-middle text-center font-black text-slate-800">${st.total}</td><td class="px-3 py-4 align-middle text-center text-emerald-600 font-black">${st.comp}</td><td class="px-3 py-4 align-middle text-center text-amber-500 font-black">${remainInner}</td><td class="px-3 py-4 align-middle text-center"><div class="flex items-center gap-2 justify-center w-full max-w-[120px] mx-auto"><div class="flex-1 h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300 shadow-inner"><div class="${barClass} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${wPct}%;"></div></div><span class="text-[11px] font-bold text-slate-700 min-w-[34px] text-right">${pctText}</span></div></td></tr>`;
+                    html += `<tr class="border-b border-slate-100 ${rowBg} page-break-inside-avoid transition-colors hover:bg-orange-50/50 row-fade-in" style="animation-delay: ${index * 0.05}s;"><td class="px-4 py-4 align-middle text-left font-black text-slate-700">${fullPhaseNames[k]}${NA_EXCEPTION_PHASES[k] ? '<span class="block text-[9px] font-bold text-slate-400">นับตามงานจริงใน Sheet</span>' : ''}</td><td class="px-3 py-4 align-middle text-center font-black text-slate-800">${st.total}</td><td class="px-3 py-4 align-middle text-center text-emerald-600 font-black">${st.comp}</td><td class="px-3 py-4 align-middle text-center text-amber-500 font-black">${remainInner}</td><td class="px-3 py-4 align-middle text-center"><div class="flex items-center gap-2 justify-center w-full max-w-[120px] mx-auto"><div class="flex-1 h-4 bg-slate-200 rounded-full overflow-hidden border border-slate-300 shadow-inner"><div class="${barClass} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${wPct}%;"></div></div><span class="text-[11px] font-bold text-slate-700 min-w-[34px] text-right">${pctText}</span></div></td></tr>`;
 
                 });
 
