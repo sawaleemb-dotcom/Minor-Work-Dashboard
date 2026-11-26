@@ -349,6 +349,116 @@
   .trend-bar{flex-wrap:wrap; gap:6px !important; font-size:9.5px !important;}
 }
 </style>
+
+<style>
+/* ============================================================
+   RESPONSIVE UPGRADE LAYER 2 — half-window / tablet / iPad tiers
+   Goal: no overlap at ANY window width. Fixed-px widgets become
+   fluid; dense table scrolls horizontally with a sticky first
+   column instead of squeezing; pills/bars wrap inside cells.
+   ============================================================ */
+
+/* 1) Progress widget: fluid at every width (replaces fixed px widths
+    emitted by getProgressHtml so the bar + % label never overflow the cell) */
+.prog-wrap{width:100% !important; max-width:100% !important; gap:6px !important; justify-content:flex-start !important;}
+.prog-bar{flex:1 1 auto !important; width:auto !important; min-width:28px !important;}
+.prog-num{flex:0 0 auto !important; width:auto !important;}
+
+/* 2) Floating edit popups always stay inside the screen edges */
+#statusPickerPopup,#fieldEditorPopup{max-width:calc(100vw - 16px) !important;}
+
+/* ============================================================
+   Tier A — narrow desktop / half browser window / tablet landscape
+   (821px – 1400px): the missing range between old phone CSS and
+   full desktop. This is the "split screen on a laptop" case.
+   ============================================================ */
+@media (min-width: 821px) and (max-width: 1280px){
+  body{padding:10px !important;}
+  #mainContainer{gap:12px !important;}
+
+  /* KPI cards: 2 x 2 instead of 4 in a row */
+  #kpiArea{grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:12px !important;}
+  #kpiArea > div{padding:12px !important;}
+  #kpiArea h3,#kpiArea span.text-4xl{font-size:1.4rem !important;}
+  #kpiArea p{font-size:9.5px !important;}
+
+  /* Header bar wraps onto two rows cleanly */
+  #compactHeader{padding:10px !important; gap:8px !important;}
+  #compactHeader > div:last-child{flex-wrap:wrap; width:100%;}
+  #userChipBtn{max-width:160px;}
+  #dropZone #fileNameDisplay{max-width:130px !important;}
+
+  /* Sheet tabs: horizontal scroll strip (same behavior as phones) */
+  #sheetTabsContainer{overflow-x:auto; scrollbar-width:none; padding-left:10px !important;}
+  #sheetTabsContainer::-webkit-scrollbar{display:none;}
+  #sheetTabsContainer > div:first-child{flex-wrap:nowrap !important; overflow-x:auto; scrollbar-width:none;}
+  #sheetTabsContainer .sheet-tab{white-space:nowrap; flex-shrink:0; padding:7px 12px !important; font-size:11.5px !important;}
+
+  /* Filter bar: controls wrap and shrink instead of colliding */
+  #normalFilterBar{padding:12px !important; gap:10px !important;}
+  #normalFilterBar > div:first-child{gap:10px !important;}
+  #normalFilterBar .dropdown-toggle{width:auto !important; min-width:0 !important; flex:1 1 auto; font-size:10.5px !important; padding:8px 10px !important;}
+  #normalFilterBar .dropdown-toggle span.truncate{max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  #quickDateFilter{flex-wrap:wrap;}
+  #quickDateFilter .date-filter-btn{font-size:10.5px !important; padding:6px 9px !important;}
+
+  /* Table toolbar: buttons wrap and get slightly smaller */
+  #tableSection{padding:14px !important;}
+  #tableSection > div:first-child{gap:8px !important;}
+  #viewToggleGroup{flex-wrap:wrap;}
+  #viewToggleGroup button{padding:7px 10px !important; font-size:10.5px !important;}
+  #tableStatusFilters{flex-wrap:wrap; max-width:100%;}
+  #tableStatusFilters button{flex:1 1 auto; padding:7px 10px !important; font-size:10.5px !important; white-space:nowrap;}
+  #tableCount{font-size:10px !important; padding:6px 12px !important;}
+
+  /* Main table: give it a sensible min-width and let the container scroll
+     horizontally; the Activity column stays sticky. Cells wrap text so
+     nothing spills into the neighbour column. */
+  #mainTable{min-width:840px !important; table-layout:fixed !important;}
+  #mainTable th{white-space:normal !important; line-height:1.25; font-size:10px !important; padding:6px 5px !important;}
+  #mainTable td{padding:6px 5px !important; vertical-align:middle;}
+  #mainTable .cell-code,#mainTable .cell-date,#mainTable .cell-person{white-space:normal !important; word-break:break-word; overflow:visible; text-overflow:clip; font-size:10px !important; line-height:1.3;}
+  #mainTable td.cell-activity{line-height:1.35; word-break:break-word; white-space:normal;}
+  #mainTable .cell-status .status-badge{width:max-content !important; max-width:100% !important; min-width:0 !important; padding:4px 8px !important; font-size:9.5px !important; white-space:normal !important; line-height:1.25;}
+  #mainTable .cell-lot > span{font-size:9px !important; padding:2px 7px !important; white-space:nowrap;}
+
+  /* Charts: tighter gaps, donut not oversized */
+  #chartSection{gap:12px !important;}
+  #chartSection > div{padding:14px !important;}
+  .donut-box{max-width:230px !important;}
+
+  /* Board view: two columns on tablet/narrow window */
+  #boardContainerView{grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:12px !important;}
+  #boardContainerView .board-code{max-width:62%; word-break:break-word; white-space:normal !important;}
+
+  /* Gantt: status pill hugs its text instead of forcing a wide column */
+  #mainGanttTable .status-badge{width:max-content !important; max-width:100% !important; min-width:0 !important; padding:4px 8px !important; font-size:9.5px !important; white-space:normal !important;}
+
+  /* Approval banner wraps its text + button */
+  #approvalBanner{flex-wrap:wrap; gap:6px; font-size:11px !important; padding:7px 12px !important; line-height:1.5; text-align:center;}
+  #approvalBanner button{margin-left:0 !important;}
+
+  /* Dropdown menus never run off the screen edge */
+  .dropdown-menu{max-width:calc(100vw - 16px) !important;}
+}
+
+/* ============================================================
+   Tier B — small phones (≤560px): extra polish on top of the
+   existing ≤820px mobile rules.
+   ============================================================ */
+@media (max-width: 560px){
+  #boardContainerView{grid-template-columns:1fr !important;}
+  #tableSection > div:first-child{flex-direction:column; align-items:stretch !important;}
+  #tableSection > div:first-child > div:last-child{justify-content:flex-start !important; flex-wrap:wrap;}
+  #btnCollapseAll,#btnExpandAll{flex:1 1 auto;}
+  #startupView{padding:18px 12px !important;}
+  #startupView h1{font-size:1.45rem !important;}
+  .swal2-popup:not(.swal2-toast){width:calc(100vw - 20px) !important;}
+  /* KPI cards: labels wrap instead of being clipped in narrow cards */
+  #kpiArea > div{min-width:0 !important;}
+  #kpiArea p{line-height:1.35 !important; word-break:break-word;}
+}
+</style>
 </head>
 
 <body class="text-slate-800 p-2 md:p-4 min-h-screen flex flex-col relative transition-all duration-300" id="mainBody">
@@ -703,6 +813,8 @@
 
                                         <label class="flex items-center gap-2 p-1.5 hover:bg-rose-50 cursor-pointer rounded-lg bg-rose-50/50 border border-rose-100 transition-colors"><input type="checkbox" value="late" class="status-cb w-4 h-4 text-rose-600 rounded border-rose-300 focus:ring-rose-500" checked><span class="text-xs text-rose-700 font-bold">🔴 ล่าช้า (Late)</span></label>
 
+                                        <label class="flex items-center gap-2 p-1.5 hover:bg-slate-100 cursor-pointer rounded-lg bg-slate-50 border border-slate-200 transition-colors"><input type="checkbox" value="na" class="status-cb w-4 h-4 text-slate-500 rounded border-slate-300 focus:ring-slate-400" checked><span class="text-xs text-slate-600 font-bold">⚪ N/A (ไม่เกี่ยวข้องกับเฟส)</span></label>
+
                                     </div>
 
                                 </div>
@@ -711,7 +823,7 @@
 
                             
 
-                            <button onclick="toggleDueSoon()" id="dueSoonBtn" class="preset-btn no-print" title="กรองงานที่ใกล้ครบกำหนด 7 วัน (กดอีกครั้งเพื่อปิด)">Due Soon</button><button onclick="copyShareLink()" class="icon-btn no-print" title="Copy share link"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button><button onclick="togglePresentation()" class="icon-btn no-print" title="Presentation mode"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button><button onclick="resetAllFilters()" id="resetFilterBtn" class="text-[11px] text-orange-600 hover:bg-orange-50 font-bold px-3 py-2.5 rounded-xl transition-colors border border-transparent hover:border-orange-200 flex items-center gap-1 shadow-sm" title="ล้างตัวกรองทั้งหมด">↺ Reset</button>
+                            <button onclick="toggleDueSoon()" id="dueSoonBtn" class="preset-btn no-print" title="กรองงานที่ใกล้ครบกำหนด 15 วัน (กดอีกครั้งเพื่อปิด)">Due Soon</button><button onclick="copyShareLink()" class="icon-btn no-print" title="Copy share link"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button><button onclick="togglePresentation()" class="icon-btn no-print" title="Presentation mode"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button><button onclick="resetAllFilters()" id="resetFilterBtn" class="text-[11px] text-orange-600 hover:bg-orange-50 font-bold px-3 py-2.5 rounded-xl transition-colors border border-transparent hover:border-orange-200 flex items-center gap-1 shadow-sm" title="ล้างตัวกรองทั้งหมด">↺ Reset</button>
 
                         </div>
 
@@ -781,9 +893,9 @@
 
                         <button onclick="exportChartAsPNG('overallChart', 'Overall_Status')" class="absolute top-4 right-4 p-1.5 bg-slate-50 hover:bg-orange-50 rounded-lg text-slate-400 hover:text-orange-600 transition-all opacity-0 group-hover:opacity-100 shadow-sm border border-slate-200 no-print transform hover:scale-110" data-tooltip="บันทึกรูปกราฟนี้">📸</button>
 
-                        <h3 class="font-black text-slate-800 text-base mb-1 flex items-center gap-2"><span class="text-xl drop-shadow-sm">🍩</span> สัดส่วนสถานะงานภาพรวม</h3>
+                        <h3 id="overallDonutTitle" class="font-black text-slate-800 text-base mb-1 flex items-center gap-2"><span class="text-xl drop-shadow-sm">🍩</span> สัดส่วนสถานะงานภาพรวม</h3>
 
-                        <p class="text-[11px] text-slate-500 mb-4 font-semibold bg-slate-50 px-2 py-0.5 rounded w-fit">แสดงเทียบจากจำนวน Activity ทั้งหมด</p>
+                        <p id="overallDonutDesc" class="text-[11px] text-slate-500 mb-4 font-semibold bg-slate-50 px-2 py-0.5 rounded w-fit">แสดงเทียบจากจำนวน Activity ทั้งหมด</p>
 
                         <div class="relative w-full flex items-center justify-center flex-1 min-h-[240px]">
 
@@ -797,9 +909,12 @@
 
                         <button onclick="exportChartAsPNG('personChart', 'Person_Overview')" class="absolute top-4 right-4 p-1.5 bg-slate-50 hover:bg-orange-50 rounded-lg text-slate-400 hover:text-orange-600 transition-all opacity-0 group-hover:opacity-100 shadow-sm border border-slate-200 no-print transform hover:scale-110" data-tooltip="บันทึกรูปกราฟนี้">📸</button>
 
-                        <h3 id="personChartTitle" class="font-black text-slate-800 text-base mb-1 flex items-center gap-2"><span class="text-xl drop-shadow-sm">📊</span> ภาพรวมรายบุคคล (ผู้รับผิดชอบ)</h3>
+                        <div class="flex items-center gap-2 flex-wrap mb-1">
+                            <h3 id="personChartTitle" class="font-black text-slate-800 text-base flex items-center gap-2"><span class="text-xl drop-shadow-sm">📊</span> <span id="personChartTitleText">ภาพรวมรายบุคคล (ผู้รับผิดชอบ)</span></h3>
+                            <span id="personChartAvgBadge" class="hidden inline-flex items-center gap-1.5 bg-emerald-600 text-white text-[11px] font-black px-2.5 py-1.5 rounded-lg shadow-sm no-print whitespace-nowrap"></span>
+                        </div>
 
-                        <p class="text-[11px] text-slate-500 mb-4 font-semibold bg-slate-50 px-2 py-0.5 rounded w-fit">นับรวมตามสถานะของ Activity หลัก</p>
+                        <p id="personChartDesc" class="text-[11px] text-slate-500 mb-4 font-semibold bg-slate-50 px-2 py-0.5 rounded w-fit">นับรวมตามสถานะของ Activity หลัก</p>
 
                         <div class="w-full flex-1"><div id="personChartWrapper" class="bar-wrapper relative w-full transition-all duration-300"><canvas id="personChart"></canvas></div></div>
 
@@ -912,6 +1027,8 @@
 
                             <button class="table-filter-btn text-slate-500 hover:text-slate-700 text-[11px] px-4 py-2 rounded-lg font-bold transition-all border border-transparent" data-status="late">🔴 ล่าช้า</button>
 
+                            <button class="table-filter-btn text-slate-500 hover:text-slate-700 text-[11px] px-4 py-2 rounded-lg font-bold transition-all border border-transparent" data-status="na">⚪ N/A</button>
+
                         </div>
 
                         <span id="tableCount" class="text-xs font-black bg-orange-100 text-orange-800 py-2 px-4 rounded-xl border border-orange-200 shadow-sm whitespace-nowrap">0 รายการ</span>
@@ -950,7 +1067,7 @@
                     </div>
 
 
-                    <div id="boardContainerView" class="hide w-full gap-5 grid grid-cols-1 md:grid-cols-3 overflow-x-auto min-h-[50vh] bg-slate-50/50 p-5 rounded-xl border border-slate-200 shadow-inner no-print">
+                    <div id="boardContainerView" class="hide w-full gap-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 overflow-x-auto min-h-[50vh] bg-slate-50/50 p-5 rounded-xl border border-slate-200 shadow-inner no-print">
 
                     </div>
 
@@ -1003,9 +1120,9 @@
 
                         <h3 id="summaryDonutTitle" class="font-black text-slate-800 text-base flex items-center gap-2 mb-1"><span class="text-xl drop-shadow-sm">📊</span> สัดส่วนสถานะงานภาพรวม</h3>
 
-                        <p id="summaryDonutDesc" class="text-[11px] text-slate-500 mb-4 font-semibold bg-slate-50 px-2 py-0.5 rounded w-fit">แสดงเทียบจากจำนวน Activity ทั้งหมด</p>
+                        <p id="summaryDonutDesc" class="text-[11px] text-slate-500 mb-4 font-semibold bg-slate-50 px-2 py-0.5 rounded w-fit">สัดส่วน เสร็จสิ้น / ตามแผน / ล่าช้า / N/A เทียบจำนวน Activity ทั้งหมด</p>
 
-                        <div class="relative w-full flex items-center justify-center flex-1 min-h-[320px]"><div class="donut-box w-full max-w-[320px] aspect-square relative flex justify-center items-center drop-shadow-sm"><canvas id="summaryDonutChart"></canvas></div></div>
+                        <div class="relative w-full flex items-center justify-center flex-1 min-h-[320px]"><div class="donut-box w-full max-w-[320px] aspect-square relative flex justify-center items-center drop-shadow-sm"><canvas id="summaryDonutChart"></canvas><div id="summaryDonutCenter" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"><span id="summaryDonutTotal" class="text-2xl font-black text-slate-800 leading-none">0</span><span class="text-[10px] font-bold text-slate-500 mt-1">รายการทั้งหมด</span></div></div></div>
 
                     </div>
 
@@ -1015,12 +1132,17 @@
 
                         <h3 id="summaryBarTitle" class="font-black text-slate-800 text-base flex items-center gap-2 mb-1"><span class="text-xl drop-shadow-sm">📈</span> เปรียบเทียบสถานะแต่ละหมวดงาน</h3>
 
-                        <p id="summaryBarDesc" class="text-[11px] text-slate-500 mb-4 font-semibold bg-slate-50 px-2 py-0.5 rounded w-fit">แสดงจำนวนงาน เสร็จสิ้น/คงเหลือ แยกตาม Phase</p>
+                        <p id="summaryBarDesc" class="text-[11px] text-slate-500 mb-4 font-semibold bg-slate-50 px-2 py-0.5 rounded w-fit">แท่งซ้อนแต่ละเฟส: เสร็จสิ้น + ตามแผน + ล่าช้า เทียบยอดงานของเฟสนั้น</p>
 
                         <div class="w-full flex-1 flex flex-col justify-center min-h-[320px]"><div id="summaryBarWrapper" class="bar-wrapper relative w-full h-full min-h-[320px]"><canvas id="summaryBarChart"></canvas></div></div>
 
                     </div>
 
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[11px] leading-relaxed text-slate-600 font-semibold flex items-start gap-2 print:shadow-none">
+                    <span class="text-base leading-none mt-0.5">ℹ️</span>
+                    <span><b>วิธีนับในตารางสรุป:</b> เฟสปกติ (Design, Procurement, Con-In, Test Procedure, Inspection, Test Report) นับ <b>N/A = เสร็จสิ้น</b> และยอด "งานทั้งหมด" ของทุกเฟสจะเท่ากันเท่ากับจำนวน Activity จริงทั้งหมด · เฉพาะเฟส <b>T&amp;C</b> และ <b>Manu-Deli (Manufacturing/Delivery)</b> นับตามจำนวนงานจริงที่อ่านได้จาก Sheet (ไม่เต็มยอดรวม) โดยส่วน N/A (แถบสีเทา) จะแสดงแยกต่างหาก</span>
                 </div>
 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full print:block">
@@ -1077,13 +1199,16 @@
 
                 ctx.restore();
 
-                let total = chart.config.data.datasets[0].data.reduce((a, b) => a + b, 0); 
+                let ds = chart.config.data.datasets[0] || {};
+                let mainText = (ds._centerMain !== undefined && ds._centerMain !== null) ? ds._centerMain : null;
+                let subText = ds._centerSub || null;
+                if (mainText === null) {
+                    let total = chart.config.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    if (total === 0) total = "N/A";
+                    mainText = total.toString(); subText = "Tasks";
+                }
 
-                if (total === 0) total = "N/A";
-
-                
-
-                let fontSize = (chart.height / 114).toFixed(2); 
+                let fontSize = (chart.height / 114).toFixed(2);
 
                 ctx.font = "900 " + fontSize + "em Prompt"; 
 
@@ -1095,7 +1220,7 @@
 
                 
 
-                ctx.fillText(total.toString(), centerX, centerY - (chart.height * 0.02)); 
+                ctx.fillText(mainText, centerX, centerY - (chart.height * 0.02)); 
 
                 
 
@@ -1103,7 +1228,7 @@
 
                 ctx.fillStyle = "#94a3b8"; 
 
-                ctx.fillText("Tasks", centerX, centerY + (chart.height * 0.12)); 
+                ctx.fillText(subText, centerX, centerY + (chart.height * 0.12)); 
 
                 ctx.save();
 
@@ -1125,7 +1250,7 @@
         function _isDueSoon(d){
   var isSum = currentSheetName.toLowerCase().includes('01 summary');
   var today=new Date(); today.setHours(0,0,0,0);
-  function _due(expectedStr, statusGrp){ if(statusGrp==='completed') return false; var ts=_parseDateFmt(expectedStr); if(ts===null) return false; var diff=Math.ceil((ts-today.getTime())/86400000); return diff>=0 && diff<=7; }
+  function _due(expectedStr, statusGrp){ if(statusGrp==='completed') return false; var ts=_parseDateFmt(expectedStr); if(ts===null) return false; var diff=Math.ceil((ts-today.getTime())/86400000); return diff>=0 && diff<=15; }
   if(!isSum){ return _due(d.expected, d.statusGroup); }
   var allPhase = document.getElementById('selectAllPerson') ? document.getElementById('selectAllPerson').checked : true;
   if(allPhase){ return _due(d.expected, d.statusGroup); }
@@ -1154,6 +1279,14 @@ function applyStatusOverrides(){
 }
 window._pendingStatus = null;
 function openStatusPicker(e, rawIdx, phaseName){
+  try{
+    var row = (typeof globalFilteredData !== 'undefined' && globalFilteredData) ? globalFilteredData[rawIdx] : null;
+    if(row){
+      if(phaseName && phaseName !== '-1' && row.phases){ var ph = row.phases.find(function(p){return p.name===phaseName;}); if(ph && ph.statusGroup==='na'){ e.stopPropagation(); return; } }
+      if((!phaseName || phaseName === '-1') && row.statusGroup === 'na'){ e.stopPropagation(); return; }
+    }
+  }catch(err){}
+  if(window.VIEW_ONLY){ e.stopPropagation(); window._warnViewOnlyEdit(); return; }
   e.stopPropagation();
   window._pendingStatus = {rawIdx: rawIdx, phaseName: phaseName};
   var p = document.getElementById('statusPickerPopup'); if(!p) return;
@@ -1234,7 +1367,7 @@ function _parseSheetMinimal(sheetName){
       if(act===''||act.toLowerCase()==='activity name'||act.indexOf('↳')===0||lot==='') continue;
       var statRaw = idxStatus!==-1 ? String(row[idxStatus]||'').trim() : '';
       var srLow = statRaw.toLowerCase();
-      if(statRaw==='' || srLow.indexOf('ยกเลิก')>=0 || srLow.indexOf('cancel')>=0 || srLow.indexOf('n/a')>=0) continue;
+      if(statRaw==='' || srLow.indexOf('ยกเลิก')>=0 || srLow.indexOf('cancel')>=0) continue;
       if(act==='Design' || act==='Procurement' || act==='Manufacturing/Delivery' || act==='Construction/Installation' || act==='T&C' || act==='Test Procedure' || act==='Inspection' || act==='Test Report') continue;
       out.push({lot:lot, activity:act, statusGroup:getStatusGroup(statRaw)});
     }
@@ -1256,31 +1389,120 @@ function preParseAllSheets(){
     recomputeSummaryStats();
   }catch(e){}
 }
+// ===== ดึงรายการ activity จริงจาก Sheet "01 summary" (ใช้คำนวณจำนวนรวมที่ต้องเท่ากันทุกเฟส) =====
+function collectSummaryActivityRows(){
+  try{
+    if(window._summaryRows && window._summaryRows.length > 0){
+      return window._summaryRows.filter(function(r){ if(r.code && r.code.indexOf('.')===-1 && !(r.phases||[]).length) return false; return true; }).map(function(r){ return { lot:r.lot, code:r.code, activity:r.activity, phases:(r.phases||[]).map(function(p){ return { name:p.name, statusGroup:p.statusGroup, statusRaw:p.statusRaw, pct:p.pct, numPct:p.numPct, expected:p.expected }; }) }; });
+    }
+    if(typeof workbookData==='undefined') return [];
+    var key = Object.keys(workbookData).find(function(n){ return String(n||'').toLowerCase().indexOf('01 summary')!==-1; });
+    if(!key) return [];
+    var rawArray = workbookData[key]; if(!rawArray || rawArray.length===0) return [];
+    var headerRowIdx=-1;
+    for(var i=0;i<Math.min(20,rawArray.length);i++){ if(rawArray[i] && rawArray[i].some(function(c){ var hs=String(c||'').toLowerCase().trim(); return hs.indexOf('activity')>=0||hs.indexOf('lot no')>=0; })){ headerRowIdx=i; break; } }
+    if(headerRowIdx===-1) return [];
+    var headers=rawArray[headerRowIdx];
+    var idxLot=-1, idxActivity=-1, idxCode=-1, idxRemark=-1, idxOverallPct=-1, idxOverallStatus=-1;
+    headers.forEach(function(h,i){ var hs=String(h||'').toLowerCase(); if(hs.indexOf('lot')>=0) idxLot=i; if(hs.indexOf('activity')>=0) idxActivity=i; if(hs==='code'||hs.indexOf('code')>=0) idxCode=i; if(hs.indexOf('remark')>=0) idxRemark=i; if(hs.indexOf('overall')>=0 && (hs.indexOf('%')>=0||hs.indexOf('percent')>=0)) idxOverallPct=i; if(hs.indexOf('overall')>=0 && (hs.indexOf('status')>=0||hs.indexOf('สถานะ')>=0)) idxOverallStatus=i; });
+    var phaseCols = customPhaseOrder.map(function(phName){
+      var keys=[phName.toLowerCase()];
+      if(phName==='Manu-Deli') keys=['manufacturing','delivery','manu','deli'];
+      if(phName==='Con-In') keys=['construction','installation','con-in'];
+      if(phName==='T&C') keys=['t&c','t & c','testing and commissioning'];
+      var sIdx=headers.findIndex(function(h){ var hs=String(h||'').toLowerCase(); return (hs.indexOf('status')>=0||hs.indexOf('สถานะ')>=0) && keys.some(function(k){return hs.indexOf(k)>=0;}); });
+      var pIdx=headers.findIndex(function(h){ var hs=String(h||'').toLowerCase(); return (hs.indexOf('%')>=0||hs.indexOf('progress')>=0) && keys.some(function(k){return hs.indexOf(k)>=0;}); });
+      var eIdx=headers.findIndex(function(h){ var hs=String(h||'').toLowerCase(); return (hs.indexOf('plan')>=0||hs.indexOf('date')>=0||hs.indexOf('expected')>=0) && keys.some(function(k){return hs.indexOf(k)>=0;}); });
+      return {name:phName, sIdx:sIdx, pIdx:pIdx, eIdx:eIdx};
+    });
+    var out=[];
+    for(var j=headerRowIdx+1;j<rawArray.length;j++){
+      var row=rawArray[j]; if(!row) continue;
+      var act=String(row[idxActivity]||'').trim(); if(!act || act.toLowerCase()==='activity name' || act.indexOf('↳')===0) continue;
+      var code=idxCode!==-1?String(row[idxCode]||'').trim():'';
+      if(idxOverallPct!==-1 && String(row[idxOverallPct]||'').indexOf('#REF!')!==-1) continue;
+      var remark=idxRemark!==-1?String(row[idxRemark]||''):''; if(/ยกเลิก|cancel|cancle/i.test(remark)) continue;
+      var lot=idxLot!==-1?String(row[idxLot]||'').trim():'';
+      var phases=[];
+      phaseCols.forEach(function(pc){
+        var stRaw=pc.sIdx!==-1?String(row[pc.sIdx]||'').trim():'';
+        var plRaw=pc.eIdx!==-1?String(row[pc.eIdx]||'').trim():'';
+        var pcRaw=pc.pIdx!==-1?String(row[pc.pIdx]||'').trim():'';
+        var isNA=/n\/a/i.test(stRaw)||/n\/a/i.test(plRaw);
+        var hasData=stRaw!==''||plRaw!==''||pcRaw!=='';
+        if(!hasData) return;
+        phases.push({ name:pc.name, statusGroup:isNA?'na':getStatusGroup(stRaw), statusRaw:isNA?'N/A':stRaw, pct:pcRaw||'-', numPct:parseFloat(String(pcRaw).replace(/[^0-9.]/g,''))||0, expected:plRaw });
+      });
+      var overallStatus=idxOverallStatus!==-1?String(row[idxOverallStatus]||'').trim():'';
+      if(phases.length===0 && overallStatus==='') continue; // ข้ามแถวหัวกลุ่มที่ไม่มีข้อมูล
+      out.push({ lot:lot, code:code, activity:act, phases:phases });
+    }
+    return out;
+  }catch(e){ return []; }
+}
+
 function recomputeSummaryStats(){
   try{
     if(typeof workbookData==='undefined') return;
     var s=JSON.parse(localStorage.getItem('mwStatusOverrides')||'{}');
-    var core=['design','procurement','manu-deli','con-in','t&c','test procedure','inspection','test report'];
-    var lot1={}, lot2={};
-    customPhaseOrder.forEach(function(k){ lot1[k]={total:0,comp:0,remain:0}; lot2[k]={total:0,comp:0,remain:0}; });
-    core.forEach(function(sheet){
-      var pk=customPhaseOrder.find(function(k){return k.toLowerCase()===sheet;});
-      if(!pk) return;
-      var rows = (window._parsedCache && window._parsedCache[sheet]) ? window._parsedCache[sheet] : _parseSheetMinimal(sheet);
-      rows.forEach(function(r){
-        var st=r.statusGroup; var ov=s[_statusKey(r.activity, sheet)]; if(ov) st=ov.statusGroup;
-        var lot=String(r.lot||'').toLowerCase(); var target=(lot.indexOf('2')>=0)?lot2:lot1;
-        target[pk].total++; if(st==='completed') target[pk].comp++; else target[pk].remain++;
+    function blankStat(){ return {total:0,comp:0,remain:0,na:0,on:0,late:0}; }
+    var lot1={}, lot2={}, overall={};
+    customPhaseOrder.forEach(function(k){ lot1[k]=blankStat(); lot2[k]=blankStat(); overall[k]=blankStat(); });
+
+    var acts = collectSummaryActivityRows();
+    var grand={lot1:0,lot2:0};
+    acts.forEach(function(r){ var lk=(String(r.lot||'').toLowerCase().indexOf('2')>=0)?'lot2':'lot1'; grand[lk]++; });
+
+    // เฟสปกติ: N/A นับเป็นเสร็จสิ้น และ total = จำนวน activity ทั้งหมด (ให้ทุกเฟสเท่ากัน)
+    acts.forEach(function(r){
+      var lk=(String(r.lot||'').toLowerCase().indexOf('2')>=0)?'lot2':'lot1';
+      var t=(lk==='lot1')?lot1:lot2;
+      (r.phases||[]).forEach(function(ph){
+        if(NA_EXCEPTION_PHASES[ph.name]) return;
+        if(ph.statusGroup==='completed' || ph.statusGroup==='na') t[ph.name].comp++;
+        else if(ph.statusGroup==='late') t[ph.name].late++;
+        else if(ph.statusGroup==='on schedule') t[ph.name].on++;
       });
     });
-    summaryStatsLot1=lot1; summaryStatsLot2=lot2;
-    customPhaseOrder.forEach(function(k){ summaryStatsOverall[k]={total:lot1[k].total+lot2[k].total, comp:lot1[k].comp+lot2[k].comp, remain:lot1[k].remain+lot2[k].remain}; });
+
+    customPhaseOrder.forEach(function(k){
+      if(NA_EXCEPTION_PHASES[k]) return;
+      ['lot1','lot2'].forEach(function(lk){
+        var t=(lk==='lot1')?lot1:lot2;
+        t[k].total=grand[lk];
+        t[k].remain=t[k].total-t[k].comp;
+      });
+    });
+
+    // ข้อยกเว้น: T&C และ Manu-Deli นับตามจำนวนงานจริงที่อ่านได้จาก Sheet เฉพาะเฟสนั้น
+    [['t&c','T&C'],['manu-deli','Manu-Deli']].forEach(function(pair){
+      var sheet=pair[0], pk=pair[1];
+      var rows=(window._parsedCache && window._parsedCache[sheet]) ? window._parsedCache[sheet] : _parseSheetMinimal(sheet);
+      rows.forEach(function(r){
+        var st=r.statusGroup; var ov=s[_statusKey(r.activity, sheet)]; if(ov) st=ov.statusGroup;
+        var lk=(String(r.lot||'').toLowerCase().indexOf('2')>=0)?'lot2':'lot1';
+        var t=(lk==='lot1')?lot1:lot2;
+        t[pk].total++;
+        if(st==='completed') t[pk].comp++;
+        else if(st==='na') t[pk].na++;
+        else if(st==='late') t[pk].late++;
+        else if(st==='on schedule') t[pk].on++;
+      });
+      ['lot1','lot2'].forEach(function(lk){ var t=(lk==='lot1')?lot1:lot2; t[pk].remain=t[pk].total-t[pk].comp; });
+    });
+
+    customPhaseOrder.forEach(function(k){
+      overall[k].total=lot1[k].total+lot2[k].total;
+      ['comp','remain','na','on','late'].forEach(function(f){ overall[k][f]=lot1[k][f]+lot2[k][f]; });
+    });
+    summaryStatsLot1=lot1; summaryStatsLot2=lot2; summaryStatsOverall=overall;
   }catch(e){}
 }
 function hideFieldEditor(){ var p=document.getElementById('fieldEditorPopup'); if(p) p.classList.add('hide'); window._pendingField=null; }
 window._pendingField = null;
 function openFieldEditor(e, rawIdx, phaseName, field){
   e.stopPropagation();
+  if(window.VIEW_ONLY){ window._warnViewOnlyEdit(); return; }
   window._pendingField = {rawIdx: rawIdx, phaseName: phaseName, field: field};
   var d = globalFilteredData[rawIdx]; if(!d) return;
   var curVal = '';
@@ -1351,6 +1573,7 @@ function hideStatusPicker(){ var p=document.getElementById('statusPickerPopup');
 document.addEventListener('click', function(e){ var p=document.getElementById('statusPickerPopup'); if(p && !p.classList.contains('hide') && !p.contains(e.target)) hideStatusPicker(); });
 function pickStatus(statusGroup){
   var labels={'completed':'Completed','on schedule':'On Schedule','late':'Late'};
+  if(window.VIEW_ONLY){ hideStatusPicker(); return; }
   var pen = window._pendingStatus; if(!pen){ hideStatusPicker(); return; }
   var d = globalFilteredData[pen.rawIdx]; if(!d){ hideStatusPicker(); return; }
   var isSum = currentSheetName.toLowerCase().includes('01 summary');
@@ -1374,15 +1597,15 @@ function pickStatus(statusGroup){
   hideStatusPicker(); updateView(); recomputeSummaryStats();
   Swal.fire({toast:true,position:'top-end',icon:'success',title:'Status -> '+labels[statusGroup]+' (sync across tabs)',showConfirmButton:false,timer:1500});
 }
-        function saveSnapshot(){ try{ var key='kpiSnap_'+new Date().toISOString().slice(0,10); var s=JSON.parse(localStorage.getItem('mwSnapshots')||'{}'); s[key]={t:Date.now(),total:globalFilteredData.length,comp:globalFilteredData.filter(function(d){return d.statusGroup==='completed';}).length,on:globalFilteredData.filter(function(d){return d.statusGroup==='on schedule';}).length,late:globalFilteredData.filter(function(d){return d.statusGroup==='late';}).length}; var keys=Object.keys(s).sort(); if(keys.length>60) delete s[keys[0]]; localStorage.setItem('mwSnapshots',JSON.stringify(s)); }catch(e){} }
+        function saveSnapshot(){ try{ var key='kpiSnap_'+new Date().toISOString().slice(0,10); var s=JSON.parse(localStorage.getItem('mwSnapshots')||'{}'); var sn=globalFilteredData.filter(function(d){return !d._noProg;}); s[key]={t:Date.now(),total:sn.length,comp:sn.filter(function(d){return d.statusGroup==='completed' || (!currentSheetIsNAException() && d.statusGroup==='na');}).length,on:sn.filter(function(d){return d.statusGroup==='on schedule';}).length,late:sn.filter(function(d){return d.statusGroup==='late';}).length,na:sn.filter(function(d){return d.statusGroup==='na';}).length}; var keys=Object.keys(s).sort(); if(keys.length>60) delete s[keys[0]]; localStorage.setItem('mwSnapshots',JSON.stringify(s)); }catch(e){} }
         function _lastSnap(){ try{ var s=JSON.parse(localStorage.getItem('mwSnapshots')||'{}'); var keys=Object.keys(s).sort(); if(keys.length<2) return null; var cur=s[keys[keys.length-1]], prev=s[keys[keys.length-2]]; return {comp:cur.comp-prev.comp,on:cur.on-prev.on,late:cur.late-prev.late,total:cur.total-prev.total,date:keys[keys.length-2]}; }catch(e){return null;} }
         function renderTrendBar(){ var el=document.getElementById('trendBar'); if(!el) return; var d=_lastSnap(); if(!d){ el.innerHTML='<span class="text-slate-400">Trend: will show after daily snapshots accumulate</span>'; return; } function f(v){return v>0?'<span class="trend-up">+'+v+'</span>':'<span class="trend-down">'+v+'</span>';} el.innerHTML='<span>vs '+d.date+':</span> Done '+f(d.comp)+' | OnSched '+f(d.on)+' | Late '+f(d.late)+' | Total '+f(d.total)+' <button onclick="toggleTrendChart()" class="preset-btn ml-auto">Trend Chart</button>'; }
         window._trendChartObj=null;
         function toggleTrendChart(){ var w=document.getElementById('trendChartWrap'); if(!w) return; w.classList.toggle('hide'); if(!w.classList.contains('hide')) renderTrendChart(); }
         function renderTrendChart(){ var c=document.getElementById('trendLineChart'); if(!c) return; try{ var s=JSON.parse(localStorage.getItem('mwSnapshots')||'{}'); var keys=Object.keys(s).sort(); if(keys.length<2) return; var labels=keys.slice(-20), comp=labels.map(function(k){return s[k].comp;}), on=labels.map(function(k){return s[k].on;}), late=labels.map(function(k){return s[k].late;}); if(_trendChartObj) _trendChartObj.destroy(); _trendChartObj=new Chart(c.getContext('2d'),{type:'line',data:{labels:labels.map(function(k){return k.slice(5);}),datasets:[{label:'Completed',data:comp,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.1)',fill:true,tension:.3},{label:'On Schedule',data:on,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',fill:true,tension:.3},{label:'Late',data:late,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.1)',fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{family:'Prompt',size:10}}}},scales:{y:{beginAtZero:true}}}}); }catch(e){} }
-        function toggleDueSoon(){ window._dueSoonOnly = !window._dueSoonOnly; var b=document.getElementById('dueSoonBtn'); if(b){ b.style.background = window._dueSoonOnly ? '#fef3c7' : ''; b.style.borderColor = window._dueSoonOnly ? '#f59e0b' : ''; b.style.color = window._dueSoonOnly ? '#b45309' : ''; b.style.fontWeight = window._dueSoonOnly ? '900' : ''; } updateView(); Swal.fire({toast:true,position:'top-end',icon:'info',title: window._dueSoonOnly ? 'กรองงานใกล้ครบ 7 วัน: ON' : 'ปิดกรอง Due Soon', showConfirmButton:false, timer:1500}); }
+        function toggleDueSoon(){ window._dueSoonOnly = !window._dueSoonOnly; var b=document.getElementById('dueSoonBtn'); if(b){ b.style.background = window._dueSoonOnly ? '#fef3c7' : ''; b.style.borderColor = window._dueSoonOnly ? '#f59e0b' : ''; b.style.color = window._dueSoonOnly ? '#b45309' : ''; b.style.fontWeight = window._dueSoonOnly ? '900' : ''; } updateView(); Swal.fire({toast:true,position:'top-end',icon:'info',title: window._dueSoonOnly ? 'กรองงานใกล้ครบ 15 วัน: ON' : 'ปิดกรอง Due Soon', showConfirmButton:false, timer:1500}); }
 
-        function applyPreset(name){ var search=document.getElementById('searchInput'); if(name==='late'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=(cb.value==='late');}); } else if(name==='duesoon'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=true;}); } else if(name==='mine'){ if(search) search.value=''; } var all=document.getElementById('selectAllStatus'); if(all) all.checked=document.querySelectorAll('.status-cb:checked').length===3; updateView(); var nm={late:'Late only',duesoon:'Due within 7 days',mine:'My tasks'}; Swal.fire({toast:true,position:'top-end',icon:'success',title:'Filter: '+(nm[name]||name),showConfirmButton:false,timer:1200}); }
+        function applyPreset(name){ var search=document.getElementById('searchInput'); if(name==='late'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=(cb.value==='late');}); } else if(name==='duesoon'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=true;}); } else if(name==='mine'){ if(search) search.value=''; } var all=document.getElementById('selectAllStatus'); if(all){ var _tot=document.querySelectorAll('.status-cb').length; var _chk=document.querySelectorAll('.status-cb:checked').length; all.checked=(_tot>0 && _chk===_tot); } updateView(); var nm={late:'Late only',duesoon:'Due within 15 days',mine:'My tasks'}; Swal.fire({toast:true,position:'top-end',icon:'success',title:'Filter: '+(nm[name]||name),showConfirmButton:false,timer:1200}); }
         function togglePresentation(){ document.body.classList.toggle('presentation-mode'); var eb=document.getElementById('exitPresentationBtn'); if(eb) eb.classList.toggle('hide', !document.body.classList.contains('presentation-mode')); Swal.fire({toast:true,position:'top-end',icon:'info',title:document.body.classList.contains('presentation-mode')?'Presentation ON - press Esc or red button to exit':'Presentation OFF',showConfirmButton:false,timer:1800}); }
         function toggleDark(){ _darkMode=!_darkMode; document.body.classList.toggle('dark-mode',_darkMode); try{localStorage.setItem('mwDark',_darkMode?'1':'0');}catch(e){} }
         function copyShareLink(){ var params=new URLSearchParams(); var s=document.getElementById('searchInput'); if(s&&s.value) params.set('q',s.value); var stats=Array.from(document.querySelectorAll('.status-cb:checked')).map(function(c){return c.value;}).join(','); if(stats) params.set('st',stats); var url=location.origin+location.pathname+'#'+params.toString(); try{ navigator.clipboard.writeText(url); Swal.fire({toast:true,position:'top-end',icon:'success',title:'Share link copied',showConfirmButton:false,timer:1500}); }catch(e){ prompt('Copy link:', url); } }
@@ -1423,9 +1646,14 @@ function pickStatus(statusGroup){
 
         const predefinedCodes = ['GEN', 'PSD', 'AFC', 'SIG', 'DWE', 'PSY', 'COM', 'RST', 'MO-CK', 'MO-BEM'];
 
-        const statusWeightMap = { 'late': 1, 'on schedule': 2, 'completed': 3 };
+        const statusWeightMap = { 'late': 1, 'on schedule': 2, 'completed': 3, 'na': 5 };
 
         const PHASE_WEIGHTS = { 'design':10, 'procurement':10, 'manudeli':10, 'conin':60, 'tc':5, 'testprocedure':1, 'inspection':1, 'testreport':3 };
+
+        // ===== กฎ N/A: เฟสปกตินับ N/A = เสร็จสิ้น (completed) ยกเว้น T&C และ Manu-Deli ที่นับตามงานจริงใน Sheet =====
+        const NA_EXCEPTION_PHASES = { 'T&C': true, 'Manu-Deli': true };
+        function naCountsAsCompleted(phaseName){ return !NA_EXCEPTION_PHASES[phaseName]; }
+        function currentSheetIsNAException(){ var n=(currentSheetName||'').toLowerCase().trim(); return n.indexOf('t&c')!==-1 || n.indexOf('manu')!==-1 || n.indexOf('deli')!==-1; }
 
         const GSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJIv_rEAGOkiiDcB-ftvlq8644ZpKFVM_rbK7O54fEpwLYWQB0xYjyiTCoFZWX2bk/exec';
         function gsGetUrl(){ return GSCRIPT_URL + (GSCRIPT_URL.indexOf('?')===-1?'?':'&') + '_t=' + Date.now(); }
@@ -1646,7 +1874,7 @@ function pickStatus(statusGroup){
             }
             if (phases.length === 0 && (d.phases || []).length > 0) phases = (d.phases || []).slice();
             var _allDone = true;
-            for (var _di = 0; _di < phases.length; _di++) { if ((parseFloat(phases[_di].numPct)||0) < 100) { _allDone = false; break; } }
+            for (var _di = 0; _di < phases.length; _di++) { var _ph = phases[_di]; var _doneFlag = (parseFloat(_ph.numPct)||0) >= 100 || _ph.statusGroup === 'completed' || (_ph.statusGroup === 'na' && naCountsAsCompleted(_ph.name)); if (!_doneFlag) { _allDone = false; break; } }
             if (_allDone && phases.length > 0) return { statusGroup: 'completed', statusRaw: 'Completed' };
             for (var _li = 0; _li < phases.length; _li++) { if (phases[_li].statusGroup === 'late') return { statusGroup: 'late', statusRaw: 'Late' }; }
             var maxTs = 0;
@@ -1694,11 +1922,15 @@ function pickStatus(statusGroup){
 
             
 
+            if (pct === 'N/A') {
+                return `<span class="inline-flex items-center justify-center text-[10px] font-black text-slate-500 bg-slate-100 border border-slate-300 px-2 py-0.5 rounded-md tracking-wide">N/A</span>`;
+            }
+
             if (pct !== '-' && pct !== '') {
 
                 let icon = isDone ? ' <span class="text-[#10b981] drop-shadow-sm ml-0.5 font-black text-[12px]">&#10003;</span>' : '';
 
-                return `<div class="flex items-center gap-2 justify-start mx-auto group prog-wrap" style="width:${contW}px;"><div class="h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300 shadow-inner relative prog-bar" style="width:${barW}px;"><div class="${barClass} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${barWidth}%;"></div></div><span class="text-[10px] font-bold ${isDone ? 'text-emerald-700' : 'text-slate-700'} text-left whitespace-nowrap inline-block prog-num" style="width:${txtW}px;">${pct}${icon}</span></div>`;
+                return `<div class="flex items-center gap-2 justify-start mx-auto group prog-wrap" style="width:100%;max-width:100%;"><div class="h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300 shadow-inner relative prog-bar"><div class="${barClass} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${barWidth}%;"></div></div><span class="text-[10px] font-bold ${isDone ? 'text-emerald-700' : 'text-slate-700'} text-left whitespace-nowrap inline-block prog-num">${pct}${icon}</span></div>`;
 
             }
 
@@ -1714,6 +1946,8 @@ function pickStatus(statusGroup){
             if(statusGroup === 'completed') return `<span class="status-badge bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm"><span class="drop-shadow-sm text-sm">✨</span> ${statusRaw||'COMPLETED'}</span>`;
 
             if(statusGroup === 'on schedule') return `<span class="status-badge bg-amber-50 text-amber-700 border-amber-200 shadow-sm"><span class="drop-shadow-sm text-sm">⚡</span> ${statusRaw||'ON SCHEDULE'}</span>`;
+
+            if(statusGroup === 'na') return `<span class="status-badge bg-slate-100 text-slate-500 border border-slate-300 shadow-sm" title="เฟสนี้ไม่เกี่ยวข้อง / ระบุ N/A ใน Sheet"><span class="drop-shadow-sm text-sm">⚪</span> N/A</span>`;
 
             return `<span class="status-badge bg-slate-50 text-slate-600 border border-slate-200 shadow-sm">${statusRaw || '-'}</span>`;
 
@@ -1869,8 +2103,8 @@ function pickStatus(statusGroup){
                     let wt = PHASE_WEIGHTS[pn] || 0;
                     if (wt === 0) return;
                     let val;
-                    if (ph.pct !== '-' && ph.pct !== '') val = Math.min(100, Math.max(0, Number(ph.numPct) || 0));
-                    else if (ph.statusGroup === 'completed') val = 100;
+                    if (ph.pct !== '-' && ph.pct !== '' && ph.pct !== 'N/A') val = Math.min(100, Math.max(0, Number(ph.numPct) || 0));
+                    else if (ph.statusGroup === 'completed' || (ph.statusGroup === 'na' && naCountsAsCompleted(ph.name))) val = 100;
                     else if (ph.statusGroup === 'on schedule' || ph.statusGroup === 'late') val = 0;
                     else return;
                     wSum += wt; wTotal += val * wt;
@@ -1885,7 +2119,7 @@ function pickStatus(statusGroup){
 
         function extractDate(val) { let exp = String(val||'').trim(); return exp === '' ? '-' : exp; }
 
-        function getStatusGroup(val) { let s = String(val||'').trim().toLowerCase(); if (s==='' || s==='-' || s==='–') return ''; if (s.includes('late')) return 'late'; if (s.includes('completed')) return 'completed'; if (s.includes('schedule')) return 'on schedule'; return ''; }
+        function getStatusGroup(val) { let s = String(val||'').trim().toLowerCase(); if (s==='' || s==='-' || s==='–') return ''; if (s.indexOf('n/a')!==-1 || s==='na') return 'na'; if (s.includes('late')) return 'late'; if (s.includes('completed')) return 'completed'; if (s.includes('schedule')) return 'on schedule'; return ''; }
 
         function parseDateString(dateStr) {
   if (!dateStr || dateStr === '-' || dateStr.trim() === '') return 0;
@@ -2445,10 +2679,17 @@ function pickStatus(statusGroup){
         window._injectViewOnlyCSS = function(){
             if(document.getElementById('_viewOnlyStyle')) return;
             var st = document.createElement('style'); st.id = '_viewOnlyStyle';
-            st.textContent = 'body.view-only #fieldEditorPopup, body.view-only #statusPickerPopup { display:none !important; } body.view-only .clickable-row, body.view-only [contenteditable] { pointer-events:none !important; cursor: default !important; } body.view-only #fieldEditorInput { pointer-events:none !important; }';
+            st.textContent = 'body.view-only #fieldEditorPopup, body.view-only #statusPickerPopup { display:none !important; } body.view-only [contenteditable] { pointer-events:none !important; } body.view-only #fieldEditorInput { pointer-events:none !important; } body.view-only td.cell-date, body.view-only td.cell-progress, body.view-only td.cell-status, body.view-only td.cell-note { cursor: default !important; }';
             document.head.appendChild(st);
         };
         window._lastViewOnlyToast = 0;
+        window._warnViewOnlyEdit = function(){
+            var now = Date.now();
+            if(now - window._lastViewOnlyToast < 4000) return;
+            window._lastViewOnlyToast = now;
+            var emOk = (window.GS_EDITOR_NAME||'').indexOf('@') !== -1;
+            Swal.fire({toast:true, position:'top-end', icon:'warning', title: emOk ? '🔒 ดูอย่างเดียว — กด "ขออนุญาตแก้ไข" ที่แถบเหลืองด้านบน' : '🔒 โหมดเข้าชมอย่างเดียว — กด "ล็อกอินเพื่อแก้ไข" ที่แถบด้านบนเพื่อขอสิทธิ์', showConfirmButton:false, timer:2500, customClass:{popup:'rounded-xl'}});
+        };
         // แสดงเนื้อหาแถบแจ้งเตือนตามสถานะ: ยังไม่ล็อกอิน (สาธารณะ) / ล็อกอินแล้วรออนุมัติ / ส่งคำขอแล้ว
         window.renderApprovalBannerContent = function(){
             var b = document.getElementById('approvalBanner'); if(!b) return;
@@ -2478,18 +2719,13 @@ function pickStatus(statusGroup){
             var b = document.getElementById('approvalBanner');
             if(b){ b.style.display = 'none'; document.body.style.paddingTop = ''; }
         };
-        // กดในพื้นที่ตารางตอน view-only → แจ้งเตือนสั้นๆ (ไม่ซ้ำบ่อย)
+        // กดเฉพาะเซลล์แก้ไขตอน view-only → แจ้งเตือนสั้นๆ (ไม่ซ้ำบ่อย) · การกดแถว/การ์ดเพื่อเปิดป๊อปรายละเอียดทำได้ปกติ
         document.addEventListener('click', function(e){
             if(!window.VIEW_ONLY) return;
-            var t = e.target;
-            var inTable = false;
-            while(t && t !== document.body){ if(t.id === 'contentArea' || t.tagName === 'TABLE' || t.classList && (t.classList.contains('clickable-row') || t.classList.contains('status-badge'))){ inTable = true; break; } t = t.parentElement; }
-            if(!inTable) return;
-            var now = Date.now();
-            if(now - window._lastViewOnlyToast < 4000) return;
-            window._lastViewOnlyToast = now;
-            var emOk = (window.GS_EDITOR_NAME||'').indexOf('@')!==-1;
-            Swal.fire({toast:true, position:'top-end', icon:'warning', title: emOk ? '🔒 ดูอย่างเดียว — กด "ขออนุญาตแก้ไข" ที่แถบเหลืองด้านบน' : '🔒 โหมดเข้าชมอย่างเดียว — กด "ล็อกอินเพื่อแก้ไข" ที่แถบด้านบนเพื่อขอสิทธิ์', showConfirmButton:false, timer:2500, customClass:{popup:'rounded-xl'}});
+            var t = e.target; if(!t || !t.closest) return;
+            var editCell = t.closest('td[onclick*="openFieldEditor"], td[onclick*="openStatusPicker"]');
+            if(!editCell) return;
+            window._warnViewOnlyEdit();
         }, true);
         window.checkApprovalStatus = function(){
             var em = (window.GS_EDITOR_NAME || '').trim();
@@ -2669,7 +2905,7 @@ function pickStatus(statusGroup){
 
                 
 
-                const allStat = document.querySelectorAll('.status-cb'); allStat.forEach(cb => cb.checked = state.statuses.includes(cb.value)); const chkdStat = document.querySelectorAll('.status-cb:checked'); const btStat = document.getElementById('statusBtnText'); if(chkdStat.length===0){ if(btStat) btStat.innerText='ว่าง'; safeCheck('selectAllStatus',false); }else if(chkdStat.length===allStat.length){ if(btStat) btStat.innerText='ทุกสถานะ'; safeCheck('selectAllStatus',true); }else{ safeCheck('selectAllStatus',false); const sMap={'completed':'เสร็จสิ้น','on schedule':'ตามแผน','late':'ล่าช้า'}; if(btStat) btStat.innerText = chkdStat.length<=2 ? Array.from(chkdStat).map(c=>sMap[c.value]||c.value).join(', ') : `เลือก ${chkdStat.length} สถานะ`; }
+                const allStat = document.querySelectorAll('.status-cb'); allStat.forEach(cb => cb.checked = state.statuses.includes(cb.value)); const chkdStat = document.querySelectorAll('.status-cb:checked'); const btStat = document.getElementById('statusBtnText'); if(chkdStat.length===0){ if(btStat) btStat.innerText='ว่าง'; safeCheck('selectAllStatus',false); }else if(chkdStat.length===allStat.length){ if(btStat) btStat.innerText='ทุกสถานะ'; safeCheck('selectAllStatus',true); }else{ safeCheck('selectAllStatus',false); const sMap={'completed':'เสร็จสิ้น','on schedule':'ตามแผน','late':'ล่าช้า','na':'N/A'}; if(btStat) btStat.innerText = chkdStat.length<=2 ? Array.from(chkdStat).map(c=>sMap[c.value]||c.value).join(', ') : `เลือก ${chkdStat.length} สถานะ`; }
 
                 
 
@@ -2801,9 +3037,13 @@ function pickStatus(statusGroup){
                     }
                 });
             }
-            if (_fromSum) { /* data flattened from 01 Summary */ } else if (isSummary) {
+            if (_fromSum) {
+                let pChartTitleText = document.getElementById('personChartTitleText'); if(pChartTitleText) pChartTitleText.textContent = 'ภาพรวมรายบุคคล (ผู้รับผิดชอบ)';
+                let pChartDesc = document.getElementById('personChartDesc'); if(pChartDesc) pChartDesc.textContent = 'นับรวมตามสถานะของ Activity หลัก';
+            } else if (isSummary) {
 
-                let pChartTitle = document.getElementById('personChartTitle'); if(pChartTitle) pChartTitle.innerHTML = '<span class="text-xl drop-shadow-sm">📊</span> ภาพรวมรายบุคคล (ผู้รับผิดชอบ)';
+                let pChartTitleText = document.getElementById('personChartTitleText'); if(pChartTitleText) pChartTitleText.textContent = 'ภาพรวมแต่ละหมวดงาน';
+                let pChartDesc = document.getElementById('personChartDesc'); if(pChartDesc) pChartDesc.textContent = 'แท่งซ้อนแยกตามหมวดงาน (เฟส) · แสดงความคืบหน้าเฉลี่ยรวมที่ป้ายด้านขวา';
 
                 let osIdx = headers.findIndex(h => cleanHeaderStr(h).includes('overall') && (cleanHeaderStr(h).includes('status') || cleanHeaderStr(h).includes('สถานะ'))); if(osIdx === -1) osIdx = headers.findIndex(h => cleanHeaderStr(h).includes('overall'));
 
@@ -2841,9 +3081,12 @@ function pickStatus(statusGroup){
 
                     for (let ph of activePhases) {
 
-                        let pStatRaw = ph.idxStatus !== -1 ? String(row[ph.idxStatus] || '').trim() : ''; let pStatGrp = getStatusGroup(pStatRaw); let pPctData = extractPct(ph.idxPct !== -1 ? row[ph.idxPct] : ''); let pNote = ph.idxNote !== -1 ? String(row[ph.idxNote] || '').trim() : '-'; if(pNote === '0' || pNote === 0) pNote = '-'; let pExp = ph.idxExp !== -1 ? extractDate(row[ph.idxExp]) : '-';
+                        let pStatRaw = ph.idxStatus !== -1 ? String(row[ph.idxStatus] || '').trim() : ''; let pPlanRaw = ph.idxExp !== -1 ? String(row[ph.idxExp] || '').trim() : ''; let pPctData = extractPct(ph.idxPct !== -1 ? row[ph.idxPct] : ''); let pNote = ph.idxNote !== -1 ? String(row[ph.idxNote] || '').trim() : '-'; if(pNote === '0' || pNote === 0) pNote = '-'; let pExp = ph.idxExp !== -1 ? extractDate(row[ph.idxExp]) : '-';
+                        let isNAPhase = /n\/a/i.test(pStatRaw) || /n\/a/i.test(pPlanRaw);
+                        let pStatGrp = isNAPhase ? 'na' : getStatusGroup(pStatRaw);
+                        let pushPct = (pPctData.pctRaw !== '-') ? pPctData.pctRaw : (isNAPhase ? 'N/A' : '-');
 
-                        if (pStatRaw !== '' || pPctData.pctRaw !== '-') { actPhases.push({ name: ph.name, statusRaw: pStatRaw === '' ? '-' : pStatRaw, statusGroup: pStatGrp, pct: pPctData.pctRaw, numPct: pPctData.numPct, note: pNote === '' ? '-' : pNote, expected: pExp }); if(pStatGrp === 'late') hasLate = true; else if(pStatGrp === 'on schedule') hasOnSchedule = true; else if(pStatGrp === 'completed') hasCompleted = true; if (pPctData.pctRaw !== '-') { totalPct += pPctData.numPct; countPct++; } }
+                        if (isNAPhase || pStatRaw !== '' || pPctData.pctRaw !== '-') { actPhases.push({ name: ph.name, statusRaw: isNAPhase ? 'N/A' : (pStatRaw === '' ? '-' : pStatRaw), statusGroup: pStatGrp, pct: pushPct, numPct: pPctData.numPct, note: pNote === '' ? '-' : pNote, expected: (isNAPhase && /n\/a/i.test(pPlanRaw)) ? 'N/A' : pExp }); if(pStatGrp === 'late') hasLate = true; else if(pStatGrp === 'on schedule') hasOnSchedule = true; else if(pStatGrp === 'completed' || (pStatGrp === 'na' && naCountsAsCompleted(ph.name))) hasCompleted = true; if (pPctData.pctRaw !== '-') { totalPct += pPctData.numPct; countPct++; } }
 
                     }
 
@@ -2873,7 +3116,8 @@ function pickStatus(statusGroup){
 
             } else {
 
-                let pChartTitle = document.getElementById('personChartTitle'); if(pChartTitle) pChartTitle.innerHTML = '<span class="text-xl drop-shadow-sm">📊</span> ภาพรวมรายบุคคล (ผู้รับผิดชอบ)';
+                let pChartTitleText = document.getElementById('personChartTitleText'); if(pChartTitleText) pChartTitleText.textContent = 'ภาพรวมรายบุคคล (ผู้รับผิดชอบ)';
+                let pChartDesc = document.getElementById('personChartDesc'); if(pChartDesc) pChartDesc.textContent = 'นับรวมตามสถานะของ Activity หลัก';
 
                 let snOriginal = sheetName.trim(); let snLower = snOriginal.toLowerCase().replace(/\s/g, ''); let sIdx = headers.findIndex(h => cleanHeaderStr(h).replace(/\s/g, '') === snLower + '(status)'); let pIdx = headers.findIndex(h => cleanHeaderStr(h).replace(/\s/g, '') === snLower + '(%)'); let plIdx = headers.findIndex(h => cleanHeaderStr(h).replace(/\s/g, '') === snLower + '(plan)');
 
@@ -2895,15 +3139,24 @@ function pickStatus(statusGroup){
 
                     const row = rawArray[i]; let actName = String(row[idxActivity] || '').trim(); if(actName === '' || actName.toLowerCase() === 'activity name') continue; 
 
-                    let sGroup = getStatusGroup(row[sIdx]); if (sGroup === '') continue;
+                    let statRawStr = String(row[sIdx] || '').trim();
+                    let planRawStr = plIdx !== -1 ? String(row[plIdx] || '').trim() : '';
+                    let sGroup = getStatusGroup(row[sIdx]);
+                    let isNA = sGroup === 'na' || /n\/a/i.test(planRawStr) || /n\/a/i.test(statRawStr);
 
-                    let pctData = extractPct(row[pIdx]); let expDate = plIdx !== -1 ? String(row[plIdx] || '').trim() || '-' : '-'; let noteRaw = idxGlobalNote !== -1 ? String(row[idxGlobalNote] || '').trim() : '-'; if(noteRaw === '0' || noteRaw === 0) noteRaw = '-'; let respPersonRaw = idxPerson !== -1 ? String(row[idxPerson] || '').trim() : '-'; if(respPersonRaw === '' || respPersonRaw === '0' || respPersonRaw === 0) respPersonRaw = '-';
+                    let pctData = extractPct(row[pIdx]); let expDate = planRawStr || '-'; let noteRaw = idxGlobalNote !== -1 ? String(row[idxGlobalNote] || '').trim() : '-'; if(noteRaw === '0' || noteRaw === 0) noteRaw = '-';
+                    if(/ยกเลิก|cancel|cancle/i.test(noteRaw)) continue;
+                    if (sGroup === '' && !isNA && pctData.pctRaw === '-' && planRawStr === '') continue;
+                    if (isNA && sGroup !== 'na') sGroup = 'na';
+                    let displayStatRaw = isNA ? 'N/A' : (statRawStr === '' ? '-' : statRawStr);
+                    let displayPct = (isNA && pctData.pctRaw === '-') ? 'N/A' : pctData.pctRaw;
 
                     let codeRaw = idxCode !== -1 ? String(row[idxCode] || '').trim() : '-'; let codeUpper = codeRaw.toUpperCase(); let cPrefix = '-'; for(let p of predefinedCodes) { if(codeUpper.includes(p)) { cPrefix = p; break; } } if(cPrefix === '-' && codeRaw !== '-') { let m = codeUpper.match(/[A-Z\-]+/); if(m) cPrefix = m[0]; }
 
-                    let statRawStr = String(row[sIdx] || '').trim(); let designSubRaw = idxDesignSubmission !== -1 ? String(row[idxDesignSubmission] || '').trim() : '-'; if(designSubRaw === '0' || designSubRaw === 0 || designSubRaw === '') designSubRaw = '-';
+                    let respPersonRaw = idxPerson !== -1 ? String(row[idxPerson] || '').trim() : '-'; if(respPersonRaw === '' || respPersonRaw === '0' || respPersonRaw === 0) respPersonRaw = '-';
+                    let designSubRaw = idxDesignSubmission !== -1 ? String(row[idxDesignSubmission] || '').trim() : '-'; if(designSubRaw === '0' || designSubRaw === 0 || designSubRaw === '') designSubRaw = '-';
 
-                    currentRawData.push({ lot: idxLot !== -1 ? String(row[idxLot] || '').trim() || '-' : '-', designSubmission: designSubRaw, code: codeRaw, codePrefix: cPrefix, expected: expDate, note: noteRaw, detail: idxDetail !== -1 ? String(row[idxDetail] || '').trim() : '', activity: actName, person: respPersonRaw, respPerson: respPersonRaw, pct: pctData.pctRaw, numPct: pctData.numPct, statusRaw: statRawStr === '' ? '-' : statRawStr, statusGroup: sGroup, phases: [] });
+                    currentRawData.push({ lot: idxLot !== -1 ? String(row[idxLot] || '').trim() || '-' : '-', designSubmission: designSubRaw, code: codeRaw, codePrefix: cPrefix, expected: expDate, note: noteRaw, detail: idxDetail !== -1 ? String(row[idxDetail] || '').trim() : '', activity: actName, person: respPersonRaw, respPerson: respPersonRaw, pct: displayPct, numPct: pctData.numPct, statusRaw: displayStatRaw, statusGroup: sGroup, phases: [] });
 
                 }
 
@@ -2999,6 +3252,7 @@ function pickStatus(statusGroup){
                 });
                 currentRawData.forEach(function(d) {
                     var _p = parseFloat(d.numPct) || 0;
+                    d._noProg = false;
                     if (_p === 0 && (!d.phases || d.phases.length === 0)) { d._noProg = true;
                         var _pc = String(d.code || '').trim();
                         if (_pc !== '' && _pc !== '-') {
@@ -3065,7 +3319,13 @@ function pickStatus(statusGroup){
 
             if(window._dueSoonOnly){ globalFilteredData = globalFilteredData.filter(function(d){return _isDueSoon(d);}); }
 
-            const _kpiData = globalFilteredData.filter(function(d){ return !((parseFloat(d.numPct)||0)===0 && (!d.phases || d.phases.length===0) && !d.statusGroup); }); const total = _kpiData.length; const compCount = _kpiData.filter(d => d.statusGroup === 'completed').length; const onSchedCount = _kpiData.filter(d => d.statusGroup === 'on schedule').length; const lateCount = _kpiData.filter(d => d.statusGroup === 'late').length;
+            const _naAllowed = currentSheetIsNAException();
+            const _kpiData = globalFilteredData.filter(function(d){ if (d._noProg) return false; if (d.statusGroup === 'na') return true; return !((parseFloat(d.numPct)||0)===0 && (!d.phases || d.phases.length===0) && !d.statusGroup); });
+            const total = _kpiData.length;
+            const naCount = _kpiData.filter(d => d.statusGroup === 'na').length;
+            const compCount = _kpiData.filter(d => d.statusGroup === 'completed' || (!_naAllowed && d.statusGroup === 'na')).length;
+            const onSchedCount = _kpiData.filter(d => d.statusGroup === 'on schedule').length;
+            const lateCount = _kpiData.filter(d => d.statusGroup === 'late').length;
 
             const compPct = total > 0 ? Math.round((compCount / total) * 100) : 0; const onSchedPct = total > 0 ? Math.round((onSchedCount / total) * 100) : 0; const latePct = total > 0 ? Math.round((lateCount / total) * 100) : 0;
 
@@ -3081,7 +3341,7 @@ function pickStatus(statusGroup){
 
             renderActiveFilterPills(searchText, checkedLots, checkedCodes, checkedRespPersons, checkedStatuses, checkedPersons, isAllLots, isAllCodes, isAllResp, isAllStatus, isAllPhase, isSummaryMode);
 
-            updateCharts(globalFilteredData, compCount, onSchedCount, lateCount);
+            updateCharts(globalFilteredData, compCount, onSchedCount, lateCount, naCount, total);
 
             try{ saveSnapshot(); renderTrendBar(); }catch(e){}
 
@@ -3114,7 +3374,7 @@ function pickStatus(statusGroup){
 
             }
 
-            if (!isAllStatus) { const sMap = { 'completed': '🟢 เสร็จสิ้น', 'on schedule': '🟡 ตามแผน', 'late': '🔴 ล่าช้า' }; checkedStatuses.forEach(s => html += createPill('status', s, sMap[s] || s, 'bg-slate-100 text-slate-700 border-slate-300')); }
+            if (!isAllStatus) { const sMap = { 'completed': '🟢 เสร็จสิ้น', 'on schedule': '🟡 ตามแผน', 'late': '🔴 ล่าช้า', 'na': '⚪ N/A' }; checkedStatuses.forEach(s => html += createPill('status', s, sMap[s] || s, 'bg-slate-100 text-slate-700 border-slate-300')); }
 
             if (!isAllLots) checkedLots.forEach(l => html += createPill('lot', l, `Lot: ${l}`, 'bg-blue-50 text-blue-700 border-blue-200'));
 
@@ -3132,19 +3392,55 @@ function pickStatus(statusGroup){
         }
 
 
-        function updateCharts(data, compCount, onSchedCount, lateCount) {
+        function updateCharts(data, compCount, onSchedCount, lateCount, naCount, totalFallback) {
 
             let ctx = document.getElementById('overallChart'); if(!ctx) return;
 
             if(overallChartObj) overallChartObj.destroy();
 
-            const totalTasks = compCount + onSchedCount + lateCount;
+            const _naAllowed = currentSheetIsNAException();
+            // นับจากข้อมูลชุดเดียวกับกล่อง KPI เพื่อให้ยอดรวมกล่อง/โดนัท/กราฟเท่ากันทุกส่วน
+            const validData = data.filter(d => !d._noProg && (d.statusGroup === 'na' || !((parseFloat(d.numPct)||0)===0 && (!d.phases || d.phases.length===0) && !d.statusGroup)));
+            const totalTasks = validData.length;
+            compCount = validData.filter(d => d.statusGroup === 'completed' || (!_naAllowed && d.statusGroup === 'na')).length;
+            onSchedCount = validData.filter(d => d.statusGroup === 'on schedule').length;
+            lateCount = validData.filter(d => d.statusGroup === 'late').length;
+            naCount = validData.filter(d => d.statusGroup === 'na').length;
+            let other = totalTasks - compCount - onSchedCount - lateCount - naCount;
+            if (other > 0) { if (_naAllowed) { naCount += other; } else { onSchedCount += other; } }
 
-            const noStatusCount = 0;
-
-            const hasNoStatus = false;
+            const hasNA = _naAllowed && naCount > 0;
 
             const isSummaryMode = currentSheetName.toLowerCase().includes('01 summary');
+
+            // ความคืบหน้าเฉลี่ยรวม (ใช้กับป้ายในกรอบกราฟแท่ง และโดนัทหน้า 01 summary)
+            let progAvg = 0;
+            if (validData.length > 0) { let _sp = 0; validData.forEach(d => { _sp += (parseFloat(d.numPct) || 0); }); progAvg = Math.round(_sp / validData.length); }
+            let avgBadge = document.getElementById('personChartAvgBadge');
+            if (avgBadge) {
+                if (totalTasks > 0) { avgBadge.classList.remove('hidden'); avgBadge.innerHTML = '📈 ความคืบหน้ารวมเฉลี่ย <span class="text-sm font-black">' + progAvg + '%</span>'; }
+                else { avgBadge.classList.add('hidden'); avgBadge.innerHTML = ''; }
+            }
+
+            let odTitle = document.getElementById('overallDonutTitle');
+            let odDesc = document.getElementById('overallDonutDesc');
+            let donutLabels, donutData, donutColors, donutCenterMain = null, donutCenterSub = null;
+            if (isSummaryMode) {
+                if (odTitle) odTitle.innerHTML = '<span class="text-xl drop-shadow-sm">🍩</span> ความคืบหน้างานภาพรวม (เฉลี่ย)';
+                if (odDesc) odDesc.textContent = 'แสดงความคืบหน้าเฉลี่ย Progress ของงานทั้งหมด เทียบกับส่วนที่ยังไม่ถึงเป้า (กล่อง KPI ยังนับตามจำนวนรายการจริง)';
+                const remainPct = Math.max(0, 100 - progAvg);
+                donutLabels = totalTasks === 0 ? ['ไม่มีข้อมูล'] : ['ความคืบหน้าเฉลี่ย', 'ยังไม่ถึงเป้า'];
+                donutData = totalTasks === 0 ? [1] : [progAvg, remainPct];
+                donutColors = totalTasks === 0 ? ['#e2e8f0'] : ['#10b981', '#e2e8f0'];
+                donutCenterMain = totalTasks === 0 ? null : (progAvg + '%');
+                donutCenterSub = 'ความคืบหน้าเฉลี่ย';
+            } else {
+                if (odTitle) odTitle.innerHTML = '<span class="text-xl drop-shadow-sm">🍩</span> สัดส่วนสถานะงานภาพรวม';
+                if (odDesc) odDesc.textContent = 'แสดงเทียบจากจำนวน Activity ทั้งหมด';
+                donutLabels = totalTasks === 0 ? ['ไม่มีข้อมูล'] : (hasNA ? ['เสร็จสิ้น', 'ตามแผน', 'ล่าช้า', 'N/A (ไม่เกี่ยวข้อง)'] : ['เสร็จสิ้น', 'ตามแผน', 'ล่าช้า']);
+                donutData = totalTasks === 0 ? [1] : (hasNA ? [compCount, onSchedCount, lateCount, naCount] : [compCount, onSchedCount, lateCount]);
+                donutColors = totalTasks === 0 ? ['#e2e8f0'] : (hasNA ? ['#10b981', '#f59e0b', '#ef4444', '#94a3b8'] : ['#10b981', '#f59e0b', '#ef4444']);
+            }
 
             
 
@@ -3154,15 +3450,15 @@ function pickStatus(statusGroup){
 
                 data: { 
 
-                    labels: totalTasks === 0 ? ['ไม่มีข้อมูล'] : (hasNoStatus ? ['เสร็จสิ้น', 'ตามแผน', 'ล่าช้า', 'ไม่ระบุสถานะ'] : ['เสร็จสิ้น', 'ตามแผน', 'ล่าช้า']), 
+                    labels: donutLabels, 
 
                     datasets: [{ 
 
-                        data: totalTasks === 0 ? [1] : (hasNoStatus ? [compCount, onSchedCount, lateCount, noStatusCount] : [compCount, onSchedCount, lateCount]), 
+                        data: donutData, 
 
-                        backgroundColor: totalTasks === 0 ? ['#e2e8f0'] : (hasNoStatus ? ['#10b981', '#f59e0b', '#ef4444', '#94a3b8'] : ['#10b981', '#f59e0b', '#ef4444']), 
+                        backgroundColor: donutColors, 
 
-                        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 4 
+                        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 4, _centerMain: donutCenterMain, _centerSub: donutCenterSub
 
                     }] 
 
@@ -3176,11 +3472,13 @@ function pickStatus(statusGroup){
 
                     onClick: (e, activeElements) => {
 
+                        if (isSummaryMode) return;
+
                         if(activeElements.length > 0 && totalTasks > 0) {
 
                             const idx = activeElements[0].index;
 
-                            const statusMap = hasNoStatus ? ['completed', 'on schedule', 'late', ''] : ['completed', 'on schedule', 'late'];
+                            const statusMap = hasNA ? ['completed', 'on schedule', 'late', 'na'] : ['completed', 'on schedule', 'late'];
 
                             const clickedStatus = statusMap[idx];
 
@@ -3194,7 +3492,7 @@ function pickStatus(statusGroup){
 
                         legend: { position: 'bottom', labels: { font: { family: 'Prompt', size: 11, weight: 'bold' }, usePointStyle: true, padding: 15 } }, 
 
-                        datalabels: { color: (ctx) => (hasNoStatus && ctx.dataIndex === 3) ? '#1e293b' : 'white', font: { family: 'Prompt', weight: 'bold', size: 12 }, formatter: (value) => totalTasks === 0 || value === 0 ? '' : Math.round((value / totalTasks) * 100) + '%' } 
+                        datalabels: { color: (c) => { if (isSummaryMode) return c.dataIndex === 1 ? '#64748b' : 'white'; return (hasNA && c.dataIndex === 3) ? '#1e293b' : 'white'; }, font: { family: 'Prompt', weight: 'bold', size: 12 }, formatter: (value) => { if (totalTasks === 0 || value === 0) return ''; if (isSummaryMode) return Math.round(value) + '%'; return Math.round((value / totalTasks) * 100) + '%'; } }
 
                     } 
 
@@ -3204,27 +3502,29 @@ function pickStatus(statusGroup){
 
 
             const personStats = {}; 
+            function blankPS(){ return { completed:0, on_schedule:0, late:0, na:0 }; }
 
             if (isSummaryMode) {
                 let _elPer = document.getElementById('selectAllPerson'); let _isAllPh = _elPer ? _elPer.checked : true;
                 let _chkPh = Array.from(document.querySelectorAll('.person-cb:checked')).map(function(cb){ return cb.value; });
                 let _elStat = document.getElementById('selectAllStatus'); let _isAllStat = _elStat ? _elStat.checked : true;
                 let _chkStat = Array.from(document.querySelectorAll('.status-cb:checked')).map(function(cb){ return String(cb.value||'').toLowerCase().trim(); });
-                if (!_isAllPh && _chkPh.length > 0) { _chkPh.forEach(function(pn){ if(!personStats[pn]) personStats[pn] = { completed: 0, on_schedule: 0, late: 0 }; }); }
+                if (!_isAllPh && _chkPh.length > 0) { _chkPh.forEach(function(pn){ if(!personStats[pn]) personStats[pn] = blankPS(); }); }
                 data.forEach(function(d){
                     let visiblePhases = d.phases || [];
                     if (!_isAllPh && _chkPh.length > 0) { visiblePhases = visiblePhases.filter(function(ph){ return _chkPh.indexOf(ph.name) !== -1; }); }
                     visiblePhases.forEach(function(ph){
                         if (!_isAllStat && _chkStat.length > 0) { if (_chkStat.indexOf(String(ph.statusGroup||'').toLowerCase().trim()) === -1) return; }
-                        if(!personStats[ph.name]) personStats[ph.name] = { completed: 0, on_schedule: 0, late: 0 };
+                        if(!personStats[ph.name]) personStats[ph.name] = blankPS();
                         if(ph.statusGroup === 'completed') personStats[ph.name].completed++;
+                        else if(ph.statusGroup === 'na'){ if(NA_EXCEPTION_PHASES[ph.name]) personStats[ph.name].na++; else personStats[ph.name].completed++; }
                         else if(ph.statusGroup === 'late') personStats[ph.name].late++;
                         else if(ph.statusGroup === 'on schedule') personStats[ph.name].on_schedule++;
                     });
                 });
-            } else { data.forEach(d => { let key = d.respPerson; if(!personStats[key]) personStats[key] = { completed: 0, on_schedule: 0, late: 0 }; if(d.statusGroup === 'completed') personStats[key].completed++; else if(d.statusGroup === 'late') personStats[key].late++; else if(d.statusGroup === 'on schedule') personStats[key].on_schedule++; }); }
+            } else { data.forEach(d => { let key = d.respPerson; if(!personStats[key]) personStats[key] = blankPS(); if(d.statusGroup === 'completed') personStats[key].completed++; else if(d.statusGroup === 'na'){ if(_naAllowed) personStats[key].na++; else personStats[key].completed++; } else if(d.statusGroup === 'late') personStats[key].late++; else if(d.statusGroup === 'on schedule') personStats[key].on_schedule++; }); }
 
-            const labels = Object.keys(personStats).sort((a,b) => { if (isSummaryMode) { let indexA = customPhaseOrder.indexOf(a); let indexB = customPhaseOrder.indexOf(b); if (indexA !== -1 && indexB !== -1) return indexA - indexB; return indexA !== -1 ? -1 : 1; } return (personStats[b].completed + personStats[b].late + personStats[b].on_schedule) - (personStats[a].completed + personStats[a].late + personStats[a].on_schedule); });
+            const labels = Object.keys(personStats).sort((a,b) => { if (isSummaryMode) { let indexA = customPhaseOrder.indexOf(a); let indexB = customPhaseOrder.indexOf(b); if (indexA !== -1 && indexB !== -1) return indexA - indexB; return indexA !== -1 ? -1 : 1; } return (personStats[b].completed + personStats[b].late + personStats[b].on_schedule + (personStats[b].na||0)) - (personStats[a].completed + personStats[a].late + personStats[a].on_schedule + (personStats[a].na||0)); });
 
             
 
@@ -3248,7 +3548,9 @@ function pickStatus(statusGroup){
 
                             { label: 'On Schedule', data: labels.map(l => personStats[l].on_schedule), backgroundColor: '#f59e0b', borderRadius: 3, maxBarThickness: 24 }, 
 
-                            { label: 'Late', data: labels.map(l => personStats[l].late), backgroundColor: '#ef4444', borderRadius: 3, maxBarThickness: 24 } 
+                            { label: 'Late', data: labels.map(l => personStats[l].late), backgroundColor: '#ef4444', borderRadius: 3, maxBarThickness: 24 }, 
+
+                            { label: 'N/A', data: labels.map(l => personStats[l].na || 0), backgroundColor: '#94a3b8', borderRadius: 3, maxBarThickness: 24 }
 
                         ] 
 
@@ -3268,7 +3570,7 @@ function pickStatus(statusGroup){
 
                                 const dataIdx = activeElements[0].index; 
 
-                                const statusMap = ['completed', 'on schedule', 'late'];
+                                const statusMap = ['completed', 'on schedule', 'late', 'na'];
 
                                 const targetStatus = statusMap[datasetIdx];
 
@@ -3392,11 +3694,13 @@ function pickStatus(statusGroup){
         function renderTable() {
 
             let tableData = globalFilteredData; if(!currentTableStatusFilters.includes('all')) { tableData = globalFilteredData.filter(d => currentTableStatusFilters.includes(d.statusGroup)); }
+            const _isSumSheetCount = currentSheetName.toLowerCase().includes('01 summary');
+            let _countRows = _isSumSheetCount ? tableData.filter(function(d){return !d._noProg;}) : tableData;
 
             tableData.sort((a, b) => { let valA, valB; if (sortConfig.key === 'statusWeight') { valA = statusWeightMap[a.statusGroup] || 4; valB = statusWeightMap[b.statusGroup] || 4; } else if (sortConfig.key === 'numPct') { valA = a.numPct; valB = b.numPct; } else if (sortConfig.key === 'expected') { valA = parseDateString(a.expected); valB = parseDateString(b.expected); } else if (sortConfig.key === 'code' || sortConfig.key === 'codePrefix') { var ia = predefinedCodes.indexOf(a.codePrefix); var ib = predefinedCodes.indexOf(b.codePrefix); if (ia === -1) ia = 99; if (ib === -1) ib = 99; if (ia !== ib) return sortConfig.direction === 'asc' ? ia - ib : ib - ia; var ccmp = (a.code||'').localeCompare((b.code||''), undefined, {numeric:true}); return sortConfig.direction === 'asc' ? ccmp : -ccmp; } else { valA = a[sortConfig.key] ? a[sortConfig.key].toString() : ''; valB = b[sortConfig.key] ? b[sortConfig.key].toString() : ''; } if (sortConfig.key === 'expected') { if (valA === 0 && valB !== 0) return 1; if (valB === 0 && valA !== 0) return -1; return sortConfig.direction === 'asc' ? valA - valB : valB - valA; } else if (typeof valA === 'string' && typeof valB === 'string') { return sortConfig.direction === 'asc' ? valA.localeCompare(valB, undefined, { numeric: true }) : valB.localeCompare(valA, undefined, { numeric: true }); } else { if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1; if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1; return 0; } });
 
 
-            let tCount = document.getElementById('tableCount'); if(tCount) tCount.innerText = tableData.length + ' รายการ';
+            let tCount = document.getElementById('tableCount'); if(tCount) tCount.innerText = _countRows.length + ' รายการ';
 
             const tbody = document.getElementById('detailTableBody'); const thead = document.querySelector('#tableSection table thead'); const table = document.querySelector('#tableSection table'); if(!tbody) return; let _footInit=document.getElementById('tableSummaryFoot'); if(_footInit) _footInit.innerHTML='';
 
@@ -3419,7 +3723,7 @@ function pickStatus(statusGroup){
             let searchInpVal2 = document.getElementById('searchInput'); const searchText = searchInpVal2 ? searchInpVal2.value.toLowerCase().trim() : ''; const hl = (txt) => highlightMatch(txt, searchText);
 
 
-            let _mobW = window.matchMedia('(max-width: 820px)').matches;
+            let _mobW = window.matchMedia('(max-width: 1100px)').matches;
             let weights = _mobW
                 ? {lot: 8, designSubmission: 9, code: 13, activity: 20, expected: 12, respPerson: 9, progress: 10, status: 12, note: 13}
                 : {lot: 5, designSubmission: 10, code: 6, activity: 24, expected: 8, respPerson: 8, progress: 10, status: 8, note: 21};
@@ -3460,11 +3764,11 @@ function pickStatus(statusGroup){
                 let _isCollapsed = _hasPhases && window._collapsedGroups.has(rawIdx);
                 let _grpChevron = _hasPhases ? '<span class="grp-chevron ' + (_isCollapsed?'collapsed':'') + '" data-parent="' + rawIdx + '" onclick="toggleGroup(event, ' + rawIdx + ')" title="ย่อ/ขยายแถวเฟส">' + (_isCollapsed?'▶':'▼') + '</span> ' : '';
                 let _phaseBadge = '';
-                if (_hasPhases) { let _phDone = _allPhases.filter(function(p){return p.statusGroup==='completed' || (p.numPct||0)>=100;}).length; let _allDone = (_phDone === _allPhases.length); _phaseBadge = ' <span class="phase-count-badge ' + (_allDone?'all-done':'') + '" title="เฟสที่เสร็จแล้ว / เฟสทั้งหมด">' + _phDone + '/' + _allPhases.length + '</span>'; }
+                if (_hasPhases) { let _phDone = _allPhases.filter(function(p){return p.statusGroup==='completed' || (p.statusGroup==='na' && naCountsAsCompleted(p.name)) || (p.numPct||0)>=100;}).length; let _allDone = (_phDone === _allPhases.length); _phaseBadge = ' <span class="phase-count-badge ' + (_allDone?'all-done':'') + '" title="เฟสที่เสร็จแล้ว / เฟสทั้งหมด (N/A เฟสปกตินับเป็นเสร็จ)">' + _phDone + '/' + _allPhases.length + '</span>'; }
 
                 
 
-                html += `<tr class="border-b border-slate-100/50 ${theme.bg} page-break-inside-avoid clickable-row group transition-colors row-fade-in ${theme.hover} ${window._selectedRows&&window._selectedRows.has(rawIdx)?'row-selected':''} ${_isDueSoon(d)?'row-due-soon':''}" style="animation-delay: ${animDelay}s;" onclick="handleRowClick(event, ${rawIdx})">${columnVisibility.lot ? `<td class="px-2 py-3.5 text-center whitespace-nowrap cell-lot">${getLotBadge(d.lot, hl)}</td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-3.5 text-center text-slate-700 font-bold">${hl(d.designSubmission || '-')}</td>` : ''}${columnVisibility.code ? `<td class="px-2 py-3.5 text-center text-slate-700 font-bold cell-code">${hl(d.code)}</td>` : ''}<td class="px-4 py-3.5 text-left text-slate-800 font-black leading-tight break-words pr-4 cell-activity sticky left-0 z-[20] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${theme.bg} ${theme.groupHoverBg} ${theme.textHover} transition-colors">${_grpChevron}${hl(d.activity)}${_phaseBadge}</td>${columnVisibility.respPerson ? `<td class="px-2 py-3.5 text-center text-slate-600 whitespace-nowrap font-bold cell-person">${d._noProg?'':hl(d.respPerson)}</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-3.5 text-center whitespace-nowrap cell-date ${expectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'expected')" title="คลิกแก้ไข Plan Date">${(typeof hideMainExpected!=='undefined'&&hideMainExpected)||d._noProg?'':d.expected}${((typeof hideMainExpected==='undefined'||!hideMainExpected)&&!d._noProg)?getDaysBadge(d):''}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-3.5 text-center cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'progress')" title="คลิกแก้ไข Progress">${d._noProg?'':getProgressHtml(d.pct, d.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-3.5 text-center cursor-pointer cell-status" onclick="openStatusPicker(event, ${rawIdx}, '-1')" title="Click to change status">${d._noProg?'':getStatusBadge(d.statusGroup, d.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-3.5 text-left text-slate-500 leading-relaxed break-words font-medium ${theme.textHover} transition-colors cursor-pointer" data-tooltip="${safeNote}" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'note')" title="คลิกแก้ไข Note">${d._noProg?'':hl(d.note.substring(0,50))}${d._noProg?'':(d.note.length>50?'...':'')}</td>` : ''}</tr>`;
+                html += `<tr class="border-b border-slate-100/50 ${theme.bg} page-break-inside-avoid clickable-row group transition-colors row-fade-in ${theme.hover} ${window._selectedRows&&window._selectedRows.has(rawIdx)?'row-selected':''} ${_isDueSoon(d)?'row-due-soon':''}" style="animation-delay: ${animDelay}s;" onclick="handleRowClick(event, ${rawIdx})">${columnVisibility.lot ? `<td class="px-2 py-3.5 text-center whitespace-nowrap cell-lot">${getLotBadge(d.lot, hl)}</td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-3.5 text-center text-slate-700 font-bold">${hl(d.designSubmission || '-')}</td>` : ''}${columnVisibility.code ? `<td class="px-2 py-3.5 text-center text-slate-700 font-bold cell-code">${hl(d.code)}</td>` : ''}<td class="px-4 py-3.5 text-left text-slate-800 font-black leading-tight break-words pr-4 cell-activity sticky left-0 z-[20] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${theme.bg} ${theme.groupHoverBg} ${theme.textHover} transition-colors">${_grpChevron}${hl(d.activity)}${_phaseBadge}</td>${columnVisibility.respPerson ? `<td class="px-2 py-3.5 text-center text-slate-600 whitespace-nowrap font-bold cell-person">${d._noProg?'':hl(d.respPerson)}</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-3.5 text-center whitespace-nowrap cell-date ${expectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'expected')" title="คลิกแก้ไข Plan Date">${(typeof hideMainExpected!=='undefined'&&hideMainExpected)||d._noProg?'':d.expected}${((typeof hideMainExpected==='undefined'||!hideMainExpected)&&!d._noProg)?getDaysBadge(d):''}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-3.5 text-center cursor-pointer cell-progress" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'progress')" title="คลิกแก้ไข Progress">${d._noProg?'':getProgressHtml(d.pct, d.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-3.5 text-center ${d.statusGroup==='na'?'':'cursor-pointer'} cell-status" ${d.statusGroup==='na'?'title="ระบุ N/A ใน Sheet — ไม่แก้ไขสถานะได้"':'onclick="openStatusPicker(event, '+rawIdx+', \'-1\')" title="Click to change status"'}>${d._noProg?'':getStatusBadge(d.statusGroup, d.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-3.5 text-left text-slate-500 leading-relaxed break-words font-medium ${theme.textHover} transition-colors cursor-pointer cell-note" data-tooltip="${safeNote}" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'note')" title="คลิกแก้ไข Note">${d._noProg?'':hl(d.note.substring(0,50))}${d._noProg?'':(d.note.length>50?'...':'')}</td>` : ''}</tr>`;
 
                 
 
@@ -3472,7 +3776,7 @@ function pickStatus(statusGroup){
 
                     let visiblePhases = isAllPhase ? (d.phases || []) : (d.phases || []).filter(ph => checkedPersonsLocal.includes(ph.name));
 
-                    visiblePhases.forEach((ph, pIndex) => { let phExpectedClass = ph.statusGroup === 'late' ? 'text-red-600 font-bold' : 'text-slate-500 font-bold'; let childBg = pIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'; let safePhNote = (ph.note || '').replace(/"/g, '&quot;'); html += `<tr class="border-b border-slate-100 ${childBg} phase-row ${_isCollapsed?'hide':''} page-break-inside-avoid hover:bg-slate-100/50 transition-colors row-fade-in" data-parent="${rawIdx}" style="animation-delay: ${animDelay + 0.05}s;">${columnVisibility.lot ? `<td class="px-2 py-2.5 text-center text-slate-300"></td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-2.5 text-center"></td>` : ''}${columnVisibility.code ? `<td class="px-2 py-2.5 text-right text-slate-300 font-bold text-xs">↳</td>` : ''}<td class="px-4 py-2.5 text-left text-slate-600 pl-6 border-l-[3px] border-orange-200 break-words font-bold cell-activity">${hl(fullPhaseNames[ph.name] || ph.name)}</td>${columnVisibility.respPerson ? `<td class="px-2 py-2.5 text-center text-slate-400">-</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-2.5 text-center whitespace-nowrap cell-date ${phExpectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'expected')" title="คลิกแก้ไข Plan Date เฟสนี้">${ph.expected}${_daysBadge(ph.expected, ph.statusGroup)}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-2.5 text-center cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'progress')" title="คลิกแก้ไข Progress เฟสนี้">${getProgressHtml(ph.pct, ph.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-2.5 text-center cursor-pointer cell-status" onclick="openStatusPickerPhase(event, ${rawIdx}, '${ph.name}')" title="คลิกเปลี่ยนสถานะเฟสนี้">${getStatusBadge(ph.statusGroup, ph.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-2.5 text-center text-slate-300 transition-colors"></td>` : ''}</tr>`; });
+                    visiblePhases.forEach((ph, pIndex) => { let phExpectedClass = ph.statusGroup === 'late' ? 'text-red-600 font-bold' : 'text-slate-500 font-bold'; let childBg = pIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'; let safePhNote = (ph.note || '').replace(/"/g, '&quot;'); html += `<tr class="border-b border-slate-100 ${childBg} phase-row ${_isCollapsed?'hide':''} page-break-inside-avoid hover:bg-slate-100/50 transition-colors row-fade-in" data-parent="${rawIdx}" style="animation-delay: ${animDelay + 0.05}s;">${columnVisibility.lot ? `<td class="px-2 py-2.5 text-center text-slate-300"></td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-2.5 text-center"></td>` : ''}${columnVisibility.code ? `<td class="px-2 py-2.5 text-right text-slate-300 font-bold text-xs">↳</td>` : ''}<td class="px-4 py-2.5 text-left text-slate-600 pl-6 border-l-[3px] border-orange-200 break-words font-bold cell-activity">${hl(fullPhaseNames[ph.name] || ph.name)}</td>${columnVisibility.respPerson ? `<td class="px-2 py-2.5 text-center text-slate-400">-</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-2.5 text-center whitespace-nowrap cell-date ${phExpectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'expected')" title="คลิกแก้ไข Plan Date เฟสนี้">${ph.expected}${_daysBadge(ph.expected, ph.statusGroup)}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-2.5 text-center cursor-pointer cell-progress" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'progress')" title="คลิกแก้ไข Progress เฟสนี้">${getProgressHtml(ph.pct, ph.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-2.5 text-center ${ph.statusGroup==='na'?'':'cursor-pointer'} cell-status" ${ph.statusGroup==='na'?'title="เฟสนี้ระบุ N/A ใน Sheet"':'onclick="openStatusPickerPhase(event, '+rawIdx+', \''+ph.name+'\')" title="คลิกเปลี่ยนสถานะเฟสนี้"'}>${getStatusBadge(ph.statusGroup, ph.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-2.5 text-center text-slate-300 transition-colors"></td>` : ''}</tr>`; });
 
                 }
 
@@ -3484,12 +3788,15 @@ function pickStatus(statusGroup){
 
             let _foot = document.getElementById('tableSummaryFoot');
             if (_foot) {
-                let _tot = tableData.length;
-                let _done = tableData.filter(function(d){return d.statusGroup==='completed';}).length;
-                let _late = tableData.filter(function(d){return d.statusGroup==='late';}).length;
-                let _other = _tot - _done - _late;
-                let _avg = _tot ? Math.round(tableData.reduce(function(s,d){return s+(d.numPct||0);},0)/_tot) : 0;
-                _foot.innerHTML = '<tr class="summary-foot-row"><td colspan="' + visibleColCount + '"><div class="flex flex-wrap items-center gap-x-5 gap-y-1 justify-center"><span>ทั้งหมด <b class="text-slate-900">' + _tot + '</b> รายการ</span><span class="text-emerald-700">เสร็จ <b>' + _done + '</b></span><span class="text-red-600">ล่าช้า <b>' + _late + '</b></span><span class="text-amber-600">กำลังดำเนิน <b>' + _other + '</b></span><span>ความคืบหน้าเฉลี่ย <b class="text-orange-700">' + _avg + '%</b></span></div></td></tr>';
+                let _tot = _countRows.length;
+                let _naAllowed = currentSheetIsNAException();
+                let _na = _countRows.filter(function(d){return d.statusGroup==='na';}).length;
+                let _done = _countRows.filter(function(d){return d.statusGroup==='completed' || (!_naAllowed && d.statusGroup==='na');}).length;
+                let _late = _countRows.filter(function(d){return d.statusGroup==='late';}).length;
+                let _other = Math.max(0, _tot - _done - _late - (_naAllowed ? _na : 0));
+                let _avg = _tot ? Math.round(_countRows.reduce(function(s,d){return s+(d.numPct||0);},0)/_tot) : 0;
+                let _naChip = _naAllowed && _na>0 ? '<span class="text-slate-500">⚪ N/A <b>' + _na + '</b></span>' : '';
+                _foot.innerHTML = '<tr class="summary-foot-row"><td colspan="' + visibleColCount + '"><div class="flex flex-wrap items-center gap-x-5 gap-y-1 justify-center"><span>ทั้งหมด <b class="text-slate-900">' + _tot + '</b> รายการ</span><span class="text-emerald-700">เสร็จ <b>' + _done + '</b></span>' + _naChip + '<span class="text-red-600">ล่าช้า <b>' + _late + '</b></span><span class="text-amber-600">กำลังดำเนิน <b>' + _other + '</b></span><span>ความคืบหน้าเฉลี่ย <b class="text-orange-700">' + _avg + '%</b></span></div></td></tr>';
             }
 
         }
@@ -3511,6 +3818,7 @@ function pickStatus(statusGroup){
             }
 
             tableData.sort((a, b) => parseDateString(a.expected) - parseDateString(b.expected));
+            const _boardCountRows = (currentSheetName.toLowerCase().includes('01 summary')) ? tableData.filter(d => !d._noProg) : tableData;
 
 
             const createCard = (d, idx) => {
@@ -3528,6 +3836,8 @@ function pickStatus(statusGroup){
                 if(d.statusGroup === 'completed') { bgBorder = 'border-emerald-200 hover:border-emerald-400 hover:shadow-emerald-100'; cardTint = 'bg-emerald-50/30'; }
 
                 if(d.statusGroup === 'on schedule') { bgBorder = 'border-amber-200 hover:border-amber-400 hover:shadow-amber-100'; cardTint = 'bg-amber-50/30'; }
+
+                if(d.statusGroup === 'na') { bgBorder = 'border-slate-300 hover:border-slate-500 hover:shadow-slate-200'; cardTint = 'bg-slate-100/40'; }
 
 
                 return `<div class="${cardTint} p-3.5 rounded-xl border ${bgBorder} shadow-sm hover:shadow-md transition-all cursor-pointer group row-fade-in" style="animation-delay: ${Math.min(idx * 0.02, 0.4)}s;" onclick="handleRowClick(event, ${rawIdx})">
@@ -3558,11 +3868,14 @@ function pickStatus(statusGroup){
             };
 
 
-            const comp = tableData.filter(d => d.statusGroup === 'completed');
+            const _naBoardAllowed = currentSheetIsNAException();
+            const comp = _boardCountRows.filter(d => d.statusGroup === 'completed' || (!_naBoardAllowed && d.statusGroup === 'na'));
 
-            const onSched = tableData.filter(d => d.statusGroup === 'on schedule');
+            const onSched = _boardCountRows.filter(d => d.statusGroup === 'on schedule');
 
-            const late = tableData.filter(d => d.statusGroup === 'late');
+            const late = _boardCountRows.filter(d => d.statusGroup === 'late');
+
+            const naArr = _boardCountRows.filter(d => d.statusGroup === 'na');
 
 
             const colHtml = (title, icon, colorClass, borderClass, bgHeadClass, dataArr) => `
@@ -3600,6 +3913,8 @@ function pickStatus(statusGroup){
 
                     ${colHtml('ล่าช้า (LATE)', '🔴', 'text-rose-800', 'border-rose-200', 'bg-rose-50/80', late)}
 
+                    ${(_naBoardAllowed && naArr.length > 0) ? colHtml('N/A (ไม่เกี่ยวข้อง)', '⚪', 'text-slate-600', 'border-slate-300', 'bg-slate-100/80', naArr) : ''}
+
                 `;
 
             }
@@ -3619,8 +3934,8 @@ function pickStatus(statusGroup){
 
                 let todayPct = ((todayTs - window.ganttMinTs) / window.ganttTotalMs);
 
-                let _mPx = window.matchMedia('(max-width: 820px)').matches ? 56 : 80;
-                let minW = Math.max(window.matchMedia('(max-width: 820px)').matches ? 600 : 800, window.ganttMonthsCount * _mPx);
+                let _mPx = window.matchMedia('(max-width: 820px)').matches ? 56 : (window.matchMedia('(max-width: 1100px)').matches ? 66 : 80);
+                let minW = Math.max(window.matchMedia('(max-width: 820px)').matches ? 600 : (window.matchMedia('(max-width: 1100px)').matches ? 700 : 800), window.ganttMonthsCount * _mPx);
 
                 let targetScroll = (todayPct * minW) - (container.clientWidth / 2) + 400; 
 
@@ -3661,7 +3976,7 @@ function pickStatus(statusGroup){
             window.ganttMinTs = minTs; window.ganttMaxTs = maxTs; window.ganttTotalMs = totalMs;
 
 
-            var monthPx = window.matchMedia('(max-width: 820px)').matches ? 56 : 80;
+            var monthPx = window.matchMedia('(max-width: 820px)').matches ? 56 : (window.matchMedia('(max-width: 1100px)').matches ? 66 : 80);
             let currM = new Date(minD); let monthHtml = '', gridHtml = '', monthsCount = 0;
 
             while(currM <= maxD) { let mYear = currM.getFullYear(); let mIndex = currM.getMonth(); let projectMonth = (mYear - 2024) * 12 + (mIndex - 7) + 1; let pmLabel = projectMonth > 0 ? `M${projectMonth}` : '-'; let label = currM.toLocaleString('en-US', {month:'short', year:'2-digit'}); monthHtml += `<div class="flex-1 border-r border-slate-200 flex flex-col bg-slate-50" style="min-width:${monthPx}px;"><div class="text-center py-1 text-xs text-orange-700 font-extrabold bg-orange-100 border-b border-orange-200 shadow-inner">${pmLabel}</div><div class="text-center py-1 text-[10px] text-slate-600 font-bold whitespace-nowrap">${label}</div></div>`; gridHtml += `<div class="flex-1 border-r border-slate-200/60" style="min-width:${monthPx}px;"></div>`; currM.setMonth(currM.getMonth() + 1); monthsCount++; }
@@ -3669,8 +3984,9 @@ function pickStatus(statusGroup){
             window.ganttMonthsCount = monthsCount;
 
             var _isMobileG = window.matchMedia('(max-width: 820px)').matches;
-            let minW = Math.max(_isMobileG ? 600 : 800, monthsCount * monthPx);
-            let gActW = _isMobileG ? 160 : 320, gExpW = _isMobileG ? 96 : 90, gStatW = _isMobileG ? 120 : 125;
+            var _isNarrowG = !_isMobileG && window.matchMedia('(max-width: 1100px)').matches;
+            let minW = Math.max(_isMobileG ? 600 : (_isNarrowG ? 700 : 800), monthsCount * monthPx);
+            let gActW = _isMobileG ? 160 : (_isNarrowG ? 230 : 320), gExpW = _isMobileG ? 96 : (_isNarrowG ? 88 : 90), gStatW = _isMobileG ? 120 : (_isNarrowG ? 112 : 125);
             let expectedLeft = gActW; let statusLeft = gActW + (columnVisibility.expected ? gExpW : 0);
 
             
@@ -3742,6 +4058,8 @@ function pickStatus(statusGroup){
             else if(d.statusGroup === 'completed') { themeLine = 'bg-emerald-500'; progBg = 'bg-emerald-50 border-emerald-200 shadow-emerald-100'; progTitle = 'text-emerald-700'; progVal = 'text-emerald-800'; } 
 
             else if(d.statusGroup === 'on schedule') { themeLine = 'bg-amber-400'; progBg = 'bg-amber-50 border-amber-200 shadow-amber-100'; progTitle = 'text-amber-700'; progVal = 'text-amber-800'; }
+
+            else if(d.statusGroup === 'na') { themeLine = 'bg-slate-400'; progBg = 'bg-slate-100 border-slate-200'; progTitle = 'text-slate-500'; progVal = 'text-slate-700'; }
 
             
 
@@ -3854,7 +4172,7 @@ function pickStatus(statusGroup){
 
                 </div>`,
 
-                showCloseButton: true, showConfirmButton: false, width: '680px', padding: '1.5em', 
+                showCloseButton: true, showConfirmButton: false, width: Math.min(680, window.innerWidth - 24) + 'px', padding: '1.5em',
 
                 customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-slate-50/95 backdrop-blur-md overflow-hidden', closeButton: 'text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors mt-2 mr-2' }
 
@@ -3865,29 +4183,10 @@ function pickStatus(statusGroup){
 
         function renderExecutiveSummary() {
 
-            summaryStatsLot1 = {}; summaryStatsLot2 = {}; summaryStatsOverall = {}; customPhaseOrder.forEach(k => { summaryStatsLot1[k] = { total: 0, comp: 0, remain: 0 }; summaryStatsLot2[k] = { total: 0, comp: 0, remain: 0 }; summaryStatsOverall[k] = { total: 0, comp: 0, remain: 0 }; });
+            function _blankStat(){ return { total:0, comp:0, remain:0, na:0, on:0, late:0 }; }
+            summaryStatsLot1 = {}; summaryStatsLot2 = {}; summaryStatsOverall = {}; customPhaseOrder.forEach(k => { summaryStatsLot1[k] = _blankStat(); summaryStatsLot2[k] = _blankStat(); summaryStatsOverall[k] = _blankStat(); });
 
-            let sumSheetName = Object.keys(workbookData).find(n => { let lw = n.toLowerCase().trim(); return lw === 'ตารางสรุป summary' || lw === 'status summary' || lw === 'สรุป summary'; }); let sumRaw = sumSheetName ? workbookData[sumSheetName] : null;
-
-            if (sumRaw && Array.isArray(sumRaw)) {
-
-                let currentLot = 1;
-
-                for (let r of sumRaw) {
-
-                    if (!r || !Array.isArray(r) || r.length < 3) continue; let rowText = r.map(x=>String(x||'')).join(' ').toLowerCase(); let cleanRow = rowText.replace(/\s+/g,'');
-
-                    if (cleanRow.includes('lot1') || cleanRow.includes('lot01')) { currentLot = 1; continue; } if (cleanRow.includes('lot2') || cleanRow.includes('lot02')) { currentLot = 2; continue; }
-
-                    let matchedKey = null; if (rowText.includes('design')) matchedKey = 'Design'; else if (rowText.includes('procurement')) matchedKey = 'Procurement'; else if (rowText.includes('manufacturing') || rowText.includes('delivery')) matchedKey = 'Manu-Deli'; else if (rowText.includes('construction') || rowText.includes('installation') || cleanRow.includes('con-in')) matchedKey = 'Con-In'; else if (cleanRow.includes('testprocedure')) matchedKey = 'Test Procedure'; else if (rowText.includes('inspection')) matchedKey = 'Inspection'; else if (cleanRow.includes('testreport')) matchedKey = 'Test Report'; else if (rowText.includes('t&c')) matchedKey = 'T&C';
-
-                    if (matchedKey) { let nums = r.map(x => parseFloat(x)).filter(x => !isNaN(x)); if (nums.length >= 3) { let remain = nums[nums.length - 1]; let comp = nums[nums.length - 2]; let total = nums[nums.length - 3]; if (currentLot === 1) { summaryStatsLot1[matchedKey].total += total; summaryStatsLot1[matchedKey].comp += comp; summaryStatsLot1[matchedKey].remain += remain; } else { summaryStatsLot2[matchedKey].total += total; summaryStatsLot2[matchedKey].comp += comp; summaryStatsLot2[matchedKey].remain += remain; } } }
-
-                }
-
-            }
-
-            customPhaseOrder.forEach(k => { summaryStatsOverall[k].total = summaryStatsLot1[k].total + summaryStatsLot2[k].total; summaryStatsOverall[k].comp = summaryStatsLot1[k].comp + summaryStatsLot2[k].comp; summaryStatsOverall[k].remain = summaryStatsLot1[k].remain + summaryStatsLot2[k].remain; });
+            // คำนวณสถิติใหม่ทั้งหมดจากการอ่าน Sheet โดยตรง (recomputeSummaryStats) — เฟสปกติ total = จำนวน Activity ทั้งหมด, T&C / Manu-Deli ใช้จำนวนงานจริง
 
             const listDiv = document.getElementById('summaryPhaseList'); if (listDiv && listDiv.innerHTML === '') { listDiv.innerHTML = customPhaseOrder.map(k => `<label class="flex items-center gap-2 p-1.5 hover:bg-slate-100 cursor-pointer rounded"><input type="checkbox" value="${k}" class="sum-phase-cb w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500" checked><span class="text-xs font-bold text-slate-700 truncate">${fullPhaseNames[k]}</span></label>`).join(''); const selectAllCb = document.getElementById('selectAllSummaryPhase'); const btnText = document.getElementById('summaryPhaseBtnText'); const updateState = () => { const allCbs = document.querySelectorAll('.sum-phase-cb'); const checked = document.querySelectorAll('.sum-phase-cb:checked'); if(checked.length === 0) { if(btnText) btnText.innerText = 'ซ่อนทั้งหมด'; safeCheck('selectAllSummaryPhase', false); } else if(checked.length === allCbs.length) { if(btnText) btnText.innerText = 'แสดงทุก Phase'; safeCheck('selectAllSummaryPhase', true); } else { if(btnText) btnText.innerText = `เลือก ${checked.length} หมวดงาน`; safeCheck('selectAllSummaryPhase', false); } currentSummaryPhaseFilters = Array.from(checked).map(cb => cb.value); updateSummaryUI(); }; if(selectAllCb) { let newSelAllCb = selectAllCb.cloneNode(true); selectAllCb.parentNode.replaceChild(newSelAllCb, selectAllCb); newSelAllCb.addEventListener('change', (e) => { document.querySelectorAll('.sum-phase-cb').forEach(cb => cb.checked = e.target.checked); updateState(); }); } document.querySelectorAll('.sum-phase-cb').forEach(cb => cb.addEventListener('change', updateState)); }
 
@@ -3906,13 +4205,15 @@ function pickStatus(statusGroup){
 
                 activePhases.forEach((k, index) => {
 
-                    let st = statsObj[k] || { total: 0, comp: 0, remain: 0 }; let avgPct = st.total > 0 ? Math.round((st.comp / st.total) * 100) : 0; let wPct = st.total > 0 ? avgPct : 0; let rowBg = index % 2 === 0 ? 'bg-white' : 'bg-slate-50';
+                    let st = statsObj[k] || { total:0, comp:0, remain:0, na:0, on:0, late:0 }; let avgPct = st.total > 0 ? Math.round((st.comp / st.total) * 100) : 0; let wPct = st.total > 0 ? avgPct : 0; let rowBg = index % 2 === 0 ? 'bg-white' : 'bg-slate-50';
 
                     let barClass = wPct === 100 ? 'bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-[#f59e0b] progress-bar-animated shadow-[0_0_8px_rgba(245,158,11,0.5)]';
 
                     let icon = wPct === 100 ? ' <span class="text-[#10b981] drop-shadow-sm font-black text-[12px]">&#10003;</span>' : ''; let pctText = st.total > 0 ? `${avgPct}%${icon}` : '-';
 
-                    html += `<tr class="border-b border-slate-100 ${rowBg} page-break-inside-avoid transition-colors hover:bg-orange-50/50 row-fade-in" style="animation-delay: ${index * 0.05}s;"><td class="px-4 py-4 align-middle text-left font-black text-slate-700">${fullPhaseNames[k]}</td><td class="px-3 py-4 align-middle text-center font-black text-slate-800">${st.total}</td><td class="px-3 py-4 align-middle text-center text-emerald-600 font-black">${st.comp}</td><td class="px-3 py-4 align-middle text-center text-amber-500 font-black">${st.remain}</td><td class="px-3 py-4 align-middle text-center"><div class="flex items-center gap-2 justify-center w-full max-w-[120px] mx-auto"><div class="flex-1 h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300 shadow-inner"><div class="${barClass} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${wPct}%;"></div></div><span class="text-[11px] font-bold text-slate-700 min-w-[34px] text-right">${pctText}</span></div></td></tr>`;
+                    let remainInner = st.remain; if ((st.na || 0) > 0) remainInner += ` <span class="inline-block text-[9px] text-slate-500 font-black bg-slate-100 border border-slate-200 rounded px-1 py-0.5 ml-1" title="งานที่ระบุ N/A ในเฟสนี้ (ไม่ใช่เสร็จสิ้น)">⚪ N/A ${st.na}</span>`;
+
+                    html += `<tr class="border-b border-slate-100 ${rowBg} page-break-inside-avoid transition-colors hover:bg-orange-50/50 row-fade-in" style="animation-delay: ${index * 0.05}s;"><td class="px-4 py-4 align-middle text-left font-black text-slate-700">${fullPhaseNames[k]}${NA_EXCEPTION_PHASES[k] ? '<span class="block text-[9px] font-bold text-slate-400">นับตามงานจริงใน Sheet</span>' : ''}</td><td class="px-3 py-4 align-middle text-center font-black text-slate-800">${st.total}</td><td class="px-3 py-4 align-middle text-center text-emerald-600 font-black">${st.comp}</td><td class="px-3 py-4 align-middle text-center text-amber-500 font-black">${remainInner}</td><td class="px-3 py-4 align-middle text-center"><div class="flex items-center gap-2 justify-center w-full max-w-[120px] mx-auto"><div class="flex-1 h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300 shadow-inner"><div class="${barClass} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${wPct}%;"></div></div><span class="text-[11px] font-bold text-slate-700 min-w-[34px] text-right">${pctText}</span></div></td></tr>`;
 
                 });
 
@@ -3933,26 +4234,34 @@ function pickStatus(statusGroup){
 
         window.drawSummaryCharts = function(statsObj, activePhases) {
 
-            let total = 0, comp = 0, remain = 0;
+            let total = 0, comp = 0, onS = 0, late = 0, na = 0;
 
-            let barLabels = [], barComp = [], barRemain = [];
+            let barLabels = [], barComp = [], barOn = [], barLate = [], barNa = [];
 
 
             activePhases.forEach(k => {
 
-                let st = statsObj[k] || { total: 0, comp: 0, remain: 0 };
+                let st = statsObj[k] || { total:0, comp:0, remain:0, na:0, on:0, late:0 };
 
-                total += st.total;
+                total += st.total || 0;
 
-                comp += st.comp;
+                comp += st.comp || 0;
 
-                remain += st.remain;
+                onS += st.on || 0;
+
+                late += st.late || 0;
+
+                na += st.na || 0;
 
                 barLabels.push(fullPhaseNames[k] || k);
 
-                barComp.push(st.comp);
+                barComp.push(st.comp || 0);
 
-                barRemain.push(st.remain);
+                barOn.push(st.on || 0);
+
+                barLate.push(st.late || 0);
+
+                barNa.push(st.na || 0);
 
             });
 
@@ -3969,13 +4278,13 @@ function pickStatus(statusGroup){
 
                     data: {
 
-                        labels: total === 0 ? ['ไม่มีข้อมูล'] : ['เสร็จสิ้น', 'คงเหลือ'],
+                        labels: total === 0 ? ['ไม่มีข้อมูล'] : ['เสร็จสิ้น', 'ตามแผน', 'ล่าช้า', 'N/A (ไม่เกี่ยวข้อง)'],
 
                         datasets: [{
 
-                            data: total === 0 ? [1] : [comp, remain],
+                            data: total === 0 ? [1] : [comp, onS, late, na],
 
-                            backgroundColor: total === 0 ? ['#e2e8f0'] : ['#10b981', '#f59e0b'],
+                            backgroundColor: total === 0 ? ['#e2e8f0'] : ['#10b981', '#f59e0b', '#ef4444', '#94a3b8'],
 
                             borderWidth: 2, borderColor: '#ffffff', hoverOffset: 4
 
@@ -4003,6 +4312,7 @@ function pickStatus(statusGroup){
 
             }
 
+            var _dcTotal = document.getElementById('summaryDonutTotal'); if(_dcTotal) _dcTotal.textContent = total.toLocaleString();
 
             let ctxBar = document.getElementById('summaryBarChart');
 
@@ -4026,7 +4336,11 @@ function pickStatus(statusGroup){
 
                             { label: 'เสร็จสิ้น', data: barComp, backgroundColor: '#10b981', borderRadius: 3, maxBarThickness: 24 },
 
-                            { label: 'คงเหลือ', data: barRemain, backgroundColor: '#f59e0b', borderRadius: 3, maxBarThickness: 24 }
+                            { label: 'ตามแผน', data: barOn, backgroundColor: '#f59e0b', borderRadius: 3, maxBarThickness: 24 },
+
+                            { label: 'ล่าช้า', data: barLate, backgroundColor: '#ef4444', borderRadius: 3, maxBarThickness: 24 },
+
+                            { label: 'N/A', data: barNa, backgroundColor: '#94a3b8', borderRadius: 3, maxBarThickness: 24 }
 
                         ]
 
@@ -4244,7 +4558,7 @@ function pickStatus(statusGroup){
 
                             let parentRow = worksheet.addRow(rowData); parentRow.font = { bold: true }; parentRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEEEEEE' } }; let pProgCell = parentRow.getCell(6); if(d.pct !== '-') { pProgCell.numFmt = '0%'; pProgCell.value = (parseFloat(d.numPct) || 0) / 100; } else { pProgCell.value = '-'; }
 
-                            let pStatCell = parentRow.getCell(7); pStatCell.alignment = { horizontal: 'center', vertical: 'middle' }; if (d.statusGroup === 'completed') { pStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00B050' } }; pStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (d.statusGroup === 'on schedule') { pStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF59E0B' } }; pStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (d.statusGroup === 'late') { pStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEF4444' } }; pStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; }
+                            let pStatCell = parentRow.getCell(7); pStatCell.alignment = { horizontal: 'center', vertical: 'middle' }; if (d.statusGroup === 'completed') { pStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00B050' } }; pStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (d.statusGroup === 'on schedule') { pStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF59E0B' } }; pStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (d.statusGroup === 'late') { pStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEF4444' } }; pStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (d.statusGroup === 'na') { pStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFCBD5E1' } }; pStatCell.font = { bold: true, color: { argb: 'FF334155' } }; }
 
                             let visiblePhases = isAllPhase ? (d.phases || []) : (d.phases || []).filter(ph => checkedPersonsLocal.includes(ph.name));
 
@@ -4254,13 +4568,13 @@ function pickStatus(statusGroup){
 
                                 let cProgCell = cRow.getCell(6); if(ph.pct !== '-') { cProgCell.numFmt = '0%'; cProgCell.value = (parseFloat(ph.numPct) || 0) / 100; } else { cProgCell.value = '-'; }
 
-                                let cStatCell = cRow.getCell(7); cStatCell.alignment = { horizontal: 'center', vertical: 'middle' }; if (ph.statusGroup === 'completed') { cStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00B050' } }; cStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (ph.statusGroup === 'on schedule') { cStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF333333' } }; cStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (ph.statusGroup === 'late') { cStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } }; cStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; }
+                                let cStatCell = cRow.getCell(7); cStatCell.alignment = { horizontal: 'center', vertical: 'middle' }; if (ph.statusGroup === 'completed') { cStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00B050' } }; cStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (ph.statusGroup === 'on schedule') { cStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF333333' } }; cStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (ph.statusGroup === 'late') { cStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } }; cStatCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (ph.statusGroup === 'na') { cStatCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFCBD5E1' } }; cStatCell.font = { bold: true, color: { argb: 'FF334155' } }; }
 
                             });
 
                         } else {
 
-                            let statusText = d.statusRaw; if (!statusText || statusText === '-' || statusText === '') { if (d.statusGroup === 'completed') statusText = 'Completed'; else if (d.statusGroup === 'late') statusText = 'Late'; else if (d.statusGroup === 'on schedule') statusText = 'On Schedule'; }
+                            let statusText = d.statusRaw; if (d.statusGroup === 'na') statusText = 'N/A'; else if (!statusText || statusText === '-' || statusText === '') { if (d.statusGroup === 'completed') statusText = 'Completed'; else if (d.statusGroup === 'late') statusText = 'Late'; else if (d.statusGroup === 'on schedule') statusText = 'On Schedule'; }
 
                             let numProgress = parseFloat(d.numPct) || 0; let rowData = { lot: d.lot, code: d.code, activity: d.activity, expected: d.expected, respPerson: d.respPerson, progress: numProgress / 100, status: statusText, note: d.note }; if (hasDesignSub) rowData.designSubmission = d.designSubmission;
 
@@ -4268,7 +4582,7 @@ function pickStatus(statusGroup){
 
                             let progCell = addedRow.getCell(progColIdx); if(d.pct !== '-') { progCell.numFmt = '0%'; progCell.value = numProgress / 100; } else { progCell.value = '-'; }
 
-                            let statusCell = addedRow.getCell(statusColIdx); statusCell.alignment = { horizontal: 'center', vertical: 'middle' }; if (d.statusGroup === 'completed') { statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00B050' } }; statusCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (d.statusGroup === 'on schedule') { statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF59E0B' } }; statusCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (d.statusGroup === 'late') { statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEF4444' } }; statusCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; }
+                            let statusCell = addedRow.getCell(statusColIdx); statusCell.alignment = { horizontal: 'center', vertical: 'middle' }; if (d.statusGroup === 'completed') { statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00B050' } }; statusCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (d.statusGroup === 'on schedule') { statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF59E0B' } }; statusCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (d.statusGroup === 'late') { statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEF4444' } }; statusCell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; } else if (d.statusGroup === 'na') { statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFCBD5E1' } }; statusCell.font = { bold: true, color: { argb: 'FF334155' } }; }
 
                             let rowBgColor = index % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC'; addedRow.eachCell({ includeEmpty: true }, function(cell, colNumber) { if (colNumber !== statusColIdx) { cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: rowBgColor } }; } });
 
@@ -4372,11 +4686,19 @@ document.addEventListener('change', function(e){
 /* Mobile: re-render Gantt on rotate / resize so sticky column widths match the new viewport */
 (function(){
   var _rzT;
+  var _bpKey = function(){ return window.matchMedia('(max-width: 820px)').matches ? 0 : (window.matchMedia('(max-width: 1100px)').matches ? 1 : 2); };
+  var _lastBp = _bpKey();
   window.addEventListener('resize', function(){
     clearTimeout(_rzT);
     _rzT = setTimeout(function(){
       try{
-        if(typeof currentDataView !== 'undefined' && currentDataView === 'gantt'){ renderGantt(); }
+        var bp = _bpKey();
+        if(bp === _lastBp){ return; }   /* only re-render when crossing a responsive breakpoint */
+        _lastBp = bp;
+        if(typeof currentDataView === 'undefined') return;
+        if(currentDataView === 'gantt'){ renderGantt(); }
+        else if(currentDataView === 'board'){ renderBoard(); }
+        else { renderTable(); }
       }catch(e){}
     }, 280);
   });
