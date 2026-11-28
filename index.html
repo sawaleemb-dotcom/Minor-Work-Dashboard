@@ -835,7 +835,7 @@
 
                             
 
-                            <button onclick="toggleDueSoon()" id="dueSoonBtn" class="preset-btn no-print" title="กรองงานที่ใกล้ครบกำหนด 15 วัน (กดอีกครั้งเพื่อปิด)">Due Soon</button><button onclick="copyShareLink()" class="icon-btn no-print" title="Copy share link"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button><button onclick="togglePresentation()" class="icon-btn no-print" title="Presentation mode"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button><button onclick="resetAllFilters()" id="resetFilterBtn" class="text-[11px] text-orange-600 hover:bg-orange-50 font-bold px-3 py-2.5 rounded-xl transition-colors border border-transparent hover:border-orange-200 flex items-center gap-1 shadow-sm" title="ล้างตัวกรองทั้งหมด">↺ Reset</button>
+                            <button onclick="toggleDueSoon()" id="dueSoonBtn" class="preset-btn no-print" title="กรองงานที่ใกล้ครบกำหนด 30 วัน (กดอีกครั้งเพื่อปิด)">Due Soon</button><button onclick="copyShareLink()" class="icon-btn no-print" title="Copy share link"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button><button onclick="togglePresentation()" class="icon-btn no-print" title="Presentation mode"><svg class="mini-svg" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button><button onclick="resetAllFilters()" id="resetFilterBtn" class="text-[11px] text-orange-600 hover:bg-orange-50 font-bold px-3 py-2.5 rounded-xl transition-colors border border-transparent hover:border-orange-200 flex items-center gap-1 shadow-sm" title="ล้างตัวกรองทั้งหมด">↺ Reset</button>
 
                         </div>
 
@@ -1265,14 +1265,14 @@
         window._collapsedGroups = new Set();
         window._darkMode = false;
         function _parseDateFmt(s){ if(!s||s==='-') return null; s=String(s).trim(); var m=s.match(/(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{2,4})/); if(m){ var d=parseInt(m[1]), mo=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(m[2].toLowerCase()), y=parseInt(m[3]); if(y<100) y+=2000; if(mo>-1) return new Date(y,mo,d).getTime(); } var m2=s.match(/([A-Za-z]{3})[-\s](\d{2})/); if(m2){ var mo2=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(m2[1].toLowerCase()), y2=2000+parseInt(m2[2]); if(mo2>-1) return new Date(y2,mo2,1).getTime(); } var t=Date.parse(s); return isNaN(t)?null:t; }
-        function _daysBadge(expectedStr, statusGroup){ var ts=_parseDateFmt(expectedStr); if(ts===null) return ''; var today=new Date(); today.setHours(0,0,0,0); var diff=Math.ceil((ts-today.getTime())/86400000); if(statusGroup==='completed') return ''; if(diff<0) return '<span class="days-badge days-late">late '+Math.abs(diff)+'d</span>'; if(diff<=7) return '<span class="days-badge days-soon">in '+diff+'d</span>'; return '<span class="days-badge days-ok">'+diff+'d</span>'; }
+        function _daysBadge(expectedStr, statusGroup){ var ts=_parseDateFmt(expectedStr); if(ts===null) return ''; var today=new Date(); today.setHours(0,0,0,0); var diff=Math.ceil((ts-today.getTime())/86400000); if(statusGroup==='completed') return ''; if(diff<0) return '<span class="days-badge days-late">late '+Math.abs(diff)+'d</span>'; if(diff<=30) return '<span class="days-badge days-soon">in '+diff+'d</span>'; return '<span class="days-badge days-ok">'+diff+'d</span>'; }
         function getDaysBadge(d){ return _daysBadge(d.expected, d.statusGroup); }
         function cycleStatus(rawIdx){ var d=globalFilteredData[rawIdx]; if(!d) return; var order=['on schedule','late','completed']; var labels={'on schedule':'On Schedule','late':'Late','completed':'Completed'}; var cur=order.indexOf(d.statusGroup); var next=(cur+1)%order.length; d.statusGroup=order[next]; d.statusRaw=labels[order[next]]; if(d._origSG!==undefined){ d._origSG=order[next]; d._origSR=labels[order[next]]; } if(d.phases&&d.phases.length){ d.phases.forEach(function(p){p.statusGroup=order[next];p.statusRaw=labels[order[next]];}); } updateView(); Swal.fire({toast:true,position:'top-end',icon:'success',title:'Status -> '+labels[order[next]],showConfirmButton:false,timer:1200}); }
         function handleRowClick(e, rawIdx){ if(e.ctrlKey||e.metaKey){ e.stopPropagation(); if(_selectedRows.has(rawIdx)) _selectedRows.delete(rawIdx); else _selectedRows.add(rawIdx); renderTable(); return; } showRowDetails(rawIdx); }
         function _isDueSoon(d){
   var isSum = currentSheetName.toLowerCase().includes('01 summary');
   var today=new Date(); today.setHours(0,0,0,0);
-  function _due(expectedStr, statusGrp){ if(statusGrp==='completed') return false; var ts=_parseDateFmt(expectedStr); if(ts===null) return false; var diff=Math.ceil((ts-today.getTime())/86400000); return diff>=0 && diff<=15; }
+  function _due(expectedStr, statusGrp){ if(statusGrp==='completed') return false; var ts=_parseDateFmt(expectedStr); if(ts===null) return false; var diff=Math.ceil((ts-today.getTime())/86400000); return diff>=0 && diff<=30; }
   if(!isSum){ return _due(d.expected, d.statusGroup); }
   var allPhase = document.getElementById('selectAllPerson') ? document.getElementById('selectAllPerson').checked : true;
   if(allPhase){ return _due(d.expected, d.statusGroup); }
@@ -1625,9 +1625,9 @@ function pickStatus(statusGroup){
         window._trendChartObj=null;
         function toggleTrendChart(){ var w=document.getElementById('trendChartWrap'); if(!w) return; w.classList.toggle('hide'); if(!w.classList.contains('hide')) renderTrendChart(); }
         function renderTrendChart(){ var c=document.getElementById('trendLineChart'); if(!c) return; try{ var s=JSON.parse(localStorage.getItem('mwSnapshots')||'{}'); var keys=Object.keys(s).sort(); if(keys.length<2) return; var labels=keys.slice(-20), comp=labels.map(function(k){return s[k].comp;}), on=labels.map(function(k){return s[k].on;}), late=labels.map(function(k){return s[k].late;}); if(_trendChartObj) _trendChartObj.destroy(); _trendChartObj=new Chart(c.getContext('2d'),{type:'line',data:{labels:labels.map(function(k){return k.slice(5);}),datasets:[{label:'Completed',data:comp,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.1)',fill:true,tension:.3},{label:'On Schedule',data:on,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',fill:true,tension:.3},{label:'Late',data:late,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.1)',fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{family:'Prompt',size:10}}}},scales:{y:{beginAtZero:true}}}}); }catch(e){} }
-        function toggleDueSoon(){ window._dueSoonOnly = !window._dueSoonOnly; var b=document.getElementById('dueSoonBtn'); if(b){ b.style.background = window._dueSoonOnly ? '#fef3c7' : ''; b.style.borderColor = window._dueSoonOnly ? '#f59e0b' : ''; b.style.color = window._dueSoonOnly ? '#b45309' : ''; b.style.fontWeight = window._dueSoonOnly ? '900' : ''; } updateView(); Swal.fire({toast:true,position:'top-end',icon:'info',title: window._dueSoonOnly ? 'กรองงานใกล้ครบ 15 วัน: ON' : 'ปิดกรอง Due Soon', showConfirmButton:false, timer:1500}); }
+        function toggleDueSoon(){ window._dueSoonOnly = !window._dueSoonOnly; var b=document.getElementById('dueSoonBtn'); if(b){ b.style.background = window._dueSoonOnly ? '#fef3c7' : ''; b.style.borderColor = window._dueSoonOnly ? '#f59e0b' : ''; b.style.color = window._dueSoonOnly ? '#b45309' : ''; b.style.fontWeight = window._dueSoonOnly ? '900' : ''; } updateView(); Swal.fire({toast:true,position:'top-end',icon:'info',title: window._dueSoonOnly ? 'กรองงานใกล้ครบ 30 วัน: ON' : 'ปิดกรอง Due Soon', showConfirmButton:false, timer:1500}); }
 
-        function applyPreset(name){ var search=document.getElementById('searchInput'); if(name==='late'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=(cb.value==='late');}); } else if(name==='duesoon'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=true;}); } else if(name==='mine'){ if(search) search.value=''; } var all=document.getElementById('selectAllStatus'); if(all){ var _tot=document.querySelectorAll('.status-cb').length; var _chk=document.querySelectorAll('.status-cb:checked').length; all.checked=(_tot>0 && _chk===_tot); } if(typeof updateStatusFilterLabel==='function') updateStatusFilterLabel(); updateView(); var nm={late:'Late only',duesoon:'Due within 15 days',mine:'My tasks'}; Swal.fire({toast:true,position:'top-end',icon:'success',title:'Filter: '+(nm[name]||name),showConfirmButton:false,timer:1200}); }
+        function applyPreset(name){ var search=document.getElementById('searchInput'); if(name==='late'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=(cb.value==='late');}); } else if(name==='duesoon'){ if(search) search.value=''; document.querySelectorAll('.status-cb').forEach(function(cb){cb.checked=true;}); } else if(name==='mine'){ if(search) search.value=''; } var all=document.getElementById('selectAllStatus'); if(all){ var _tot=document.querySelectorAll('.status-cb').length; var _chk=document.querySelectorAll('.status-cb:checked').length; all.checked=(_tot>0 && _chk===_tot); } if(typeof updateStatusFilterLabel==='function') updateStatusFilterLabel(); updateView(); var nm={late:'Late only',duesoon:'Due within 30 days',mine:'My tasks'}; Swal.fire({toast:true,position:'top-end',icon:'success',title:'Filter: '+(nm[name]||name),showConfirmButton:false,timer:1200}); }
         function togglePresentation(){ document.body.classList.toggle('presentation-mode'); var eb=document.getElementById('exitPresentationBtn'); if(eb) eb.classList.toggle('hide', !document.body.classList.contains('presentation-mode')); Swal.fire({toast:true,position:'top-end',icon:'info',title:document.body.classList.contains('presentation-mode')?'Presentation ON - press Esc or red button to exit':'Presentation OFF',showConfirmButton:false,timer:1800}); }
         function toggleDark(){ _darkMode=!_darkMode; document.body.classList.toggle('dark-mode',_darkMode); try{localStorage.setItem('mwDark',_darkMode?'1':'0');}catch(e){} }
         function copyShareLink(){ var params=new URLSearchParams(); var s=document.getElementById('searchInput'); if(s&&s.value) params.set('q',s.value); var stats=Array.from(document.querySelectorAll('.status-cb:checked')).map(function(c){return c.value;}).join(','); if(stats) params.set('st',stats); var url=location.origin+location.pathname+'#'+params.toString(); try{ navigator.clipboard.writeText(url); Swal.fire({toast:true,position:'top-end',icon:'success',title:'Share link copied',showConfirmButton:false,timer:1500}); }catch(e){ prompt('Copy link:', url); } }
@@ -2009,15 +2009,17 @@ function pickStatus(statusGroup){
         function extractPct(rawVal) { let pctRaw = String(rawVal||'').trim(); let numPct = 0; if(pctRaw !== '-' && pctRaw !== '') { let strPct = String(pctRaw); if(!isNaN(strPct) && !strPct.includes('%')) { let num = parseFloat(strPct); numPct = (num > 0 && num <= 1) ? num * 100 : num; pctRaw = parseFloat(numPct.toFixed(2)) + '%'; } else { numPct = parseFloat(strPct.replace(/[^0-9.]/g, '')) || 0; } } else { pctRaw = '-'; } return { pctRaw, numPct }; }
 
 
-        const PROGRESS_BUCKETS = ['0%', '1-25%', '26-50%', '51-75%', '76-99%', '100%', 'ไม่ระบุ'];
+        const PROGRESS_BUCKETS = ['0%', '1-25%', '26-50%', '51-75%', '76-99%', '100%', 'N/A'];
 
         function getProgressBucket(d) {
 
-            if (!d) return 'ไม่ระบุ';
+            if (!d) return 'N/A';
 
             let p = (d.pct !== undefined && d.pct !== null) ? String(d.pct).trim() : '';
 
-            if (p === '-' || p === '') return 'ไม่ระบุ';
+            if (p === '-' || p === '' || /^n\/a$/i.test(p)) return 'N/A';
+
+            if (d.statusGroup === 'na') return 'N/A';
 
             let n = (d.numPct !== undefined) ? Number(d.numPct) : extractPct(p).numPct;
 
@@ -2042,7 +2044,7 @@ function pickStatus(statusGroup){
             var tp = (typeof window._progressTargetPhase !== 'undefined') ? window._progressTargetPhase : 'overall';
             if(tp === 'overall' || !d || !d.phases || !d.phases.length) return getProgressBucket(d);
             for(var i=0;i<d.phases.length;i++){ if(d.phases[i].name === tp){ return getProgressBucket({ pct: d.phases[i].pct, numPct: d.phases[i].numPct }); } }
-            return 'ไม่ระบุ'; // รายการนั้นๆ ไม่มีเฟสนี้ ให้นับว่าไม่ระบุ
+            return 'N/A'; // รายการนั้นๆ ไม่มีเฟสนี้ ให้นับเป็น N/A
         }
 
         // ===== ฟิลเตอร์ Progress หลายเงื่อนไข (AND) =====
@@ -3351,10 +3353,16 @@ function pickStatus(statusGroup){
                     passProgress = _conds.every(function(c){
                         if(c.phase === 'overall' || !d.phases || !d.phases.length){ return getProgressBucket(d) === c.bucket; }
                         for(var _ci=0;_ci<d.phases.length;_ci++){ if(d.phases[_ci].name === c.phase){ return getProgressBucket({pct:d.phases[_ci].pct, numPct:d.phases[_ci].numPct}) === c.bucket; } }
-                        return c.bucket === 'ไม่ระบุ';
+                        return c.bucket === 'N/A';
                     });
                 } else {
                     passProgress = isAllProgress ? true : checkedProgress.includes(getProgressBucketForTarget(d));
+                }
+
+                // แถวที่ไม่มี Progress / สถานะจริง (_noProg = รายการว่างใน Summary) จะไม่ถูกแสดงเมื่อมีฟิลเตอร์ใดๆ ทำงานอยู่
+                if (d._noProg) {
+                    const anyFilterOn = !isAllStatus || !isAllProgress || !isAllCodes || !isAllLots || !isAllResp || !!searchText || (currentDateFilter !== 'all' || currentSpecificMonths.length > 0) || (isSummaryMode && !isAllPhase) || _conds.length > 0;
+                    if (anyFilterOn) return false;
                 }
 
                 return passSearch && passPhase && passStatus && passCode && passLot && passResp && passProgress && passDate;
