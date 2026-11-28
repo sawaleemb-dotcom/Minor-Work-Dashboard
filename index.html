@@ -436,6 +436,12 @@
   #mainTable .cell-status .status-badge{width:max-content !important; max-width:100% !important; min-width:0 !important; padding:4px 8px !important; font-size:9.5px !important; white-space:normal !important; line-height:1.25;}
   #mainTable .cell-lot > span{font-size:9px !important; padding:2px 7px !important; white-space:nowrap;}
 
+  /* Progress widget: fluid bar + compact label so it never spills into the Plan Date column */
+  #mainTable .prog-wrap{display:grid !important; grid-template-columns:minmax(58px,1fr) 46px !important; column-gap:6px !important;}
+  #mainTable .prog-bar{width:100% !important; min-width:0 !important; max-width:none !important;}
+  #mainTable .prog-num{width:46px !important; min-width:46px !important; max-width:46px !important;}
+  #mainTable{min-width:760px !important;}
+
   /* Charts: tighter gaps, donut not oversized */
   #chartSection{gap:12px !important;}
   #chartSection > div{padding:14px !important;}
@@ -471,6 +477,188 @@
   /* KPI cards: labels wrap instead of being clipped in narrow cards */
   #kpiArea > div{min-width:0 !important;}
   #kpiArea p{line-height:1.35 !important; word-break:break-word;}
+}
+</style>
+
+<style>
+/* ============================================================
+   MOBILE CARD LAYER — phones portrait + landscape (≤900px)
+   The dense data table becomes stacked cards; no horizontal
+   scrolling and no overlapping cells. Desktop ≥901px untouched.
+   ============================================================ */
+
+/* Public-view approval banner: sticky in-flow bar (no JS padding hack) */
+#approvalBanner.approval-banner{position:sticky !important; top:0; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:6px 10px;}
+#approvalBanner.approval-banner button{margin-left:0 !important;}
+
+@media (max-width: 900px){
+
+  html,body{max-width:100%; overflow-x:hidden;}
+  #mainContainer{gap:12px !important;}
+
+  /* ---------- Banner ---------- */
+  #approvalBanner.approval-banner{padding:8px 12px !important; margin:0 -8px 10px; line-height:1.4;}
+  #approvalBannerText{font-size:12.5px; font-weight:700; flex:1 1 100%; text-align:center;}
+  #approvalBanner.approval-banner button{font-size:11px !important; padding:6px 14px !important; border-radius:9999px !important; font-weight:800; white-space:nowrap;}
+
+  /* ---------- Header card ---------- */
+  #compactHeader{padding:10px !important; gap:10px !important;}
+  #compactHeader > div:first-child h1{font-size:15px !important;}
+  #compactHeader > div:first-child p{font-size:9px !important;}
+  #compactHeader > div:last-child{width:100% !important; flex-wrap:wrap;}
+  #dropZone{flex:1 1 100% !important; width:100%;}
+  #headerLoginBtn{flex:1 1 auto; justify-content:center;}
+  #userChipBtn{max-width:100%;}
+
+  /* ---------- Sheet tabs: horizontal scroll strip ---------- */
+  #sheetTabsContainer{overflow-x:auto; scrollbar-width:none; padding:8px 10px 0 !important;}
+  #sheetTabsContainer::-webkit-scrollbar{display:none;}
+  #sheetTabsContainer > div:first-child{flex-wrap:nowrap !important; overflow-x:auto;}
+  #sheetTabsContainer .sheet-tab{white-space:nowrap; flex-shrink:0; padding:7px 12px !important; font-size:11px !important;}
+
+  /* ---------- Filter bar ---------- */
+  #normalFilterBar{padding:12px !important; gap:10px !important;}
+  #normalFilterBar > div:first-child{gap:10px !important;}
+  #normalFilterBar .max-w-md,#searchInput{max-width:100% !important;}
+  #quickDateFilter{flex-wrap:wrap; width:100%; padding:6px !important;}
+  #quickDateFilter .date-filter-btn{flex:1 1 auto; padding:7px 8px !important; font-size:10.5px !important;}
+  #normalFilterBar .dropdown-toggle{flex:1 1 calc(50% - 6px); min-width:0; font-size:10.5px !important; padding:9px 10px !important;}
+  #normalFilterBar .dropdown-toggle span.truncate{max-width:100% !important;}
+  .dropdown-menu{left:0 !important; right:auto !important; max-width:calc(100vw - 16px) !important;}
+
+  /* ---------- KPI cards 2×2 ---------- */
+  #kpiArea{grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:10px !important;}
+  #kpiArea > div{padding:12px !important; min-width:0;}
+  #kpiArea h3,#kpiArea span.text-4xl{font-size:1.35rem !important;}
+  #kpiArea p{font-size:9px !important; line-height:1.35;}
+
+  /* ---------- Charts ---------- */
+  #chartSection{gap:12px !important;}
+  #chartSection > div{padding:14px !important; min-width:0;}
+  .donut-box{max-width:200px !important;}
+  #personChartWrapper{min-height:230px;}
+
+  /* ---------- Table toolbar ---------- */
+  #tableSection{padding:12px !important;}
+  #tableSection > div:first-child{flex-direction:column !important; align-items:stretch !important; gap:10px !important;}
+  #viewToggleGroup{width:100%;}
+  #viewToggleGroup button{flex:1 1 auto; justify-content:center; padding:8px 10px !important;}
+  #tableSection > div:first-child > div:last-child{flex-wrap:wrap; gap:8px; width:100%;}
+  #tableSection > div:first-child > div:last-child > button,
+  #tableSection > div:first-child > div:last-child > label{flex:1 1 auto; min-width:0; justify-content:center;}
+  #tableSection button span.hidden.sm\:inline{display:inline !important;}
+  #tableSection > div:nth-child(2){flex-direction:row !important; flex-wrap:wrap !important; align-items:center; gap:10px !important;}
+  #tableStatusFilters{flex:1 1 100%; flex-wrap:wrap; max-width:100%;}
+  #tableStatusFilters button{flex:1 1 auto; padding:7px 10px !important; font-size:10.5px !important;}
+  #tableCount{order:-1; flex:1 1 100%; width:100%; text-align:center;}
+  #btnCollapseAll,#btnExpandAll{flex:1 1 calc(50% - 5px); width:auto;}
+
+  /* ===== Main table → stacked activity cards ===== */
+  #tableContainerView{max-height:none !important; overflow:visible !important; border:none !important; background:transparent !important; box-shadow:none !important; border-radius:0 !important;}
+  #mainTable{min-width:0 !important; width:100% !important; table-layout:auto !important;}
+  #mainTable thead{display:none !important;}
+  #mainTable,#mainTable tbody,#mainTable tfoot,#mainTable tr,#mainTable td{display:block !important;}
+
+  /* Parent activity card */
+  #mainTable tbody tr:not(.phase-row){
+    display:flex !important; flex-direction:column;
+    background:#fff !important;
+    border:1px solid #e2e8f0 !important;
+    border-radius:14px 14px 4px 4px;
+    margin:12px 2px 0 !important;
+    padding:10px 12px 6px !important;
+    box-shadow:0 1px 3px rgba(15,23,42,.06);
+    transform:none !important;
+  }
+  #mainTable tbody tr:not(.phase-row):hover{transform:none !important; box-shadow:0 4px 12px rgba(15,23,42,.08);}
+  #mainTable tbody tr:not(.phase-row) td.cell-activity{
+    order:-1;
+    position:static !important; box-shadow:none !important; z-index:auto !important;
+    padding:0 0 8px !important; font-size:13px !important; font-weight:800;
+    color:#1e293b !important; line-height:1.45; overflow-wrap:break-word;
+    border-bottom:1px solid #f1f5f9; margin-bottom:4px;
+  }
+  /* Label / value rows */
+  #mainTable td[data-label]{
+    display:flex !important; justify-content:space-between; align-items:baseline; gap:12px;
+    padding:6px 0 !important; border-top:1px dashed #eef2f7;
+  }
+  #mainTable td[data-label]::before{
+    content:attr(data-label); flex:0 0 auto; color:#94a3b8;
+    font-size:10px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+  }
+  #mainTable td[data-label] > *{margin-left:auto; min-width:0; text-align:right;}
+  #mainTable td[data-empty="true"]{display:none !important;}
+  #mainTable td.cell-code,#mainTable td.cell-code > *{font-size:11px !important;}
+
+  /* Date cell: value + late badge wrap cleanly */
+  #mainTable td.cell-date{flex-wrap:wrap;}
+  #mainTable td.cell-date .days-badge{margin-left:6px;}
+
+  /* Progress: fluid bar + fixed label, never overflows the cell */
+  #mainTable td.cell-progress{display:block !important; text-align:left;}
+  #mainTable td.cell-progress::before{display:block; margin-bottom:4px; text-align:left;}
+  #mainTable .prog-wrap{display:grid !important; grid-template-columns:minmax(64px,1fr) 50px !important; column-gap:8px !important; width:100% !important; max-width:100% !important; justify-content:stretch !important;}
+  #mainTable .prog-bar{width:100% !important; min-width:0 !important; max-width:none !important;}
+  #mainTable .prog-num{width:50px !important; min-width:50px !important; max-width:50px !important; text-align:right !important;}
+
+  /* Status pill hugs its text; wraps instead of spilling into Note column */
+  #mainTable td.cell-status{display:flex !important; justify-content:flex-end;}
+  #mainTable td.cell-status::before{margin-right:auto;}
+  #mainTable .status-badge{width:max-content !important; max-width:100% !important; min-width:0 !important; white-space:normal !important; padding:4px 9px !important; font-size:9.5px !important; line-height:1.25;}
+
+  /* Note: full-width text under its label, left aligned */
+  #mainTable td.cell-note{display:flex !important; flex-direction:column; align-items:flex-start; gap:2px; text-align:left;}
+  #mainTable td.cell-note::before{margin-bottom:1px;}
+  #mainTable td.cell-note > *{margin-left:0 !important; text-align:left; color:#64748b; font-size:11px; line-height:1.45;}
+
+  /* Phase sub-rows: compact 2×2 grid attached under the parent card */
+  #mainTable tr.phase-row{
+    display:grid !important; grid-template-columns:1fr auto; gap:4px 12px; align-items:center;
+    background:#f8fafc !important; border:1px solid #eef2f7; border-top:none;
+    margin:0 2px !important; padding:6px 12px 8px 24px !important; font-size:11.5px;
+    border-radius:0 0 12px 12px;
+  }
+  #mainTable tr.phase-row td:not(.cell-activity):not(.cell-date):not(.cell-progress):not(.cell-status){display:none !important;}
+  #mainTable tr.phase-row td.cell-activity{
+    grid-column:1; grid-row:1;
+    padding:2px 0 2px 8px !important; font-size:11.5px !important; font-weight:700;
+    color:#475569; border-left:3px solid #fdba74 !important;
+  }
+  #mainTable tr.phase-row td.cell-date{grid-column:2; grid-row:1; justify-self:end; display:inline-flex !important; align-items:center; gap:6px; font-size:10.5px; color:#64748b;}
+  #mainTable tr.phase-row td.cell-date::before{display:none;}
+  #mainTable tr.phase-row td.cell-date > *{margin-left:0 !important;}
+  #mainTable tr.phase-row td.cell-progress{grid-column:1; grid-row:2; min-width:0; display:block !important;}
+  #mainTable tr.phase-row td.cell-progress::before{display:none;}
+  #mainTable tr.phase-row td.cell-progress > *{margin-left:0 !important;}
+  #mainTable tr.phase-row td.cell-status{grid-column:2; grid-row:2; justify-self:end; align-self:center; display:inline-flex !important;}
+  #mainTable tr.phase-row td.cell-status::before{display:none;}
+  #mainTable tr.phase-row td.cell-status > *{margin-left:0 !important;}
+  #mainTable tr.phase-row .prog-wrap{grid-template-columns:minmax(56px,1fr) 42px !important;}
+  #mainTable tr.phase-row .prog-num{width:42px !important; min-width:42px !important; max-width:42px !important;}
+  #mainTable tr.phase-row .status-badge{font-size:9px !important; padding:3px 7px !important;}
+
+  /* Sticky summary footer → plain summary strip */
+  #tableSummaryFoot{display:block !important;}
+  #tableSummaryFoot tr.summary-foot-row{display:block !important;}
+  #tableSummaryFoot tr.summary-foot-row > td{
+    position:static !important; box-shadow:none !important; background:#f1f5f9 !important;
+    border:1px solid #e2e8f0 !important; border-radius:12px !important; margin:10px 2px !important; padding:10px 12px !important;
+  }
+  #tableSummaryFoot td > div{
+    display:grid !important; grid-template-columns:1fr 1fr; gap:8px 14px;
+    justify-content:stretch !important; font-size:11px !important; text-align:left;
+  }
+
+  /* Back-to-top button */
+  #tableBackToTop{width:42px !important; height:42px !important; bottom:14px !important; right:14px !important;}
+
+  /* Board view: single tidy column; empty columns collapse instead of stretching 65vh */
+  #boardContainerView{grid-template-columns:1fr !important; gap:10px !important; padding:12px !important;}
+  #boardContainerView > div{height:auto !important; min-height:0 !important; max-height:none !important; overflow:visible !important;}
+  #boardContainerView > div > div:nth-child(2){overflow:visible !important; max-height:none !important;}
+  #boardContainerView > div[data-empty="true"]{display:none !important;}
+  #boardContainerView .board-meta{flex-wrap:wrap; row-gap:6px; column-gap:12px;}
 }
 </style>
 </head>
@@ -2753,10 +2941,10 @@ function pickStatus(statusGroup){
             if(!b){
                 b = document.createElement('div');
                 b.id = 'approvalBanner';
-                b.className = 'fixed top-0 left-0 right-0 z-[99998] bg-amber-500 text-white px-4 py-2 text-center text-sm font-bold shadow-lg no-print';
+                b.className = 'sticky top-0 left-0 right-0 z-[99998] bg-amber-500 text-white px-3 py-2 text-center text-sm font-bold shadow-lg no-print approval-banner';
                 b.style.display = 'none';
                 b.innerHTML = '<span id="approvalBannerText">🔒 คุณกำลังดูอย่างเดียว — ยังไม่ได้รับอนุญาตให้แก้ไข</span> <button onclick="requestEditAccess()" style="background:#fff;color:#b45309;padding:4px 12px;border-radius:8px;font-weight:900;font-size:11px;border:none;cursor:pointer;margin-left:8px;">ขออนุญาตแก้ไข</button>';
-                document.body.appendChild(b);
+                document.body.prepend(b);
             }
             return b;
         };
@@ -2794,7 +2982,7 @@ function pickStatus(statusGroup){
             var b = window._ensureApprovalBanner();
             window.renderApprovalBannerContent();
             b.style.display = 'block';
-            setTimeout(function(){ try{ document.body.style.paddingTop = (b.offsetHeight + 6) + 'px'; }catch(err){ document.body.style.paddingTop = '42px'; } }, 30);
+            document.body.style.paddingTop = '';
             if(window._updateHeaderAuthUI) window._updateHeaderAuthUI();
         };
         window.hideApprovalBanner_ = function(){
@@ -3908,7 +4096,7 @@ function pickStatus(statusGroup){
 
                 
 
-                html += `<tr class="border-b border-slate-100/50 ${theme.bg} page-break-inside-avoid clickable-row group transition-colors row-fade-in ${theme.hover} ${window._selectedRows&&window._selectedRows.has(rawIdx)?'row-selected':''} ${_isDueSoon(d)?'row-due-soon':''}" style="animation-delay: ${animDelay}s;" onclick="handleRowClick(event, ${rawIdx})">${columnVisibility.lot ? `<td class="px-2 py-3.5 text-center whitespace-nowrap cell-lot">${getLotBadge(d.lot, hl)}</td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-3.5 text-center text-slate-700 font-bold">${hl(d.designSubmission || '-')}</td>` : ''}${columnVisibility.code ? `<td class="px-2 py-3.5 text-center text-slate-700 font-bold cell-code">${hl(d.code)}</td>` : ''}<td class="px-4 py-3.5 text-left text-slate-800 font-black leading-tight break-words pr-4 cell-activity sticky left-0 z-[20] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${theme.bg} ${theme.groupHoverBg} ${theme.textHover} transition-colors">${_grpChevron}${hl(d.activity)}${_phaseBadge}</td>${columnVisibility.respPerson ? `<td class="px-2 py-3.5 text-center text-slate-600 whitespace-nowrap font-bold cell-person">${d._noProg?'':hl(d.respPerson)}</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-3.5 text-center whitespace-nowrap cell-date ${expectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'expected')" title="คลิกแก้ไข Plan Date">${(typeof hideMainExpected!=='undefined'&&hideMainExpected)||d._noProg?'':d.expected}${((typeof hideMainExpected==='undefined'||!hideMainExpected)&&!d._noProg)?getDaysBadge(d):''}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-3.5 text-center cursor-pointer cell-progress" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'progress')" title="คลิกแก้ไข Progress">${d._noProg?'':getProgressHtml(d.pct, d.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-3.5 text-center ${d.statusGroup==='na'?'':'cursor-pointer'} cell-status" ${d.statusGroup==='na'?'title="ระบุ N/A ใน Sheet — ไม่แก้ไขสถานะได้"':'onclick="openStatusPicker(event, '+rawIdx+', \'-1\')" title="Click to change status"'}>${d._noProg?'':getStatusBadge(d.statusGroup, d.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-3.5 text-left text-slate-500 leading-relaxed break-words font-medium ${theme.textHover} transition-colors cursor-pointer cell-note" data-tooltip="${safeNote}" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'note')" title="คลิกแก้ไข Note">${d._noProg?'':hl(d.note.substring(0,50))}${d._noProg?'':(d.note.length>50?'...':'')}</td>` : ''}</tr>`;
+                html += `<tr class="border-b border-slate-100/50 ${theme.bg} page-break-inside-avoid clickable-row group transition-colors row-fade-in ${theme.hover} ${window._selectedRows&&window._selectedRows.has(rawIdx)?'row-selected':''} ${_isDueSoon(d)?'row-due-soon':''}" style="animation-delay: ${animDelay}s;" onclick="handleRowClick(event, ${rawIdx})">${columnVisibility.lot ? `<td data-label="Lot" class="px-2 py-3.5 text-center whitespace-nowrap cell-lot">${getLotBadge(d.lot, hl)}</td>` : ''}${columnVisibility.designSubmission ? `<td data-label="Design Sub." data-empty="${(d.designSubmission && d.designSubmission!=='-')?'false':'true'}" class="px-2 py-3.5 text-center text-slate-700 font-bold">${hl(d.designSubmission || '-')}</td>` : ''}${columnVisibility.code ? `<td data-label="Code" class="px-2 py-3.5 text-center text-slate-700 font-bold cell-code">${hl(d.code)}</td>` : ''}<td class="px-4 py-3.5 text-left text-slate-800 font-black leading-tight break-words pr-4 cell-activity sticky left-0 z-[20] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${theme.bg} ${theme.groupHoverBg} ${theme.textHover} transition-colors">${_grpChevron}${hl(d.activity)}${_phaseBadge}</td>${columnVisibility.respPerson ? `<td data-label="ผู้รับผิดชอบ" data-empty="${(d.respPerson && d.respPerson!=='-' && !d._noProg)?'false':'true'}" class="px-2 py-3.5 text-center text-slate-600 whitespace-nowrap font-bold cell-person">${d._noProg?'':hl(d.respPerson)}</td>` : ''}${columnVisibility.expected ? `<td data-label="Plan Date" class="px-2 py-3.5 text-center whitespace-nowrap cell-date ${expectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'expected')" title="คลิกแก้ไข Plan Date">${(typeof hideMainExpected!=='undefined'&&hideMainExpected)||d._noProg?'':d.expected}${((typeof hideMainExpected==='undefined'||!hideMainExpected)&&!d._noProg)?getDaysBadge(d):''}</td>` : ''}${columnVisibility.progress ? `<td data-label="Progress" class="px-2 py-3.5 text-center cursor-pointer cell-progress" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'progress')" title="คลิกแก้ไข Progress">${d._noProg?'':getProgressHtml(d.pct, d.numPct)}</td>` : ''}${columnVisibility.status ? `<td data-label="Status" class="px-2 py-3.5 text-center ${d.statusGroup==='na'?'':'cursor-pointer'} cell-status" ${d.statusGroup==='na'?'title="ระบุ N/A ใน Sheet — ไม่แก้ไขสถานะได้"':'onclick="openStatusPicker(event, '+rawIdx+', \'-1\')" title="Click to change status"'}>${d._noProg?'':getStatusBadge(d.statusGroup, d.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td data-label="Note" data-empty="${(d.note && !d._noProg)?'false':'true'}" class="px-4 py-3.5 text-left text-slate-500 leading-relaxed break-words font-medium ${theme.textHover} transition-colors cursor-pointer cell-note" data-tooltip="${safeNote}" onclick="openFieldEditor(event, ${rawIdx}, '-1', 'note')" title="คลิกแก้ไข Note">${d._noProg?'':hl(d.note.substring(0,50))}${d._noProg?'':(d.note.length>50?'...':'')}</td>` : ''}</tr>`;
 
                 
 
@@ -3916,7 +4104,7 @@ function pickStatus(statusGroup){
 
                     let visiblePhases = (isAllPhase || window._chartFocus) ? (d.phases || []) : (d.phases || []).filter(ph => checkedPersonsLocal.includes(ph.name));
 
-                    visiblePhases.forEach((ph, pIndex) => { let phExpectedClass = ph.statusGroup === 'late' ? 'text-red-600 font-bold' : 'text-slate-500 font-bold'; let childBg = pIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'; let safePhNote = (ph.note || '').replace(/"/g, '&quot;'); html += `<tr class="border-b border-slate-100 ${childBg} phase-row ${(window._chartFocus && ph.name===window._chartFocus.phase) ? 'phase-focus-row' : ''} ${_isCollapsed?'hide':''} page-break-inside-avoid hover:bg-slate-100/50 transition-colors row-fade-in" data-parent="${rawIdx}" style="animation-delay: ${animDelay + 0.05}s;">${columnVisibility.lot ? `<td class="px-2 py-2.5 text-center text-slate-300"></td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-2.5 text-center"></td>` : ''}${columnVisibility.code ? `<td class="px-2 py-2.5 text-right text-slate-300 font-bold text-xs">↳</td>` : ''}<td class="px-4 py-2.5 text-left text-slate-600 pl-6 border-l-[3px] border-orange-200 break-words font-bold cell-activity">${hl(fullPhaseNames[ph.name] || ph.name)}</td>${columnVisibility.respPerson ? `<td class="px-2 py-2.5 text-center text-slate-400">-</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-2.5 text-center whitespace-nowrap cell-date ${phExpectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'expected')" title="คลิกแก้ไข Plan Date เฟสนี้">${ph.expected}${_daysBadge(ph.expected, ph.statusGroup)}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-2.5 text-center cursor-pointer cell-progress" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'progress')" title="คลิกแก้ไข Progress เฟสนี้">${getProgressHtml(ph.pct, ph.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-2.5 text-center ${ph.statusGroup==='na'?'':'cursor-pointer'} cell-status" ${ph.statusGroup==='na'?'title="เฟสนี้ระบุ N/A ใน Sheet"':'onclick="openStatusPickerPhase(event, '+rawIdx+', \''+ph.name+'\')" title="คลิกเปลี่ยนสถานะเฟสนี้"'}>${getStatusBadge(ph.statusGroup, ph.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-2.5 text-center text-slate-300 transition-colors"></td>` : ''}</tr>`; });
+                    visiblePhases.forEach((ph, pIndex) => { let phExpectedClass = ph.statusGroup === 'late' ? 'text-red-600 font-bold' : 'text-slate-500 font-bold'; let childBg = pIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'; let safePhNote = (ph.note || '').replace(/"/g, '&quot;'); html += `<tr class="border-b border-slate-100 ${childBg} phase-row ${(window._chartFocus && ph.name===window._chartFocus.phase) ? 'phase-focus-row' : ''} ${_isCollapsed?'hide':''} page-break-inside-avoid hover:bg-slate-100/50 transition-colors row-fade-in" data-parent="${rawIdx}" style="animation-delay: ${animDelay + 0.05}s;">${columnVisibility.lot ? `<td class="px-2 py-2.5 text-center text-slate-300"></td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-2.5 text-center"></td>` : ''}${columnVisibility.code ? `<td class="px-2 py-2.5 text-right text-slate-300 font-bold text-xs">↳</td>` : ''}<td class="px-4 py-2.5 text-left text-slate-600 pl-6 border-l-[3px] border-orange-200 break-words font-bold cell-activity">${hl(fullPhaseNames[ph.name] || ph.name)}</td>${columnVisibility.respPerson ? `<td class="px-2 py-2.5 text-center text-slate-400">-</td>` : ''}${columnVisibility.expected ? `<td data-label="Plan Date" class="px-2 py-2.5 text-center whitespace-nowrap cell-date ${phExpectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'expected')" title="คลิกแก้ไข Plan Date เฟสนี้">${ph.expected}${_daysBadge(ph.expected, ph.statusGroup)}</td>` : ''}${columnVisibility.progress ? `<td data-label="Progress" class="px-2 py-2.5 text-center cursor-pointer cell-progress" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'progress')" title="คลิกแก้ไข Progress เฟสนี้">${getProgressHtml(ph.pct, ph.numPct)}</td>` : ''}${columnVisibility.status ? `<td data-label="Status" class="px-2 py-2.5 text-center ${ph.statusGroup==='na'?'':'cursor-pointer'} cell-status" ${ph.statusGroup==='na'?'title="เฟสนี้ระบุ N/A ใน Sheet"':'onclick="openStatusPickerPhase(event, '+rawIdx+', \''+ph.name+'\')" title="คลิกเปลี่ยนสถานะเฟสนี้"'}>${getStatusBadge(ph.statusGroup, ph.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-2.5 text-center text-slate-300 transition-colors"></td>` : ''}</tr>`; });
 
                 }
 
@@ -4020,7 +4208,7 @@ function pickStatus(statusGroup){
 
             const colHtml = (title, icon, colorClass, borderClass, bgHeadClass, dataArr) => `
 
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl border ${borderClass} flex flex-col h-[65vh] overflow-hidden shadow-sm">
+                <div data-empty="${dataArr.length===0}" class="bg-white/80 backdrop-blur-sm rounded-2xl border ${borderClass} flex flex-col h-[65vh] overflow-hidden shadow-sm">
 
                     <div class="p-3 border-b border-slate-200 ${bgHeadClass} flex justify-between items-center z-10 shadow-sm">
 
