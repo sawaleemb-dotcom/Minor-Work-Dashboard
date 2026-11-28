@@ -197,6 +197,8 @@
         .days-soon { background:#fef3c7; color:#b45309; border:1px solid #fcd34d; }
         .days-late { background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; }
         tr.row-due-soon > td { background-color:#fffbeb !important; }
+        tr.phase-focus-row > td { background-color:#fffbeb !important; }
+        tr.phase-focus-row td.cell-activity { color:#b45309 !important; font-weight:900 !important; }
         tr.row-selected > td { background-color:#eff6ff !important; box-shadow: inset 3px 0 0 #3b82f6; }
         .preset-btn { font-size:10px; font-weight:800; padding:6px 10px; border-radius:10px; border:1px solid #e2e8f0; background:#fff; color:#475569; cursor:pointer; transition:all .15s; }
         .preset-btn:hover { background:#fff7ed; border-color:#fdba74; color:#c2410c; transform:translateY(-1px); }
@@ -1642,6 +1644,7 @@ function pickStatus(statusGroup){
         let workbookData = {}, currentSheetName = "", currentRawData = [], globalFilteredData = [];
 
         let currentTableStatusFilters = ['all'], currentDateFilter = 'all', currentSpecificMonths = [];
+        window._chartFocus = null; // โฟกัสชั่วคราวจากการคลิกแท่งกราฟ {phase, status} — แสดงเฟสอื่นของรายการนั้นด้วย
 
         let sortConfig = { key: 'code', direction: 'asc' }; let currentDataView = 'table';
 
@@ -1860,6 +1863,54 @@ function pickStatus(statusGroup){
 
         function computeOverallStatus(d, checkedPhases, isAllPhase) {
             var pct = parseFloat(d.numPct) || 0;
+
+            // ===== รายการหลักที่มีเฟสย่อย: ตัดสินสถานะจากเฟสจริงก่อน =====
+            // กฎ: (1) ถ้ามีเฟสไหน Late → แถวหลักต้องเป็น Late เสมอ ไม่ใช่ Completed
+            //     (2) N/A ของเฟสปกตินับเป็นเสร็จสำหรับแถบ Progress (เขียว) และนับเข้า "เสร็จ"
+            //         แต่จะไม่ดันสถานะรวมของแถวหลักเป็น Completed ถ้ายังมีเฟสจริงที่ล่าช้า/ยังไม่เสร็จ
+            if (d.phases && d.phases.length > 0) {
+                var phases = (d.phases || []).slice();
+                if (!isAllPhase && !window._chartFocus && checkedPhases && checkedPhases.length > 0) {
+                    phases = phases.filter(function(ph){ return checkedPhases.indexOf(ph.name) !== -1; });
+                }
+                if (phases.length === 0) phases = (d.phases || []).slice();
+
+                // 1) ลำดับแรกสุด: มีเฟสจริงล่าช้า → แถวหลัก = Late
+                for (var _li = 0; _li < phases.length; _li++) {
+                    if (phases[_li].statusGroup === 'late') return { statusGroup: 'late', statusRaw: 'Late' };
+                }
+
+                // 2) ทุกเฟสนับว่าเสร็จแล้ว (เฟสปกติที่ N/A นับเป็นเสร็จตามกฎเดิม) → Completed
+                var _allDone = true;
+                for (var _di = 0; _di < phases.length; _di++) {
+                    var _ph = phases[_di];
+                    var _doneFlag = (parseFloat(_ph.numPct)||0) >= 100 || _ph.statusGroup === 'completed' || (_ph.statusGroup === 'na' && naCountsAsCompleted(_ph.name));
+                    if (!_doneFlag) { _allDone = false; break; }
+                }
+                if (_allDone && phases.length > 0) return { statusGroup: 'completed', statusRaw: 'Completed' };
+
+                // 3) ยังไม่เสร็จและไม่มี Late → ใช้วันแพลนตัดสิน On Schedule / Late
+                if (isAllPhase) {
+                    var mainPlanTs = parseDateString(d.expected);
+                    if (mainPlanTs > 0) {
+                        var _n5 = new Date(); var _t5 = new Date(_n5.getFullYear(), _n5.getMonth(), _n5.getDate()).getTime();
+                        if (mainPlanTs >= _t5) return { statusGroup: 'on schedule', statusRaw: 'On Schedule' };
+                        return { statusGroup: 'late', statusRaw: 'Late' };
+                    }
+                }
+                var maxTs = 0;
+                for (var i = 0; i < phases.length; i++) { var ts = parseDateString(phases[i].expected); if (ts > maxTs) maxTs = ts; }
+                if (maxTs > 0) {
+                    var now = new Date();
+                    var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+                    if (maxTs >= todayStart) return { statusGroup: 'on schedule', statusRaw: 'On Schedule' };
+                    return { statusGroup: 'late', statusRaw: 'Late' };
+                }
+                if (pct >= 100) return { statusGroup: 'completed', statusRaw: 'Completed' };
+                return null;
+            }
+
+            // ===== รายการที่ไม่มีเฟสย่อย =====
             if (pct >= 100) return { statusGroup: 'completed', statusRaw: 'Completed' };
             if (pct === 0 && (!d.phases || d.phases.length === 0)) {
                 var prefixCode = String(d.code || '').trim();
@@ -1882,30 +1933,14 @@ function pickStatus(statusGroup){
                 }
             }
             if (isAllPhase) {
-                var mainPlanTs = parseDateString(d.expected);
-                if (mainPlanTs > 0) {
+                var mainPlanTs2 = parseDateString(d.expected);
+                if (mainPlanTs2 > 0) {
                     var _n5 = new Date(); var _t5 = new Date(_n5.getFullYear(), _n5.getMonth(), _n5.getDate()).getTime();
-                    if (mainPlanTs >= _t5) return { statusGroup: 'on schedule', statusRaw: 'On Schedule' };
+                    if (mainPlanTs2 >= _t5) return { statusGroup: 'on schedule', statusRaw: 'On Schedule' };
                     return { statusGroup: 'late', statusRaw: 'Late' };
                 }
-                return null;
             }
-            var phases = (d.phases || []).slice();
-            if (!isAllPhase && checkedPhases && checkedPhases.length > 0) {
-                phases = phases.filter(function(ph){ return checkedPhases.indexOf(ph.name) !== -1; });
-            }
-            if (phases.length === 0 && (d.phases || []).length > 0) phases = (d.phases || []).slice();
-            var _allDone = true;
-            for (var _di = 0; _di < phases.length; _di++) { var _ph = phases[_di]; var _doneFlag = (parseFloat(_ph.numPct)||0) >= 100 || _ph.statusGroup === 'completed' || (_ph.statusGroup === 'na' && naCountsAsCompleted(_ph.name)); if (!_doneFlag) { _allDone = false; break; } }
-            if (_allDone && phases.length > 0) return { statusGroup: 'completed', statusRaw: 'Completed' };
-            for (var _li = 0; _li < phases.length; _li++) { if (phases[_li].statusGroup === 'late') return { statusGroup: 'late', statusRaw: 'Late' }; }
-            var maxTs = 0;
-            for (var i = 0; i < phases.length; i++) { var ts = parseDateString(phases[i].expected); if (ts > maxTs) maxTs = ts; }
-            if (maxTs === 0) return null;
-            var now = new Date();
-            var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-            if (maxTs >= todayStart) return { statusGroup: 'on schedule', statusRaw: 'On Schedule' };
-            return { statusGroup: 'late', statusRaw: 'Late' };
+            return null;
         }
 
 
@@ -2512,7 +2547,9 @@ function pickStatus(statusGroup){
         });
 
 
-        window.filterFromKPI = function(status) {
+        window.filterFromKPI = function(status, fromChart) {
+
+            if(!fromChart) window._chartFocus = null;
 
             currentTableStatusFilters = [status];
 
@@ -2605,7 +2642,7 @@ function pickStatus(statusGroup){
 
             if(btnAll) { btnAll.classList.remove('text-slate-500', 'border-transparent'); btnAll.classList.add('active', 'bg-white', 'shadow-sm', 'text-slate-800', 'border-slate-200'); }
 
-            
+            window._chartFocus = null;
 
             updateView();
 
@@ -2861,9 +2898,9 @@ function pickStatus(statusGroup){
 
             const updateBtnText = () => { const allCbs = document.querySelectorAll('.' + cbClass); const checkedCbs = document.querySelectorAll('.' + cbClass + ':checked'); if (checkedCbs.length === 0) { if(btnText) btnText.innerText = `ว่าง`; safeCheck(selectAllId, false); } else if (checkedCbs.length === allCbs.length) { if(btnText) btnText.innerText = defaultText; safeCheck(selectAllId, true); } else { safeCheck(selectAllId, false); if(btnText) btnText.innerText = checkedCbs.length <= 2 ? Array.from(checkedCbs).map(cb => cb.value).join(', ') : `เลือก ${checkedCbs.length} รายการ`; } };
 
-            let selAllCb = document.getElementById(selectAllId); if(selAllCb) { let newSelAllCb = selAllCb.cloneNode(true); selAllCb.parentNode.replaceChild(newSelAllCb, selAllCb); newSelAllCb.addEventListener('change', (e) => { document.querySelectorAll('.' + cbClass).forEach(cb => cb.checked = e.target.checked); updateBtnText(); updateView(); }); }
+            let selAllCb = document.getElementById(selectAllId); if(selAllCb) { let newSelAllCb = selAllCb.cloneNode(true); selAllCb.parentNode.replaceChild(newSelAllCb, selAllCb); newSelAllCb.addEventListener('change', (e) => { document.querySelectorAll('.' + cbClass).forEach(cb => cb.checked = e.target.checked); if(cbClass==='person-cb') window._chartFocus = null; updateBtnText(); updateView(); }); }
 
-            document.querySelectorAll('.' + cbClass).forEach(cb => { cb.addEventListener('change', () => { updateBtnText(); updateView(); }); }); updateBtnText();
+            document.querySelectorAll('.' + cbClass).forEach(cb => { cb.addEventListener('change', () => { if(cbClass==='person-cb') window._chartFocus = null; updateBtnText(); updateView(); }); }); updateBtnText();
 
         }
 
@@ -3332,7 +3369,7 @@ function pickStatus(statusGroup){
 
                     let expTs;
                     if (!isAllPhase && checkedPersons && checkedPersons.length > 0 && d.phases && d.phases.length > 0) {
-                        let _fph = d.phases.filter(function(ph){ return checkedPersons.indexOf(ph.name) !== -1; });
+                        let _fph = window._chartFocus ? d.phases : d.phases.filter(function(ph){ return checkedPersons.indexOf(ph.name) !== -1; });
                         expTs = 0; for (let _pi = 0; _pi < _fph.length; _pi++) { let _t = parseDateString(_fph[_pi].expected); if (_t > expTs) expTs = _t; }
                     } else {
                         expTs = parseDateString(d.expected);
@@ -3372,10 +3409,11 @@ function pickStatus(statusGroup){
 
             if(window._dueSoonOnly){ globalFilteredData = globalFilteredData.filter(function(d){return _isDueSoon(d);}); }
 
-            const _naAllowed = currentSheetIsNAException();
             const _kpiData = globalFilteredData.filter(function(d){ if (d._noProg) return false; if (d.statusGroup === 'na') return true; return !((parseFloat(d.numPct)||0)===0 && (!d.phases || d.phases.length===0) && !d.statusGroup); });
+            const _naAllowed = currentSheetIsNAException();
             const total = _kpiData.length;
             const naCount = _kpiData.filter(d => d.statusGroup === 'na').length;
+            // เฟส/งานปกติที่ N/A นับเป็นเสร็จ (เขียว) รวมใน Completed เหมือนเดิม; เฉพาะชีทยกเว้น T&C / Manu-Deli จึงคงแยกเป็น N/A
             const compCount = _kpiData.filter(d => d.statusGroup === 'completed' || (!_naAllowed && d.statusGroup === 'na')).length;
             const onSchedCount = _kpiData.filter(d => d.statusGroup === 'on schedule').length;
             const lateCount = _kpiData.filter(d => d.statusGroup === 'late').length;
@@ -3675,17 +3713,21 @@ function pickStatus(statusGroup){
                                 const personName = personChartObj.data.labels[dataIdx];
 
 
+                                let focusPhaseVal = personName;
+
                                 if (isSummaryMode) {
 
                                     document.querySelectorAll('.person-cb').forEach(cb => cb.checked = false);
 
                                     const targetCb = Array.from(document.querySelectorAll('.person-cb')).find(cb => cb.value === personName || fullPhaseNames[cb.value] === personName);
 
-                                    if(targetCb) targetCb.checked = true;
+                                    if(targetCb) { targetCb.checked = true; focusPhaseVal = targetCb.value; }
 
                                     const bt = document.getElementById('personBtnText'); if(bt) bt.innerText = personName;
 
                                     safeCheck('selectAllPerson', false);
+
+                                    window._chartFocus = { phase: focusPhaseVal, status: targetStatus };
 
                                 } else {
 
@@ -3699,11 +3741,11 @@ function pickStatus(statusGroup){
 
                                     safeCheck('selectAllRespPerson', false);
 
+                                    window._chartFocus = null;
+
                                 }
 
-                                
-
-                                filterFromKPI(targetStatus);
+                                filterFromKPI(targetStatus, isSummaryMode);
 
                             }
 
@@ -3791,7 +3833,7 @@ function pickStatus(statusGroup){
 
         function renderTable() {
 
-            let tableData = globalFilteredData; if(!currentTableStatusFilters.includes('all')) { tableData = globalFilteredData.filter(d => currentTableStatusFilters.includes(d.statusGroup)); }
+            let tableData = globalFilteredData; if(!currentTableStatusFilters.includes('all')) { tableData = globalFilteredData.filter(d => { if(currentTableStatusFilters.includes(d.statusGroup)) return true; if(window._chartFocus && Array.isArray(d.phases) && d.phases.some(ph => ph.name===window._chartFocus.phase && (currentTableStatusFilters.includes(ph.statusGroup) || (currentTableStatusFilters.includes('completed') && ph.statusGroup==='na' && naCountsAsCompleted(ph.name))))) return true; return false; }); }
             const _isSumSheetCount = currentSheetName.toLowerCase().includes('01 summary');
             let _countRows = _isSumSheetCount ? tableData.filter(function(d){return !d._noProg;}) : tableData;
 
@@ -3872,9 +3914,9 @@ function pickStatus(statusGroup){
 
                 if (isSummaryMode) {
 
-                    let visiblePhases = isAllPhase ? (d.phases || []) : (d.phases || []).filter(ph => checkedPersonsLocal.includes(ph.name));
+                    let visiblePhases = (isAllPhase || window._chartFocus) ? (d.phases || []) : (d.phases || []).filter(ph => checkedPersonsLocal.includes(ph.name));
 
-                    visiblePhases.forEach((ph, pIndex) => { let phExpectedClass = ph.statusGroup === 'late' ? 'text-red-600 font-bold' : 'text-slate-500 font-bold'; let childBg = pIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'; let safePhNote = (ph.note || '').replace(/"/g, '&quot;'); html += `<tr class="border-b border-slate-100 ${childBg} phase-row ${_isCollapsed?'hide':''} page-break-inside-avoid hover:bg-slate-100/50 transition-colors row-fade-in" data-parent="${rawIdx}" style="animation-delay: ${animDelay + 0.05}s;">${columnVisibility.lot ? `<td class="px-2 py-2.5 text-center text-slate-300"></td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-2.5 text-center"></td>` : ''}${columnVisibility.code ? `<td class="px-2 py-2.5 text-right text-slate-300 font-bold text-xs">↳</td>` : ''}<td class="px-4 py-2.5 text-left text-slate-600 pl-6 border-l-[3px] border-orange-200 break-words font-bold cell-activity">${hl(fullPhaseNames[ph.name] || ph.name)}</td>${columnVisibility.respPerson ? `<td class="px-2 py-2.5 text-center text-slate-400">-</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-2.5 text-center whitespace-nowrap cell-date ${phExpectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'expected')" title="คลิกแก้ไข Plan Date เฟสนี้">${ph.expected}${_daysBadge(ph.expected, ph.statusGroup)}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-2.5 text-center cursor-pointer cell-progress" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'progress')" title="คลิกแก้ไข Progress เฟสนี้">${getProgressHtml(ph.pct, ph.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-2.5 text-center ${ph.statusGroup==='na'?'':'cursor-pointer'} cell-status" ${ph.statusGroup==='na'?'title="เฟสนี้ระบุ N/A ใน Sheet"':'onclick="openStatusPickerPhase(event, '+rawIdx+', \''+ph.name+'\')" title="คลิกเปลี่ยนสถานะเฟสนี้"'}>${getStatusBadge(ph.statusGroup, ph.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-2.5 text-center text-slate-300 transition-colors"></td>` : ''}</tr>`; });
+                    visiblePhases.forEach((ph, pIndex) => { let phExpectedClass = ph.statusGroup === 'late' ? 'text-red-600 font-bold' : 'text-slate-500 font-bold'; let childBg = pIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'; let safePhNote = (ph.note || '').replace(/"/g, '&quot;'); html += `<tr class="border-b border-slate-100 ${childBg} phase-row ${(window._chartFocus && ph.name===window._chartFocus.phase) ? 'phase-focus-row' : ''} ${_isCollapsed?'hide':''} page-break-inside-avoid hover:bg-slate-100/50 transition-colors row-fade-in" data-parent="${rawIdx}" style="animation-delay: ${animDelay + 0.05}s;">${columnVisibility.lot ? `<td class="px-2 py-2.5 text-center text-slate-300"></td>` : ''}${columnVisibility.designSubmission ? `<td class="px-2 py-2.5 text-center"></td>` : ''}${columnVisibility.code ? `<td class="px-2 py-2.5 text-right text-slate-300 font-bold text-xs">↳</td>` : ''}<td class="px-4 py-2.5 text-left text-slate-600 pl-6 border-l-[3px] border-orange-200 break-words font-bold cell-activity">${hl(fullPhaseNames[ph.name] || ph.name)}</td>${columnVisibility.respPerson ? `<td class="px-2 py-2.5 text-center text-slate-400">-</td>` : ''}${columnVisibility.expected ? `<td class="px-2 py-2.5 text-center whitespace-nowrap cell-date ${phExpectedClass} cursor-pointer" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'expected')" title="คลิกแก้ไข Plan Date เฟสนี้">${ph.expected}${_daysBadge(ph.expected, ph.statusGroup)}</td>` : ''}${columnVisibility.progress ? `<td class="px-2 py-2.5 text-center cursor-pointer cell-progress" onclick="openFieldEditor(event, ${rawIdx}, '${ph.name}', 'progress')" title="คลิกแก้ไข Progress เฟสนี้">${getProgressHtml(ph.pct, ph.numPct)}</td>` : ''}${columnVisibility.status ? `<td class="px-2 py-2.5 text-center ${ph.statusGroup==='na'?'':'cursor-pointer'} cell-status" ${ph.statusGroup==='na'?'title="เฟสนี้ระบุ N/A ใน Sheet"':'onclick="openStatusPickerPhase(event, '+rawIdx+', \''+ph.name+'\')" title="คลิกเปลี่ยนสถานะเฟสนี้"'}>${getStatusBadge(ph.statusGroup, ph.statusRaw)}</td>` : ''}${columnVisibility.note ? `<td class="px-4 py-2.5 text-center text-slate-300 transition-colors"></td>` : ''}</tr>`; });
 
                 }
 
@@ -3911,7 +3953,7 @@ function pickStatus(statusGroup){
 
             if (!currentTableStatusFilters.includes('all')) {
 
-                tableData = globalFilteredData.filter(d => currentTableStatusFilters.includes(d.statusGroup));
+                tableData = globalFilteredData.filter(d => { if(currentTableStatusFilters.includes(d.statusGroup)) return true; if(window._chartFocus && Array.isArray(d.phases) && d.phases.some(ph => ph.name===window._chartFocus.phase && (currentTableStatusFilters.includes(ph.statusGroup) || (currentTableStatusFilters.includes('completed') && ph.statusGroup==='na' && naCountsAsCompleted(ph.name))))) return true; return false; });
 
             }
 
@@ -4050,7 +4092,7 @@ function pickStatus(statusGroup){
 
         function renderGantt() {
 
-            let tableData = globalFilteredData; if(!currentTableStatusFilters.includes('all')) tableData = globalFilteredData.filter(d => currentTableStatusFilters.includes(d.statusGroup)); tableData.sort((a, b) => parseDateString(a.expected) - parseDateString(b.expected));
+            let tableData = globalFilteredData; if(!currentTableStatusFilters.includes('all')) tableData = globalFilteredData.filter(d => { if(currentTableStatusFilters.includes(d.statusGroup)) return true; if(window._chartFocus && Array.isArray(d.phases) && d.phases.some(ph => ph.name===window._chartFocus.phase && (currentTableStatusFilters.includes(ph.statusGroup) || (currentTableStatusFilters.includes('completed') && ph.statusGroup==='na' && naCountsAsCompleted(ph.name))))) return true; return false; }); tableData.sort((a, b) => parseDateString(a.expected) - parseDateString(b.expected));
 
             const tbody = document.getElementById('ganttTableBody'); const thead = document.getElementById('ganttHeaderArea'); let visibleColCount = 1 + (columnVisibility.expected ? 1 : 0) + (columnVisibility.status ? 1 : 0);
 
